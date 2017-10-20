@@ -8,7 +8,9 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "dom-storage": "^2.0.2"
+    "awesome-typescript-loader": "^3.2.3",
+    "dom-storage": "^2.0.2",
+    "source-map-loader": "^0.2.2"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
