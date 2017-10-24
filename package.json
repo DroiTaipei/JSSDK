@@ -14,6 +14,8 @@
     "xmlhttprequest": "^1.8.0"
   },
   "devDependencies": {
-    "gulp": "^3.9.1"
+    "gulp": "^3.9.1",
+    "gulp-typescript": "^3.2.3",
+    "typescript": "^2.5.3"
   }
 }
