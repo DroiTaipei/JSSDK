@@ -2,7 +2,7 @@
   "name": "JSSDK",
   "version": "1.0.0",
   "description": "DroiBaaS JavaScript SDK",
-  "main": "index.js",
+  "main": "./built/index.js",
   "repository": "git@github.com:DroiTaipei/JSSDK.git",
   "author": "Droi developers",
   "license": "MIT",
@@ -10,10 +10,10 @@
   "dependencies": {
     "awesome-typescript-loader": "^3.2.3",
     "dom-storage": "^2.0.2",
-    "source-map-loader": "^0.2.2"
+    "source-map-loader": "^0.2.2",
+    "xmlhttprequest": "^1.8.0"
   },
   "devDependencies": {
-    "gulp": "^3.9.1",
-    "webpack": "^3.8.1"
+    "gulp": "^3.9.1"
   }
 }
