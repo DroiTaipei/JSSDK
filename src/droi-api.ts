@@ -3,8 +3,7 @@
 // 2 implementation - HTTPS(RestAPI) and DroiSecure HTTP for each api
 
 import { DroiError } from "./droi-error"
-import * as xhr from "xmlhttprequest"
-let XMLHttpRequest = xhr.XMLHttpRequest;
+import { DroiHttpMethod } from "./droi-http"
 
 export namespace RemoteServiceHelper {
     export interface HeaderMap {
@@ -27,11 +26,7 @@ export namespace RemoteServiceHelper {
         }
     }
 
-    export function callServer(urlPath: string, method: string, input: string, headers:HeaderMap, tokenHolder: TokenHolder, error: DroiError): string {
-        let xtr = new 
-        XMLHttpRequest();
+    export function callServer(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder, error: DroiError): string {
         return "    ";
     }
 }
-
-RemoteServiceHelper.callServer("", "", "", null, null, null);

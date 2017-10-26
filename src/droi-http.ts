@@ -1,4 +1,4 @@
-import DroiCallback from "./droi-callback"
+import { DroiCallback } from "./droi-callback"
 import { DroiError } from "./droi-error"
 
 export enum DroiHttpMethod {
@@ -44,6 +44,7 @@ export class DroiHttp {
                 }
             }
 
+            // Result callback
             xhr.onreadystatechange = () => {
                 if (xhr.readyState == 4) {
                     statusText = xhr.statusText;
