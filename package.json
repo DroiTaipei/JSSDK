@@ -8,7 +8,6 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "awesome-typescript-loader": "^3.2.3",
     "dom-storage": "^2.0.2",
     "source-map-loader": "^0.2.2",
     "xmlhttprequest": "^1.8.0"

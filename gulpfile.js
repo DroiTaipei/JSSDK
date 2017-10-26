@@ -7,5 +7,5 @@ gulp.task("default", function () {
               noImplicitAny: true,
               out: "output.js"
         }));
-    return tsResult.js.pipe(gulp.dest("built/local"));
+    return tsResult.js.pipe(gulp.dest("local"));
 });

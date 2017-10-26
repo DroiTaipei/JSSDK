@@ -1,13 +1,14 @@
 {
     "compilerOptions": {
+        "mapRoot": "./map",
         "outDir": "./built",
         "allowJs": true,
         "target": "es5",
         "sourceMap": true,
-        "mapRoot": "map",
         "lib": ["dom", "es2015.promise", "es5"]
     },
     "include": [
         "./src/**/*"
     ]
 }
+
