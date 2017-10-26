@@ -2,11 +2,11 @@
 //
 // 2 implementation - HTTPS(RestAPI) and DroiSecure HTTP for each api
 
-import DroiError from "./droi-error"
+import { DroiError } from "./droi-error"
 import * as xhr from "xmlhttprequest"
 let XMLHttpRequest = xhr.XMLHttpRequest;
 
-namespace RemoteServiceHelper {
+export namespace RemoteServiceHelper {
     export interface HeaderMap {
         [key: string]: string;
     }
