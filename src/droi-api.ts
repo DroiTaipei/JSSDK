@@ -26,7 +26,7 @@ export namespace RemoteServiceHelper {
             this._isAuto = isAuto;
         }
 
-        private make(token: string): TokenHolder {
+        static make(token: string): TokenHolder {
             return new TokenHolder(token, false);
         }
 
@@ -39,7 +39,7 @@ export namespace RemoteServiceHelper {
         }
     }
 
-    export function callServer(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder, callback?: DroiCallback<string>): Promise<string> {
+    export function callServer(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder): Promise<string> {
         let request = new DroiHttpRequest();
         request.url = urlPath;
         request.method = method;
@@ -54,30 +54,15 @@ export namespace RemoteServiceHelper {
             }
         }
 
-        if (callback) {
-            DroiHttp.sendRequest(request, (resp, error) => {
+        return DroiHttp.sendRequest(request).then<string>(
+            (response): string => {
+                let error = translateDroiError(response, null);
                 if (!error.isOk)
-                    callback(null, error);
-                else {
-                    let err = translateDroiError(resp, null);
-                    if (!err.isOk)
-                        callback(null, err);
-                    else
-                        callback(resp.data, err);
-                }
-            });
-            return null;
-        } else {
-            return DroiHttp.sendRequest(request).then<string>(
-                (response): string => {
-                    let error = translateDroiError(response, null);
-                    if (!error.isOk)
-                        throw error;
+                    throw error;
 
-                    return response.data;
-                },
-            );
-        }
+                return response.data;
+            },
+        );
     }
 
     export function callServerSecure(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder, callback?: DroiCallback<string>): Promise<string> {

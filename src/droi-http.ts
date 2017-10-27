@@ -19,7 +19,7 @@ export class DroiHttpResponse {
 }
 
 export class DroiHttp {
-    static sendRequest(request: DroiHttpRequest, callback?: DroiCallback<DroiHttpResponse>): Promise<DroiHttpResponse> {
+    static sendRequest(request: DroiHttpRequest): Promise<DroiHttpResponse> {
         let promiseHandler = (resolve, reject) => {
             let statusText: string = null;
             let xhr = new XMLHttpRequest();            
@@ -93,17 +93,6 @@ export class DroiHttp {
             xhr.send(request.data);
         };
 
-        if (callback) {
-            promiseHandler( 
-                (resp) => {
-                    callback(resp, new DroiError(DroiError.OK));
-                }, 
-                (reject) => {
-                    callback(null, reject);
-                });
-            return null;
-        } else {
-            return new Promise<DroiHttpResponse>(promiseHandler);
-        }
+        return new Promise<DroiHttpResponse>(promiseHandler);
     }
 }
