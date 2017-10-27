@@ -20,28 +20,23 @@ export class DroiHttpResponse {
 
 export class DroiHttp {
     static sendRequest(request: DroiHttpRequest, callback?: DroiCallback<DroiHttpResponse>): Promise<DroiHttpResponse> {
-
-        let promise = new Promise<DroiHttpResponse>( (resolve, reject) => {
+        let promiseHandler = (resolve, reject) => {
             let statusText: string = null;
             let xhr = new XMLHttpRequest();            
 
             // Arrow function to return response for callback or promise
             let resultBack = (response: DroiHttpResponse) => {
                 // callback or promise
-                if (callback) {
-                    let error: DroiError = new DroiError(DroiError.OK);
-                    if (statusText && statusText != "") {
-                        error.code = DroiError.ERROR;
-                        error.appendMessage = `[HTTPS] ${statusText}`;
-                    }
-
-                    callback(response, error);
-                } else {
-                    if (statusText && statusText != "")
-                        reject(statusText);
-                    else
-                        resolve(response);
+                let error: DroiError = new DroiError(DroiError.OK);
+                if (statusText && statusText != "") {
+                    error.code = DroiError.ERROR;
+                    error.appendMessage = `[HTTPS] ${statusText}`;
                 }
+
+                if (error.isOk)
+                    resolve(response);
+                else
+                    reject(error);
             }
 
             // Result callback
@@ -96,7 +91,19 @@ export class DroiHttp {
 
             // Send request
             xhr.send(request.data);
-        } );
-        return promise;
+        };
+
+        if (callback) {
+            promiseHandler( 
+                (resp) => {
+                    callback(resp, new DroiError(DroiError.OK));
+                }, 
+                (reject) => {
+                    callback(null, reject);
+                });
+            return null;
+        } else {
+            return new Promise<DroiHttpResponse>(promiseHandler);
+        }
     }
 }

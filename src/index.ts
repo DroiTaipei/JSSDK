@@ -1,6 +1,7 @@
 export * from "./droi-core";
 export * from "./droi-object";
-export * from "./droi-http"
+export * from "./droi-api"
+export { DroiHttpMethod } from "./droi-http"
 export * from "./droi-error"
 
 // trick for bypass typescript checking

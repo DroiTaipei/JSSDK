@@ -105,6 +105,10 @@ export class DroiError {
         this._appendMessage = v;
     }
 
+    get isOk(): boolean {
+        return this._code == 0;
+    }
+
     toString(): string {
         let message = DroiError.MESSAGES[this._code];
         if (!message)
