@@ -4,7 +4,9 @@
 
 import { DroiHttpResponse } from "./droi-http"
 
-export class DroiHttpSecureResponse extends DroiHttpResponse {
+class DroiHttpSecureResponse extends DroiHttpResponse {
     errorCode: number;
     droiStatusCode: number;
 }
+
+export {DroiHttpSecureResponse};
