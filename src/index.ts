@@ -1,3 +1,4 @@
+export * from "./droi-permission";
 export * from "./droi-core";
 export * from "./droi-object";
 export * from "./droi-api"
