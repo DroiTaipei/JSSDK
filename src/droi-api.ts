@@ -46,16 +46,14 @@ export namespace RemoteServiceHelper {
         request.data = input;
         request.headers = headers;
 
-        // set token
-        if (tokenHolder) {
-            let token = tokenHolder.token;
-            if (token && token != "") {
-                request.headers[KEY_SESSION_TOKEN] = token;
-            }
-        }
+        appendDefaultHeaders(request, tokenHolder);
 
+        console.log(`Headers: ${request.headers}`);
+        console.log(`Input: ${input}`);
+        
         return DroiHttp.sendRequest(request).then<string>(
             (response): string => {
+                console.log(`Output: ${response.data}`)
                 let error = translateDroiError(response, null);
                 if (!error.isOk)
                     throw error;
@@ -67,6 +65,19 @@ export namespace RemoteServiceHelper {
 
     export function callServerSecure(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder, callback?: DroiCallback<string>): Promise<string> {
         return null;
+    }
+
+    function appendDefaultHeaders(request: DroiHttpRequest, tokenHolder: TokenHolder) {
+        //TODO: Append app id
+        //TODO: Append device id
+
+        // set token
+        if (tokenHolder) {
+            let token = tokenHolder.token;
+            if (token && token != "") {
+                request.headers[KEY_SESSION_TOKEN] = token;
+            }
+        }
     }
 
     function translateDroiError(resp: DroiHttpResponse, ticket: string): DroiError {
