@@ -6,13 +6,61 @@ import { DroiError } from "./droi-error"
 import { DroiHttpMethod, DroiHttp, DroiHttpRequest, DroiHttpResponse } from "./droi-http"
 import { DroiHttpSecureResponse } from "./droi-secure-http"
 import { DroiCallback } from "./droi-callback"
+import { UINT64 } from "cuint"
 
 export namespace RemoteServiceHelper {
     const KEY_SESSION_TOKEN = "X-Droi-Session-Token";
     const DROI_TOKEN_INVALID = 1040006;
+    const FETCH_DEVICE_ID_URL = "https://api.droibaas.com/uregister";
 
     export interface HeaderMap {
         [key: string]: string;
+    }
+
+    if (!(String.prototype as any).padStart) {
+        (String.prototype as any).padStart = function padStart(targetLength,padString) {
+            targetLength = targetLength>>0; //floor if number or convert non-number to 0;
+            padString = String(padString || ' ');
+            if (this.length > targetLength) {
+                return String(this);
+            }
+            else {
+                targetLength = targetLength-this.length;
+                if (targetLength > padString.length) {
+                    padString += padString.repeat(targetLength/padString.length); //append to original to ensure we are longer than needed
+                }
+                return padString.slice(0,targetLength) + String(this);
+            }
+        };
+    }
+
+    export class DeviceIdFormat {
+        private _string: string;
+        private _uidh: string;
+        private _uidl: string;
+
+        static parse(uidh: string, uidl: string): DeviceIdFormat {
+            let format = new DeviceIdFormat();
+            let cuidh = UINT64(uidh, 10);
+            let cuidl = UINT64(uidl, 10);
+            format._uidh = uidh;
+            format._uidl = uidl;
+            format._string = cuidh.toString(16).padStart(16, '0') + cuidl.toString(16).padStart(16, '0');
+
+            return format;
+        }
+
+        get string(): string {
+            return this._string;
+        }
+
+        get uidh(): string {
+            return this._uidh;
+        }
+
+        get uidl(): string {
+            return this._uidl;
+        }        
     }
 
     export class TokenHolder {
@@ -65,6 +113,20 @@ export namespace RemoteServiceHelper {
 
     export function callServerSecure(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder, callback?: DroiCallback<string>): Promise<string> {
         return null;
+    }
+
+    export function fetchHttpsDeviceId(): Promise<DeviceIdFormat> {
+        let request = new DroiHttpRequest();
+        request.url = FETCH_DEVICE_ID_URL;
+        request.method = DroiHttpMethod.GET;
+        
+
+        return DroiHttp.sendRequest(request)
+            .then( (response) => {
+                let regex = /.*\[(\d+),\s*(\d+),\s*(\d+)/g;
+                let match = regex.exec(response.data);
+                return DeviceIdFormat.parse(match[1], match[2]);
+            });
     }
 
     function appendDefaultHeaders(request: DroiHttpRequest, tokenHolder: TokenHolder) {

@@ -11,9 +11,11 @@
     "test": "mocha -r ts-node/register test/**/*.test.*"
   },
   "dependencies": {
+    "cuint": "^0.2.2",
     "dom-storage": "^2.0.2",
     "gulp-bump": "^2.8.0",
     "semver": "^5.4.1",
+    "sha256": "^0.2.0",
     "source-map-loader": "^0.2.2",
     "xmlhttprequest": "^1.8.0"
   },

@@ -205,4 +205,4 @@ class DroiObject {
 
 };
 
-export { DroiObject };
+export { DroiObject, Guid };
