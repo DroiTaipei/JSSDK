@@ -37,8 +37,10 @@ class DroiCore {
         if (did) {
             if (callback)
                 callback(did, new DroiError(DroiError.OK));
-            else
+            else {
+                console.log(`did: ${did}`);
                 return Promise.resolve(did);
+            }
         }
 
         //TODO check Droi Secure
@@ -82,6 +84,13 @@ class DroiCore {
         }
 
         return iid;
+    }
+
+    /**
+     * Get application id
+     */
+    static getAppId(): string {
+        return DroiCore.appId;
     }
 
     private static appId : string;

@@ -1,25 +1,29 @@
 
 class DroiConstant {
-    public static DROI_KEY_JSON_CLASSNAME = "_ClassName";
-    public static DROI_KEY_JSON_TABLE_NAME = "_TableName";
-    public static DROI_KEY_JSON_OBJECTID = "_Id";
-    public static DROI_KEY_JSON_CREATION_TIME = "_CreationTime";
-    public static DROI_KEY_JSON_MODIFIED_TIME = "_ModifiedTime";
-    public static DROI_KEY_JSON_DATA_TYPE = "_DataType";
-    public static DROI_KEY_JSON_FILE_TYPE = "_FileType";
-    public static DROI_KEY_JSON_KEY = "_DataKey";
-    public static DROI_KEY_JSON_VALUE = "_DataValue";
-    public static DROI_KEY_JSON_VALUE_SET = "_ValueSet";
-    public static DROI_KEY_JSON_BYTE_ARRAY = "_ByteArray";
-    public static DROI_KEY_JSON_REFERENCE_TYPE = "_ReferenceType";
-    public static DROI_KEY_JSON_REFERENCE_VALUE = "_Object";
-    public static DROI_KEY_JSON_REFERENCE_DIRTY_FLAG = "_ReferenceDirtyFlag";
-    public static DROI_KEY_JSON_PERMISSION = "_ACL";
-    public static DROI_KEY_JSON_OBJECT_VALUE = "_Value";
+    static readonly DROI_KEY_JSON_CLASSNAME = "_ClassName";
+    static readonly DROI_KEY_JSON_TABLE_NAME = "_TableName";
+    static readonly DROI_KEY_JSON_OBJECTID = "_Id";
+    static readonly DROI_KEY_JSON_CREATION_TIME = "_CreationTime";
+    static readonly DROI_KEY_JSON_MODIFIED_TIME = "_ModifiedTime";
+    static readonly DROI_KEY_JSON_DATA_TYPE = "_DataType";
+    static readonly DROI_KEY_JSON_FILE_TYPE = "_FileType";
+    static readonly DROI_KEY_JSON_KEY = "_DataKey";
+    static readonly DROI_KEY_JSON_VALUE = "_DataValue";
+    static readonly DROI_KEY_JSON_VALUE_SET = "_ValueSet";
+    static readonly DROI_KEY_JSON_BYTE_ARRAY = "_ByteArray";
+    static readonly DROI_KEY_JSON_REFERENCE_TYPE = "_ReferenceType";
+    static readonly DROI_KEY_JSON_REFERENCE_VALUE = "_Object";
+    static readonly DROI_KEY_JSON_REFERENCE_DIRTY_FLAG = "_ReferenceDirtyFlag";
+    static readonly DROI_KEY_JSON_PERMISSION = "_ACL";
+    static readonly DROI_KEY_JSON_OBJECT_VALUE = "_Value";
+
+    // HTTP
+    static readonly DROI_KEY_HTTP_APP_ID = "X-Droi-AppID";
+    static readonly DROI_KEY_HTTP_DEVICE_ID = "X-Droi-DeviceID";
 
     //
-    public static DROI_PERMISSION_READ = 2;
-    public static DROI_PERMISSION_WRITE = 1;
+    static readonly DROI_PERMISSION_READ = 2;
+    static readonly DROI_PERMISSION_WRITE = 1;
 }
 
 export { DroiConstant };

@@ -79,6 +79,9 @@ export class DroiHttp {
             xhr.ontimeout = errorHandler;
             xhr.onerror = errorHandler;
 
+            console.log(`Headers: ${JSON.stringify(request.headers)}`);
+            console.log(`Input: ${request.data}`);    
+
             // Init connection
             xhr.open(request.method, request.url);
 

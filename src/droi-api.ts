@@ -6,6 +6,8 @@ import { DroiError } from "./droi-error"
 import { DroiHttpMethod, DroiHttp, DroiHttpRequest, DroiHttpResponse } from "./droi-http"
 import { DroiHttpSecureResponse } from "./droi-secure-http"
 import { DroiCallback } from "./droi-callback"
+import { DroiCore } from "./droi-core"
+import { DroiConstant } from "./droi-const"
 import { UINT64 } from "cuint"
 
 export namespace RemoteServiceHelper {
@@ -88,6 +90,9 @@ export namespace RemoteServiceHelper {
     }
 
     export function callServer(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder): Promise<string> {
+        if (!headers)
+            headers = {};
+
         let request = new DroiHttpRequest();
         request.url = urlPath;
         request.method = method;
@@ -95,10 +100,7 @@ export namespace RemoteServiceHelper {
         request.headers = headers;
 
         appendDefaultHeaders(request, tokenHolder);
-
-        console.log(`Headers: ${request.headers}`);
-        console.log(`Input: ${input}`);
-        
+                
         return DroiHttp.sendRequest(request).then<string>(
             (response): string => {
                 console.log(`Output: ${response.data}`)
@@ -119,7 +121,6 @@ export namespace RemoteServiceHelper {
         let request = new DroiHttpRequest();
         request.url = FETCH_DEVICE_ID_URL;
         request.method = DroiHttpMethod.GET;
-        
 
         return DroiHttp.sendRequest(request)
             .then( (response) => {
@@ -129,9 +130,17 @@ export namespace RemoteServiceHelper {
             });
     }
 
-    function appendDefaultHeaders(request: DroiHttpRequest, tokenHolder: TokenHolder) {
+    async function appendDefaultHeaders(request: DroiHttpRequest, tokenHolder: TokenHolder) {
         //TODO: Append app id
         //TODO: Append device id
+        let appid = DroiCore.getAppId();
+        request.headers[DroiConstant.DROI_KEY_HTTP_APP_ID] = appid;
+        
+        try {
+            request.headers[DroiConstant.DROI_KEY_HTTP_DEVICE_ID] = await DroiCore.getDeviceId();
+        } catch (e) {
+            console.log(`get device id fail. ${e}`);
+        }
 
         // set token
         if (tokenHolder) {
@@ -139,7 +148,7 @@ export namespace RemoteServiceHelper {
             if (token && token != "") {
                 request.headers[KEY_SESSION_TOKEN] = token;
             }
-        }
+        }    
     }
 
     function translateDroiError(resp: DroiHttpResponse, ticket: string): DroiError {
