@@ -91,7 +91,7 @@ export namespace RemoteServiceHelper {
         }
     }
 
-    export async function callServer(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder): Promise<string> {
+    export async function callServer(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder): Promise<JSON> {
         if (!headers)
             headers = {};
 
@@ -103,19 +103,19 @@ export namespace RemoteServiceHelper {
 
         await appendDefaultHeaders(request, tokenHolder);
                 
-        return DroiHttp.sendRequest(request).then<string>(
-            (response): string => {
+        return DroiHttp.sendRequest(request).then<JSON>(
+            (response): JSON => {
                 console.log(`Output: ${response.data}`)
                 let error = translateDroiError(response, null);
                 if (!error.isOk)
                     throw error;
 
-                return response.data;
+                return JSON.parse(response.data).Result;
             },
         );
     }
 
-    export function callServerSecure(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder, callback?: DroiCallback<string>): Promise<string> {
+    export function callServerSecure(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder, callback?: DroiCallback<JSON>): Promise<JSON> {
         return null;
     }
 
@@ -133,8 +133,8 @@ export namespace RemoteServiceHelper {
     }
 
     async function appendDefaultHeaders(request: DroiHttpRequest, tokenHolder: TokenHolder) {
-        let appid = DroiCore.getAppId();
-        request.headers[DroiConstant.DROI_KEY_HTTP_APP_ID] = appid;
+        request.headers[DroiConstant.DROI_KEY_HTTP_APP_ID] = DroiCore.getAppId();
+        request.headers[DroiConstant.DROI_KEY_HTTP_API_KEY] = DroiCore.getApiKey();
         
         try {
             request.headers[DroiConstant.DROI_KEY_HTTP_DEVICE_ID] = await DroiCore.getDeviceId();

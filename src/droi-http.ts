@@ -79,6 +79,7 @@ export class DroiHttp {
             xhr.ontimeout = errorHandler;
             xhr.onerror = errorHandler;
 
+            console.log(`url: ${request.url}`);
             console.log(`Headers: ${JSON.stringify(request.headers)}`);
             console.log(`Input: ${request.data}`);    
 

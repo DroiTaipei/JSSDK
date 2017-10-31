@@ -28,7 +28,8 @@ class DroiObject {
         return new DroiObject( tableName );
     }
 
-    private constructor( tableName : string ) {
+    protected constructor( tableName : string ) {
+
         // createdTime, modifiedTime
         let currentDate = new Date();
         this.properties[ DroiConstant.DROI_KEY_JSON_CLASSNAME ] = tableName;

@@ -20,6 +20,10 @@ class DroiConstant {
     // HTTP
     static readonly DROI_KEY_HTTP_APP_ID = "X-Droi-AppID";
     static readonly DROI_KEY_HTTP_DEVICE_ID = "X-Droi-DeviceID";
+    static readonly DROI_KEY_HTTP_API_KEY = "X-Droi-Api-Key";
+
+    // USER
+    static readonly DROI_API_USER_NOT_EXISTS = 1040009;
 
     //
     static readonly DROI_PERMISSION_READ = 2;

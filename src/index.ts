@@ -1,6 +1,7 @@
-export * from "./droi-permission";
-export * from "./droi-core";
-export * from "./droi-object";
+export * from "./droi-permission"
+export * from "./droi-core"
+export * from "./droi-object"
+export * from "./droi-user"
 export { DroiHttpMethod } from "./droi-http"
 export * from "./droi-error"
 

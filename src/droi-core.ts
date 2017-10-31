@@ -17,8 +17,9 @@ class DroiCore {
      * Initiate DroiCore SDK
      * @param appid The application identifier
      */
-    static initializeCore(appid:string) {
+    static initializeCore(appid:string, apikey: string) {
         DroiCore.appId = appid;
+        DroiCore.apiKey = apikey;
     }
 
     /**
@@ -92,7 +93,15 @@ class DroiCore {
         return DroiCore.appId;
     }
 
+    /**
+     * Get api key
+     */
+    static getApiKey(): string {
+        return DroiCore.apiKey;
+    }
+
     private static appId : string;
+    private static apiKey : string;
 };
 
 export { DroiCore };
