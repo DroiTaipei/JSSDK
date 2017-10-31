@@ -1,3 +1,9 @@
+/**
+ * Errors for DroiBaaS JS SDK.
+ * 
+ * @export
+ * @class DroiError
+ */
 export class DroiError {
     static readonly OK: number = 0;
     static readonly UNKNOWN_ERROR = 1070000;
@@ -75,40 +81,93 @@ export class DroiError {
         return result;
     }
 
+    /**
+     * Creates an instance of DroiError.
+     * @param {number} code Error code
+     * @param {string} [msg] Appended message
+     * @param {string} [ticket] Server ticket
+     * @memberof DroiError
+     */
     constructor(code: number, msg?: string, ticket?: string) {
         this._code = code;
         this._appendMessage = msg;
         this._ticket = ticket;
     }
 
+    /**
+     * Error code
+     * 
+     * @type {number}
+     * @memberof DroiError
+     */
     get code(): number {
         return this._code;
     }
 
+    /**
+     * Set error code
+     * 
+     * @memberof DroiError
+     */
     set code(v: number) {
         this._code = v;
     }
 
+    /**
+     * Server ticket
+     * 
+     * @type {string}
+     * @memberof DroiError
+     */
     get ticket(): string {
         return this._ticket;
     }
 
+    /**
+     * Set server ticket
+     * 
+     * @memberof DroiError
+     */
     set ticket(v: string) {
         this._ticket = v;
     }
 
+    /**
+     * Appended message
+     * 
+     * @type {string}
+     * @memberof DroiError
+     */
     get appendMessage(): string {
         return this._appendMessage;
     }
 
+    /**
+     * Set appended message
+     * 
+     * @memberof DroiError
+     */
     set appendMessage(v: string) {
         this._appendMessage = v;
     }
 
+    /**
+     * Check result
+     * 
+     * @readonly
+     * @type {boolean}
+     * @memberof DroiError
+     */
     get isOk(): boolean {
         return this._code == 0;
     }
 
+    /**
+     * Format error string
+     * 
+     * @returns {string} 
+     * @memberof DroiError
+     */
     toString(): string {
         let message = DroiError.MESSAGES[this._code];
         if (!message)
