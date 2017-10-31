@@ -45,9 +45,11 @@ export namespace RemoteServiceHelper {
             let format = new DeviceIdFormat();
             let cuidh = UINT64(uidh, 10);
             let cuidl = UINT64(uidl, 10);
+            let uuid = cuidh.toString(16).padStart(16, '0') + cuidl.toString(16).padStart(16, '0');
+            uuid = `${uuid.substring(0, 8)}-${uuid.substring(8, 12)}-${uuid.substring(12, 16)}-${uuid.substring(16, 20)}-${uuid.substring(20, 32)}`
             format._uidh = uidh;
             format._uidl = uidl;
-            format._string = cuidh.toString(16).padStart(16, '0') + cuidl.toString(16).padStart(16, '0');
+            format._string = uuid;
 
             return format;
         }
@@ -89,7 +91,7 @@ export namespace RemoteServiceHelper {
         }
     }
 
-    export function callServer(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder): Promise<string> {
+    export async function callServer(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder): Promise<string> {
         if (!headers)
             headers = {};
 
@@ -99,7 +101,7 @@ export namespace RemoteServiceHelper {
         request.data = input;
         request.headers = headers;
 
-        appendDefaultHeaders(request, tokenHolder);
+        await appendDefaultHeaders(request, tokenHolder);
                 
         return DroiHttp.sendRequest(request).then<string>(
             (response): string => {
@@ -131,8 +133,6 @@ export namespace RemoteServiceHelper {
     }
 
     async function appendDefaultHeaders(request: DroiHttpRequest, tokenHolder: TokenHolder) {
-        //TODO: Append app id
-        //TODO: Append device id
         let appid = DroiCore.getAppId();
         request.headers[DroiConstant.DROI_KEY_HTTP_APP_ID] = appid;
         

@@ -38,7 +38,6 @@ class DroiCore {
             if (callback)
                 callback(did, new DroiError(DroiError.OK));
             else {
-                console.log(`did: ${did}`);
                 return Promise.resolve(did);
             }
         }
