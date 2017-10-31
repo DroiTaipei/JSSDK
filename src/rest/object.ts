@@ -15,7 +15,7 @@ export class RestObject {
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
         return callServer(url, DroiHttpMethod.PUT, obj, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
-            .then( (result) => {
+            .then( (_) => {
                 return true;
             });
     }
@@ -27,7 +27,7 @@ export class RestObject {
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
         
         return callServer(url, DroiHttpMethod.DELETE, null, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
-            .then( (result) => {
+            .then( (_) => {
                 return true;
             });
     }
@@ -55,12 +55,7 @@ export class RestObject {
         if (queryStrings !== "")
             url = `${url}?${queryStrings.substring(0, queryStrings.length-1)}`;
 
-        return callServer(url, DroiHttpMethod.GET, null, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
-            .then( (result) => {
-                let obj = JSON.parse(result);
-                return obj.Result;
-            });
-
+        return callServer(url, DroiHttpMethod.GET, null, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN);
     }
 
     static updateData(table: string, data: string, where?: string): Promise<boolean> {
@@ -70,7 +65,7 @@ export class RestObject {
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
         return callServer(url, DroiHttpMethod.PATCH, data, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
-            .then( (result) => {
+            .then( (_) => {
                 return true;
             });
     }
@@ -82,7 +77,7 @@ export class RestObject {
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
         return callServer(url, DroiHttpMethod.PUT, data, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
-            .then( (result) => {
+            .then( (_) => {
                 return true;
             });
     }
@@ -97,7 +92,7 @@ export class RestObject {
             url = `${url}?body=${encodeURIComponent(data)}`;
 
         return callServer(url, DroiHttpMethod.DELETE, null, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
-            .then( (result) => {
+            .then( (_) => {
                 return true;
             });
     }    

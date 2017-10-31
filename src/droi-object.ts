@@ -33,7 +33,7 @@ class DroiObject {
         // createdTime, modifiedTime
         let currentDate = new Date();
         this.properties[ DroiConstant.DROI_KEY_JSON_CLASSNAME ] = tableName;
-        this.properties[ DroiConstant.DROI_KEY_JSON_OBJECTID ] = Guid.newGuid();
+        this.properties[ DroiConstant.DROI_KEY_JSON_OBJECTID ] = Guid.newGuid().replace(/-/g, "").substring(8);
         this.properties[ DroiConstant.DROI_KEY_JSON_CREATION_TIME ] = currentDate.toISOString();
         this.properties[ DroiConstant.DROI_KEY_JSON_MODIFIED_TIME ] = currentDate.toISOString();
     }
