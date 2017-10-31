@@ -15,14 +15,20 @@ class Guid {
     }
 }
 
+/**
+ * 
+ */
 class DroiObject {
+
+    /**
+     * Create DroiObject instance by specific table name
+     * @param tableName Table name of collection
+     */
     static createObject( tableName : string ) : DroiObject {
         return new DroiObject( tableName );
     }
 
     private constructor( tableName : string ) {
-        this.tableName = tableName;
-
         // createdTime, modifiedTime
         let currentDate = new Date();
         this.properties[ DroiConstant.DROI_KEY_JSON_CLASSNAME ] = tableName;
@@ -31,6 +37,9 @@ class DroiObject {
         this.properties[ DroiConstant.DROI_KEY_JSON_MODIFIED_TIME ] = currentDate.toISOString();
     }
 
+    /**
+     * The object Id of DroiObject
+     */
     objectId() : string {
         return this.properties[DroiConstant.DROI_KEY_JSON_OBJECTID];
     }
@@ -47,8 +56,8 @@ class DroiObject {
         return res;
     }
 
-    getTableName() : string {
-        return this.tableName;
+    tableName() : string {
+        return this.properties[DroiConstant.DROI_KEY_JSON_CLASSNAME];
     }
 
     setValue( keyName : string, value : any ) {
@@ -96,16 +105,16 @@ class DroiObject {
         return this.properties[keyName];
     }
 
-    toJson() : string {
-        return this.toJSON();
+    toJson( withRef : boolean = false ) : string {
+        let clone = DroiObject.exportProperties( this.properties, 0, withRef );
+        
+        // 
+        return JSON.stringify( clone );        
     }
 
     // For JSON.stringify function
     toJSON() : string {
-        let clone = DroiObject.exportProperties( this.properties );
-        
-        // 
-        return JSON.stringify( clone );        
+        return this.toJson( true );
     }
 
     static fromJson( jobj : any ) : any {
@@ -123,12 +132,8 @@ class DroiObject {
         if ( jobj instanceof Array ) {
             let array = new Array();
             for ( let item of jobj ) {
-                let r = DroiObject.fromJson( item );
-                if ( r == null ) {
-                    if ( typeof item === 'string' || typeof item === 'number' || typeof item === 'object' )
-                        array.push( item );
-                } else
-                    array.push( r );
+                let r = DroiObject.fromJson( item ) || item;
+                array.push( item );
             }
             res = array;
         } else if ( typeof jobj === 'object' ) {    // Dictionary
@@ -145,43 +150,85 @@ class DroiObject {
                 // Copy the key-Value into object
                 for ( let keyName in jobj ) {
                     let v = jobj[keyName];
-                    let o = DroiObject.fromJson( v );
-                    if ( o != null ) { 
-                        r.properties[keyName] = o;
-                    } else if ( typeof v === 'string' || typeof v === 'number' || typeof v === 'object' ) {
-                        r.properties[keyName] = v;
-                    }
+                    let o = DroiObject.fromJson( v ) || v;
+                    r.properties[keyName] = o;
                 }
 
                 res = r;
+            } else {
+                // Normal Dictionary structure
+                let dict = {};
+                for ( let keyName in jobj ) {
+                    let v = jobj[keyName];
+                    let o = DroiObject.fromJson( v ) || v;
+                    dict[keyName] = o;
+                }
+                res = dict;
             }
         } 
 
         return res;
     }
 
+    public static travelDroiObject(obj:any, cb: (droiObject:DroiObject)=>void) : void {
+
+        // Handle the 3 simple types, and null or undefined
+        if (null == obj || "object" !== typeof obj) return;
+
+        let dobject = null;
+        if ( obj instanceof DroiObject ) {
+            dobject = obj;
+            obj = obj.properties;
+        }
+
+        // 
+        if ( obj instanceof Array ) {
+            for ( let item of obj )
+                DroiObject.travelDroiObject( item, cb );
+        } else if ( obj instanceof Object ) {
+            for ( let key in obj ) {
+                DroiObject.travelDroiObject( obj[key], cb );
+            }
+        }
+
+        //
+        if ( dobject != null )
+            cb( dobject );
+    }
+
     //
-    private static exportProperties(obj) : any {
+    private static exportProperties(obj:any, depth:number, withReference:boolean) : any {
         let copy;
     
         // Handle the 3 simple types, and null or undefined
         if (null == obj || "object" !== typeof obj) return obj;
 
-        if ( obj instanceof DroiObject )
-            return DroiObject.exportProperties( obj.properties );
-    
+        if ( obj instanceof DroiObject ) {
+            if ( depth == 0 || withReference ) {
+                return DroiObject.exportProperties( obj.properties, depth+1, withReference );
+            } else {
+                // export reference only..
+                copy = { };
+                copy[ DroiConstant.DROI_KEY_JSON_OBJECTID ] = obj.objectId();
+                copy[ DroiConstant.DROI_KEY_JSON_REFERENCE_TYPE ] = DroiConstant.DROI_KEY_JSON_DATA_TYPE;
+                copy[ DroiConstant.DROI_KEY_JSON_TABLE_NAME ] = obj.tableName;
+                return copy;
+            }
+            
+        }
+
         // Handle Date
         if (obj instanceof Date) {
             copy = new Date();
             copy.setTime(obj.getTime());
-            return copy;
+            return copy.toISOString();
         }
     
         // Handle Array
         if (obj instanceof Array) {
             copy = [];
             for (let i = 0, len = obj.length; i < len; i++) {
-                copy[i] = DroiObject.exportProperties(obj[i]);
+                copy[i] = DroiObject.exportProperties(obj[i], depth+1, withReference);
             }
             return copy;
         }
@@ -190,7 +237,7 @@ class DroiObject {
         if (obj instanceof Object) {
             copy = {};
             for (var attr in obj) {
-                if (obj.hasOwnProperty(attr)) copy[attr] = DroiObject.exportProperties(obj[attr]);
+                if (obj.hasOwnProperty(attr)) copy[attr] = DroiObject.exportProperties(obj[attr], depth+1, withReference);
             }
             return copy;
         }
@@ -201,8 +248,6 @@ class DroiObject {
     //
     private permission : DroiPermission;
     private properties : Dictionary = {};
-    private tableName : string;
-
 };
 
 export { DroiObject, Guid };
