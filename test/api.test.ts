@@ -12,19 +12,19 @@ describe('Droi User API', () => {
 
     it('Anonymous login', async () => {
         let user = DroiBaaS.DroiUser.getCurrentUser();
-        console.log(`user type ${(user.constructor as any).name}`)
-        if (user.isLoggedIn()) {
-            console.log(`user logged in`);
-            user.logout();
-        }
 
-        DroiBaaS.DroiUser.loginAnonymous()
-            .then( (user) => {
-                console.log(`user logged in: ${JSON.stringify(user)}`);
-            })
-            .catch( (error) => {
-                console.log(`error: ${error}`);
-            })
+        try {
+            if (user != null && user.isLoggedIn()) {
+                console.log(`user logged in`);
+                await user.logout();
+            }
+
+            user = await DroiBaaS.DroiUser.loginAnonymous();
+            console.log(`user token: ${user.objectId()}`);
+
+        } catch (error) {
+            console.log(`error: ${error}`);
+        }
     });
 });
 

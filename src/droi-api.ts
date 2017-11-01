@@ -13,8 +13,9 @@ import { UINT64 } from "cuint"
 export namespace RemoteServiceHelper {
     const KEY_SESSION_TOKEN = "X-Droi-Session-Token";
     const DROI_TOKEN_INVALID = 1040006;
+    const FETCH_DEVICE_ID_URL = "https://api.droibaas.com/uregister";
     // const FETCH_DEVICE_ID_URL = "https://api.droibaas.com/uregister?format=hex";
-    const FETCH_DEVICE_ID_URL = "http://10.128.81.202/uregister?format=hex";
+    // const FETCH_DEVICE_ID_URL = "http://10.128.81.202/uregister?format=hex";
 
     export interface HeaderMap {
         [key: string]: string;
@@ -143,9 +144,11 @@ export namespace RemoteServiceHelper {
 
         return DroiHttp.sendRequest(request)
             .then( (response) => {
-                let regex = /.*\[\"([0-9A-Z]+)\",\s*(\d+)/g;
+                // let regex = /.*\[\"([0-9A-Z]+)\",\s*(\d+)/g;
+                let regex = /.*\[(\d+),\s*(\d+),\s*(\d+)/g;
                 let match = regex.exec(response.data);
-                return DeviceIdFormat.parseId(match[1]);
+                // return DeviceIdFormat.parseId(match[1]);
+                return DeviceIdFormat.parse(match[1], match[2]);
             });
     }
 

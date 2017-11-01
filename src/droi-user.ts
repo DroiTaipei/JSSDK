@@ -79,7 +79,7 @@ export class DroiUser extends DroiObject {
         }
 
         user = DroiUser.createUser();
-        user.setValue("UserId", DroiCore.getInstallationId + await DroiCore.getDeviceId());
+        user.setValue("UserId", DroiCore.getInstallationId() + await DroiCore.getDeviceId());
         user.setValue("AuthData", {"anonymous": "1"});
 
         let promise = RestUser.loginAnonymous(user)
@@ -106,7 +106,7 @@ export class DroiUser extends DroiObject {
             return ReturnSingleHandler(new DroiError(DroiError.USER_NOT_AUTHORIZED), callback);
         }
 
-        let promise = RestUser.logout(this.objectId())
+        let promise = RestUser.logout(this.objectId(), this.session["Token"])
             .then( (_) => {
                 return ReturnSingleHandler(new DroiError(DroiError.OK), callback);
             })

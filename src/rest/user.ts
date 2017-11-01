@@ -46,13 +46,13 @@ export class RestUser {
             });
     }
 
-    static logout(objId: string): Promise<boolean> {
+    static logout(objId: string, token: string): Promise<boolean> {
         let secureAvaiable = false;
         
         let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_LOGOUT}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
-        let data = JSON.stringify({_Id: objId});
+        let data = JSON.stringify({_Id: objId, Token: token});
 
         return callServer(url, DroiHttpMethod.POST, data, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
             .then( (_) => {
