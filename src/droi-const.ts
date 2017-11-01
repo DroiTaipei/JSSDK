@@ -28,6 +28,34 @@ class DroiConstant {
     //
     static readonly DROI_PERMISSION_READ = 2;
     static readonly DROI_PERMISSION_WRITE = 1;
+
+    // DroiQuery
+    static readonly DroiQuery_SELECT = "select";
+    static readonly DroiQuery_INSERT = "insert";
+    static readonly DroiQuery_DELETE = "delete";
+    static readonly DroiQuery_UPDATE = "update";
+    static readonly DroiQuery_UPDATE_DATA = "updateData";
+    static readonly DroiQuery_COUNT = "count";
+
+    static readonly DroiQuery_WHERE = "where";
+    static readonly DroiQuery_COND = "cond";
+    static readonly DroiQuery_VALUES = "values";
+    static readonly DroiQuery_OR = "$or";
+    static readonly DroiQuery_AND = "$and";
+
+    static readonly DroiQuery_INC = "inc";
+    static readonly DroiQuery_DEC = "dec";
+    static readonly DroiQuery_SET = "set";
+    static readonly DroiQuery_ATOMIC = "amotic";
+    static readonly DroiQuery_ADD = "add";
+
+    static readonly DroiQuery_ORDERBY = "orderby";
+    static readonly DroiQuery_ASC = "ASC";
+    static readonly DroiQuery_DESC = "DESC";
+
+    static readonly DroiQuery_LIMIT = "limit";
+    static readonly DroiQuery_OFFSET = "offset";    
+
 }
 
 export { DroiConstant };

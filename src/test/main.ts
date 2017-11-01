@@ -10,13 +10,8 @@ test.setValue( "array", [8, 2, 3, 4]);
 test.setValue( "dict", { "12":12, "24":24, "T":test1 });
 test.setValue( "test1", test1 );
 test.setValue( "currentTime", new Date() );
-console.log( 'test is ' + test.toJson(true) );
-let s = test.toJson(true);
 
-DroiBaaS.DroiObject.travelDroiObject( test, (droiObject) => {
-    console.log('The class is ' + droiObject.tableName() );
-}
-);
-console.log("The s is " + s );
-let res = DroiBaaS.DroiObject.fromJson( s );
-console.log( 'res is ' + res.toJson() ); 
+console.log("before save" );
+// test.save().then( (error) => console.log('sldkfs') ).catch( (error) => console.log('error') );
+test.atomicAdd( "1234", 123 ).then( (error) => console.log('sldkfs') ).catch( (error) => console.log('error') );
+console.log("end save");

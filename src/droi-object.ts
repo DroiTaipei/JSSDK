@@ -1,5 +1,8 @@
-import {DroiConstant} from './droi-const';
-import {DroiPermission} from './droi-permission';
+import { DroiConstant } from './droi-const';
+import { DroiPermission } from './droi-permission';
+import { DroiError } from "./droi-error";
+import { DroiCallback, DroiSingleCallback } from "./droi-callback";
+import { DroiQueryInternal as DroiQuery } from "./droi-query-internal";
 
 class Dictionary {
     [keyName: string]: any;
@@ -14,6 +17,11 @@ class Guid {
         });
     }
 }
+
+enum DirtyFlag {
+    DIRTY_FLAG_BODY = 1,
+    DIRTY_FLAG_REFERENCE = 2
+};
 
 /**
  * 
@@ -91,6 +99,8 @@ class DroiObject {
 
         // Return the value
         if ( val != null ) {
+            if ( val != this.properties[keyName] )
+                this.dirtyFlags |= DirtyFlag.DIRTY_FLAG_BODY;
             this.properties[ keyName ] = val;
         }
     }
@@ -104,6 +114,120 @@ class DroiObject {
             return null;
 
         return this.properties[keyName];
+    }
+
+    static saveAll( items : Array<DroiObject>, callback? : DroiSingleCallback ) :Promise<DroiError> {
+
+        return null;
+    }
+
+    save( callback? : DroiSingleCallback ):Promise<DroiError> {
+        return this.funcTemplate( this.saveToStorage, callback);
+    }
+
+    delete( callback? : DroiSingleCallback ):Promise<DroiError> {
+        return this.funcTemplate( this.deleteFromStorage, callback);
+    }
+
+    atomicAdd( field : string, amount : number, callback? : DroiSingleCallback ):Promise<DroiError> {
+        return this.funcTemplate( async function () {
+            //
+            this.checkDirtyFlags();
+            if ( (this.dirtyFlags & DirtyFlag.DIRTY_FLAG_BODY) != 0 )
+                throw new DroiError( DroiError.ERROR, "DroiObject content dirty" );
+
+            let query = DroiQuery.create( this.tableName() ).add( field, amount );
+            // TODO:
+            //query.updateObjectAtomic( this, this.objectId(), field, amount );
+            let error = await query.run();
+            return error;
+        }, callback );
+    }
+
+    private funcTemplate( func : () => Promise<DroiError>, callback? : DroiSingleCallback ):Promise<DroiError> {
+        let handler = async (resolve, reject) => {
+            // Execute func
+            try {
+                let error = await func();
+                if ( error.isOk ) {
+                    resolve();
+                } else {
+                    reject( error );
+                }
+            } catch( e ) {
+                let error : DroiError;
+                if ( e instanceof DroiError )
+                    error = e;
+                else {
+                    error = new DroiError( DroiError.ERROR );
+                }
+
+                reject( error );
+            }                
+        };
+
+        // Use Callback method
+        if (callback) {
+            handler(
+                () => {
+                    callback(new DroiError(DroiError.OK));
+                },
+                (error) => {
+                   callback( error );
+                }
+            )
+            return null;
+        }
+        
+        // Use Promise method
+        return new Promise(handler);        
+    }
+
+    private async saveToStorage() : Promise<DroiError> {
+        this.checkDirtyFlags();
+        // 
+        if ( this.dirtyFlags == 0 )
+            return new DroiError( DroiError.OK );
+
+        let error = new DroiError(DroiError.OK);
+        let date = new Date();
+        // date = new Date( date.getTime() + TIME_SHIFT );
+        this.properties[ DroiConstant.DROI_KEY_JSON_MODIFIED_TIME ] = date.toISOString();
+        this.dirtyFlags |= DirtyFlag.DIRTY_FLAG_BODY;
+        let query = DroiQuery.create( this.tableName() );
+        query.upsert( this );
+        error = await query.run();
+        return error;
+    }
+
+    private async deleteFromStorage() : Promise<DroiError> {
+        let error = new DroiError(DroiError.OK);
+        let query = DroiQuery.create( this.tableName() );
+        query.delete( this );
+        error = await query.run();
+        return error;
+    }
+
+    isDirty() : boolean {
+        return (this.dirtyFlags != 0)?true:false;
+    }
+
+    private checkDirtyFlags() : void {
+        let referenceDirty = false;
+
+        // Check all children
+        DroiObject.travelDroiObject( this, (droiObject) => {
+            if ( this == droiObject )
+                return;
+
+            droiObject.checkDirtyFlags();
+            
+            referenceDirty = droiObject.isDirty() || referenceDirty;
+        });
+
+        if ( referenceDirty ) {
+            this.dirtyFlags |= DirtyFlag.DIRTY_FLAG_REFERENCE;
+        }
     }
 
     toJson( withRef : boolean = false ) : string {
@@ -249,6 +373,7 @@ class DroiObject {
     //
     protected permission : DroiPermission;
     protected properties : Dictionary = {};
+    private dirtyFlags : number = DirtyFlag.DIRTY_FLAG_BODY;
 };
 
 export { DroiObject, Guid };
