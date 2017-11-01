@@ -11,14 +11,20 @@ describe('Droi User API', () => {
     });
 
     it('Anonymous login', async () => {
-        let did = await DroiBaaS.DroiCore.getDeviceId();
+        let user = DroiBaaS.DroiUser.getCurrentUser();
+        console.log(`user type ${(user.constructor as any).name}`)
+        if (user.isLoggedIn()) {
+            console.log(`user logged in`);
+            user.logout();
+        }
 
-        let userObj = DroiBaaS.DroiUser.createUser();
-        userObj.setValue("UserId", DroiBaaS.DroiCore.getInstallationId() + did);
-        userObj.setValue("AuthData", {anonymous: "1"})
-
-        let juser = await RestUser.loginAnonymous(userObj);
-        console.log(JSON.stringify(juser));
+        DroiBaaS.DroiUser.loginAnonymous()
+            .then( (user) => {
+                console.log(`user logged in: ${JSON.stringify(user)}`);
+            })
+            .catch( (error) => {
+                console.log(`error: ${error}`);
+            })
     });
 });
 

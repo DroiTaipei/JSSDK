@@ -70,7 +70,7 @@ export class RestObject {
             });
     }
 
-    static buldUpsert(table: string, data: string): Promise<boolean> {
+    static bulkUpsert(table: string, data: string): Promise<boolean> {
         let secureAvaiable = false;
         
         let url = `${secureAvaiable?RestObject.REST_HTTPS_SECURE:RestObject.REST_HTTPS}${RestObject.REST_BULK_OBJECT_URL}/${table}`;
@@ -82,7 +82,7 @@ export class RestObject {
             });
     }
 
-    static buldDelete(table: string, data: string): Promise<boolean> {
+    static bulkDelete(table: string, data: string): Promise<boolean> {
         let secureAvaiable = false;
         
         let url = `${secureAvaiable?RestObject.REST_HTTPS_SECURE:RestObject.REST_HTTPS}${RestObject.REST_BULK_OBJECT_URL}/${table}`;

@@ -247,8 +247,8 @@ class DroiObject {
     }
 
     //
-    private permission : DroiPermission;
-    private properties : Dictionary = {};
+    protected permission : DroiPermission;
+    protected properties : Dictionary = {};
 };
 
 export { DroiObject, Guid };
