@@ -3,6 +3,7 @@ import { DroiCallback } from "./droi-callback"
 import { DroiError } from "./droi-error"
 import { DroiCore } from "./droi-core"
 import { RestUser } from "./rest/user"
+import { DroiPersistSettings } from "./droi-persist-settings"
 
 export class DroiUser extends DroiObject {
 
@@ -14,6 +15,12 @@ export class DroiUser extends DroiObject {
 
     private constructor() {
         super("_User");
+    }
+
+    private static saveUser(user: DroiUser) {
+        let userData = user.toJson();
+        let jdata = {userData: userData, session: user.session};
+        DroiPersistSettings.setItem(DroiPersistSettings.KEY_SAVED_USER, JSON.stringify(jdata));
     }
 
     static getCurrentUser(): DroiUser {
@@ -43,7 +50,8 @@ export class DroiUser extends DroiObject {
                 let juser = jlogin["Data"];
                 let user: DroiUser = DroiObject.fromJson(juser);
                 user.session = {Token: token, ExpireAt: expired};
-                //TODO save user
+                
+                DroiUser.saveUser(user);
 
                 if (callback) 
                     callback(user, new DroiError(DroiError.OK));
