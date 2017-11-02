@@ -25,6 +25,8 @@ class DroiConstant {
 
     // USER
     static readonly DROI_API_USER_NOT_EXISTS = 1040009;
+    static readonly DROI_API_RECORD_CONFLICT = 1030305;
+    static readonly DROI_API_USER_EXISTS = 1040008;
 
     //
     static readonly DROI_PERMISSION_READ = 2;

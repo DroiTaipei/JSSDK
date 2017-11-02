@@ -13,13 +13,30 @@ export class RestUser {
     private static readonly REST_USER_LOGIN = "/login";
     private static readonly REST_USER_SIGNUP = "/signup";
     private static readonly REST_USER_LOGOUT = "/logout";
+    private static readonly REST_USER_CHANGEPASSWORD = "/password";
 
-    static signupUser(userId: string, password: string, data: string): Promise<JSON> {
-        return null;
+    static readonly USER_TYPE_GENERAL = "general";
+    static readonly USER_TYPE_ANONYMOUS = "anonymous";
+
+    static signupUser(data: JSON): Promise<JSON> {
+        let secureAvaiable = false;
+        
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_SIGNUP}`;
+        let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
+        let jdata = {Data: data, Type: RestUser.USER_TYPE_GENERAL, InstallationId: DroiCore.getInstallationId()};
+
+        return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN);
     }
 
     static loginUser(userId: string, password: string): Promise<JSON> {
-        return null;
+        let secureAvaiable = false;
+        
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_SIGNUP}`;
+        let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
+
+        let jdata = {Type: RestUser.USER_TYPE_GENERAL, InstallationId: DroiCore.getInstallationId(), UserId: userId, Password: password};
+
+        return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN);
     }
 
     static loginAnonymous(userData: DroiUser): Promise<JSON> {
@@ -54,6 +71,19 @@ export class RestUser {
 
         let data = JSON.stringify({_Id: objId});
         return callServer(url, DroiHttpMethod.POST, data, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
+            .then( (_) => {
+                return true;
+            });
+    }
+
+    static changePassword(oldPassword: string, newPassword: string): Promise<boolean> {
+        let secureAvaiable = false;
+        
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_CHANGEPASSWORD}`;
+        let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
+
+        let jdata = {Old: oldPassword, New: newPassword};
+        return callServer(url, DroiHttpMethod.PUT, JSON.stringify(jdata), null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
             .then( (_) => {
                 return true;
             });
