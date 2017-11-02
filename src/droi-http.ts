@@ -47,6 +47,7 @@ export class DroiHttp {
                         let response = new DroiHttpResponse();
                         response.status = xhr.status;
                         response.data = xhr.responseText;
+                        console.log(`OUTPUT: ${response.data}`);
                         let allheaders = xhr.getAllResponseHeaders().split("\r\n");
                         let headers: {[key: string]: string} = {};
                         response.headers = headers;

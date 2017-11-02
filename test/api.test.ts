@@ -15,15 +15,15 @@ describe('Droi User API', () => {
 
         try {
             if (user != null && user.isLoggedIn()) {
-                console.log(`user logged in`);
                 await user.logout();
             }
 
             user = await DroiBaaS.DroiUser.loginAnonymous();
-            console.log(`user token: ${user.objectId()}`);
+            //console.log(`user token: ${user.objectId()}`);
 
         } catch (error) {
-            console.log(`error: ${error}`);
+            //console.log(`error: ${error}`);
+            throw error;
         }
     });
 });

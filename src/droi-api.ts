@@ -9,9 +9,9 @@ import { DroiCallback } from "./droi-callback"
 import { DroiCore } from "./droi-core"
 import { DroiConstant } from "./droi-const"
 import { UINT64 } from "cuint"
+import { DroiUser } from "./droi-user"
 
 export namespace RemoteServiceHelper {
-    const KEY_SESSION_TOKEN = "X-Droi-Session-Token";
     const DROI_TOKEN_INVALID = 1040006;
     const FETCH_DEVICE_ID_URL = "https://api.droibaas.com/uregister";
     // const FETCH_DEVICE_ID_URL = "https://api.droibaas.com/uregister?format=hex";
@@ -102,7 +102,11 @@ export namespace RemoteServiceHelper {
 
         get token(): string {
             if (this._isAuto) {
-                //TODO return user token
+                let user = DroiUser.getCurrentUser();
+                if (user != null && user.isLoggedIn())
+                    return user.sessionToken;
+                else
+                    return null;
             } else {
                 return this._token;
             }
@@ -123,7 +127,6 @@ export namespace RemoteServiceHelper {
                 
         return DroiHttp.sendRequest(request).then<JSON>(
             (response): JSON => {
-                console.log(`Output: ${response.data}`)
                 let error = translateDroiError(response, null);
                 if (!error.isOk)
                     throw error;
@@ -166,7 +169,7 @@ export namespace RemoteServiceHelper {
         if (tokenHolder) {
             let token = tokenHolder.token;
             if (token && token != "") {
-                request.headers[KEY_SESSION_TOKEN] = token;
+                request.headers[DroiConstant.DROI_KEY_HTTP_TOKEN] = token;
             }
         }    
     }

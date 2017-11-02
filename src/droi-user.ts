@@ -37,13 +37,13 @@ export class DroiUser extends DroiObject {
         this.session = null;
     }
 
-    private static saveUser(user: DroiUser) {
+    private static saveUserCache(user: DroiUser) {
         let userData = user.toJson();
         let jdata = {userData: userData, session: user.session};
         DroiPersistSettings.setItem(DroiPersistSettings.KEY_SAVED_USER, JSON.stringify(jdata));
     }
 
-    private static loadUser(): DroiUser {
+    private static loadUserCache(): DroiUser {
         let jstr = DroiPersistSettings.getItem(DroiPersistSettings.KEY_SAVED_USER);
         if (jstr == null)
             return null;
@@ -59,11 +59,16 @@ export class DroiUser extends DroiObject {
         return user;
     }
 
+    private static cleanUserCache() {
+        DroiPersistSettings.removeItem(DroiPersistSettings.KEY_SAVED_USER);
+        DroiUser.currentUser = null;
+    }
+
     static getCurrentUser(): DroiUser {
         if (DroiUser.currentUser != null)
             return DroiUser.currentUser;
 
-        let user = DroiUser.loadUser();
+        let user = DroiUser.loadUserCache();
         if (user == null)
             return null;
 
@@ -90,7 +95,7 @@ export class DroiUser extends DroiObject {
                 let user: DroiUser = DroiObject.fromJson(juser);
                 user.session = {Token: token, ExpiredAt: expired};
                 
-                DroiUser.saveUser(user);
+                DroiUser.saveUserCache(user);
 
                 return ReturnHandler(new DroiError(DroiError.OK), user, callback);
             })
@@ -108,9 +113,11 @@ export class DroiUser extends DroiObject {
 
         let promise = RestUser.logout(this.objectId(), this.session["Token"])
             .then( (_) => {
+                DroiUser.cleanUserCache();
                 return ReturnSingleHandler(new DroiError(DroiError.OK), callback);
             })
             .catch( (error) => {
+                DroiUser.cleanUserCache();
                 return ReturnSingleHandler(error, callback);
             });
 
@@ -118,8 +125,6 @@ export class DroiUser extends DroiObject {
     }
 
     isLoggedIn(): boolean {
-        console.log(`user session ${this.session}`);
-        
         if (this.session == null)
             return false;
 
@@ -134,5 +139,12 @@ export class DroiUser extends DroiObject {
             return false;
 
         return true;
+    }
+
+    get sessionToken(): string {
+        if (!this.isLoggedIn())
+            return null;
+        
+        return this.session["Token"];
     }
 }

@@ -52,11 +52,16 @@ export class RestUser {
         let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_LOGOUT}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
-        let data = JSON.stringify({_Id: objId, Token: token});
-
+        let data = null;
+        if (secureAvaiable) {
+            data = JSON.stringify({_Id: objId, Token: token});
+        } else {
+            data = JSON.stringify({_Id: objId});
+        }
+            
         return callServer(url, DroiHttpMethod.POST, data, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
             .then( (_) => {
                 return true;
-            })
+            });
     }
 }
