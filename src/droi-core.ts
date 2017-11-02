@@ -6,8 +6,6 @@ import { RemoteServiceHelper } from "./droi-api"
 
 const version = "1.0.13";
 
-//TODO: Read data from local storage
-
 /**
  * 
  */

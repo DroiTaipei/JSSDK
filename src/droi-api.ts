@@ -187,7 +187,8 @@ export namespace RemoteServiceHelper {
                 if (typeof jdata.Code === 'number') {
                     code = jdata.Code;
                     if (code == DROI_TOKEN_INVALID) {
-                        //TODO clear user data
+                        // Trick to access private member
+                        (DroiUser as any).cleanUserData();
                     } 
 
                     if (typeof jdata.Message === 'string') {

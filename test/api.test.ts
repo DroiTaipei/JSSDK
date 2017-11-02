@@ -19,10 +19,8 @@ describe('Droi User API', () => {
             }
 
             user = await DroiBaaS.DroiUser.loginAnonymous();
-            //console.log(`user token: ${user.objectId()}`);
-
         } catch (error) {
-            //console.log(`error: ${error}`);
+            // Error handling
             throw error;
         }
     });
