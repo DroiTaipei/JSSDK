@@ -76,6 +76,15 @@ class DroiObject {
             keyName == DroiConstant.DROI_KEY_JSON_CLASSNAME )
             return;
 
+        if ( value == null ) {
+            // Check whether the data is in properties
+            if ( this.properties.hasOwnProperty(keyName) ) {
+                delete this.properties[keyName];
+                this.dirtyFlags |= DirtyFlag.DIRTY_FLAG_BODY;
+            }
+            return;
+        }
+
         // TODO: Normally, we should check the datatype of all variables
         let val = null;
         if ( value instanceof Date ) {
