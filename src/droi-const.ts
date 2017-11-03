@@ -59,6 +59,22 @@ class DroiConstant {
     static readonly DroiQuery_LIMIT = "limit";
     static readonly DroiQuery_OFFSET = "offset";    
 
+    static readonly DroiCondition_LT = "$lt";
+    static readonly DroiCondition_LT_OR_EQ = "$lte";
+    static readonly DroiCondition_EQ = "$eq";
+    static readonly DroiCondition_NEQ = "$ne";
+    static readonly DroiCondition_GT_OR_EQ = "$gte";
+    static readonly DroiCondition_GT = "$gt";
+    static readonly DroiCondition_ISNULL = "ISNULL";
+    static readonly DroiCondition_ISNOTNULL = "ISNOTNULL";
+    static readonly DroiCondition_CONTAINS = "$contains";
+    static readonly DroiCondition_NOTCONTAINS = "$notContains";
+    static readonly DroiCondition_STARTSWITH = "$starts";
+    static readonly DroiCondition_NOTSTARTSWITH = "$notStarts";
+    static readonly DroiCondition_ENDSWITH = "$ends";
+    static readonly DroiCondition_NOTENDSWITH = "$notEnds";
+    static readonly DroiCondition_IN = "$in";
+    static readonly DroiCondition_NOTIN = "$nin";    
 }
 
 export { DroiConstant };
