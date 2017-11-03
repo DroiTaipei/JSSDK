@@ -4,7 +4,7 @@ import { DroiCallback } from "./droi-callback"
 import { DroiError } from "./droi-error"
 import { RemoteServiceHelper } from "./droi-api"
 
-const version = "1.0.13";
+const version = "1.0.14";
 
 /**
  * 

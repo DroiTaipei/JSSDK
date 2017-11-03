@@ -11,7 +11,7 @@ class CloudStorageDataProvider implements DroiDataProvider {
         return null;
     }
     
-    query( commands: Multimap<string, any> ): Promise<DroiCallback<Array<DroiObject>>> {
+    query( commands: Multimap<string, any> ): Promise<Array<DroiObject>> {
         return null;
     }
 
