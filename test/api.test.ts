@@ -24,6 +24,22 @@ describe('Droi User API', () => {
             throw error;
         }
     });
+
+    it('Normal signup', async () => {
+        let user = DroiBaaS.DroiUser.getCurrentUser();
+
+        try {
+            if (user != null && user.isLoggedIn())
+                await user.logout();
+
+            user = DroiBaaS.DroiUser.createUser();
+            user.setValue("UserId", "skyer");
+            user.Password = "123456";
+            await user.signup();
+        } catch (error) {
+            throw error;
+        }
+    });
 });
 
 // describe('Droi API Objects', () => {

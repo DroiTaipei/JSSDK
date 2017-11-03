@@ -114,7 +114,33 @@ export class DroiUser extends DroiObject {
     }
 
     static login(userId: string, password: string, callback?: DroiCallback<DroiUser>): Promise<DroiUser> {
-        
+        if (userId == null || password == null) {
+            return ReturnHandler(new DroiError(DroiError.INVALID_PARAMETER, "Empty UserId or Password"), null, callback);
+        }
+
+        // User already logged in
+        let curUser = DroiUser.getCurrentUser();
+        if (curUser != null && curUser.isLoggedIn() && !curUser.isAnonymous()) {
+            return ReturnHandler(new DroiError(DroiError.USER_ALREADY_LOGIN), null, callback);
+        }
+
+        let promise = RestUser.loginUser(userId, sha256(password))
+            .then( (jresult) => {
+                let user = DroiUser.createUser();
+                let obj = DroiObject.fromJson(jresult["Data"]);
+                user.properties = obj.properties;
+                user.permission = obj.permission;
+                user.session = {Token: jresult["Token"], ExpiredAt: jresult["ExpiredAt"]};
+
+                DroiUser.saveUserCache(user);
+                DroiUser.currentUser = user;
+                return ReturnHandler(new DroiError(DroiError.OK), user, callback);
+            })
+            .catch( (error) => {
+                return ReturnHandler(error, null, callback);
+            });
+
+        return callback ? null : promise;
     }
 
     async signup(callback?: DroiSingleCallback): Promise<DroiError> {
