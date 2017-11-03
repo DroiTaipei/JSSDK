@@ -13,7 +13,10 @@ export class RestUser {
     private static readonly REST_USER_LOGIN = "/login";
     private static readonly REST_USER_SIGNUP = "/signup";
     private static readonly REST_USER_LOGOUT = "/logout";
-    private static readonly REST_USER_CHANGEPASSWORD = "/password";
+    private static readonly REST_USER_PASSWORD = "/password";
+    private static readonly REST_USER_EMAIL = "/email";
+    private static readonly REST_USER_SMS = "/sms";
+    private static readonly REST_USER_VALIDATE_SMS = "/validate/sms";
 
     static readonly USER_TYPE_GENERAL = "general";
     static readonly USER_TYPE_ANONYMOUS = "anonymous";
@@ -31,7 +34,7 @@ export class RestUser {
     static loginUser(userId: string, password: string): Promise<JSON> {
         let secureAvaiable = false;
         
-        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_SIGNUP}`;
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_LOGIN}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
         let jdata = {Type: RestUser.USER_TYPE_GENERAL, InstallationId: DroiCore.getInstallationId(), UserId: userId, Password: password};
@@ -63,7 +66,7 @@ export class RestUser {
             });
     }
 
-    static logout(objId: string, token: string): Promise<boolean> {
+    static logout(objId: string): Promise<boolean> {
         let secureAvaiable = false;
         
         let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_LOGOUT}`;
@@ -79,7 +82,7 @@ export class RestUser {
     static changePassword(oldPassword: string, newPassword: string): Promise<boolean> {
         let secureAvaiable = false;
         
-        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_CHANGEPASSWORD}`;
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_PASSWORD}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
         let jdata = {Old: oldPassword, New: newPassword};
@@ -87,5 +90,43 @@ export class RestUser {
             .then( (_) => {
                 return true;
             });
+    }
+
+    static validateEmail(): Promise<boolean> {
+        let secureAvaiable = false;
+        
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_EMAIL}`;
+        let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
+
+        return callServer(url, DroiHttpMethod.POST, null, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
+            .then( (_) => {
+                return true;
+            });
+    }
+
+    static validatePhoneNum(): Promise<boolean> {
+        let secureAvaiable = false;
+        
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_SMS}`;
+        let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
+
+        return callServer(url, DroiHttpMethod.POST, null, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
+            .then( (_) => {
+                return true;
+            });
+    }
+
+    static confirmPhoneNumPin(pin: string): Promise<boolean> {
+        let secureAvaiable = false;
+        
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_VALIDATE_SMS}`;
+        let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
+        let jdata = {PinCode: pin};
+
+        return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
+            .then( (_) => {
+                return true;
+            });
+
     }
 }

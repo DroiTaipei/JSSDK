@@ -37,9 +37,59 @@ describe('Droi User API', () => {
                 await user.logout();
 
             user = DroiBaaS.DroiUser.createUser();
-            user.setValue("UserId", "skyer");
+            user.UserId = "skyer";
             user.Password = "123456";
+            user.Email = "skyer.tai@droi.com.tw";
+            user.PhoneNum = "886937011180";
             await user.signup();
+        } catch (error) {
+            throw error;
+        }
+    });
+
+    it('Normal login', async () => {
+        let user = DroiBaaS.DroiUser.getCurrentUser();
+
+        try {
+            if (user != null && user.isLoggedIn())
+                await user.logout();
+
+            user = await DroiBaaS.DroiUser.login("skyer", "123456")
+            console.log(`id: ${user.objectId()}, token: ${user.sessionToken}`);
+        } catch (error) {
+            throw error;
+        }
+    });
+
+    it('Validate Email', async () => {
+        let user = DroiBaaS.DroiUser.getCurrentUser();
+        
+        try {
+            if (user != null && user.isLoggedIn())
+                await user.logout();
+
+            user = await DroiBaaS.DroiUser.login("skyer", "123456")
+            console.log(`id: ${user.objectId()}, token: ${user.sessionToken}`);
+
+            await user.validateEmail();
+
+        } catch (error) {
+            throw error;
+        }
+    });
+
+    it('Validate Phone', async () => {
+        let user = DroiBaaS.DroiUser.getCurrentUser();
+        
+        try {
+            if (user != null && user.isLoggedIn())
+                await user.logout();
+
+            user = await DroiBaaS.DroiUser.login("skyer", "123456")
+            console.log(`id: ${user.objectId()}, token: ${user.sessionToken}`);
+
+            await user.validatePhoneNum();
+
         } catch (error) {
             throw error;
         }

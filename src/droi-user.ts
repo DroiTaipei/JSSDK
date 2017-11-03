@@ -29,6 +29,8 @@ export class DroiUser extends DroiObject {
 
     private static readonly KEY_USERID = "UserId";
     private static readonly KEY_AUTHDATA = "AuthData";
+    private static readonly KEY_EMAIL = "Email";
+    private static readonly KEY_PHONENUM = "PhoneNum";
 
     private session: {[key: string]: string};
     private password: string;
@@ -221,7 +223,7 @@ export class DroiUser extends DroiObject {
             return ReturnSingleHandler(new DroiError(DroiError.USER_NOT_AUTHORIZED), callback);
         }
 
-        let promise = RestUser.logout(this.objectId(), this.session["Token"])
+        let promise = RestUser.logout(this.objectId())
             .then( (_) => {
                 DroiUser.cleanUserCache();
                 return ReturnSingleHandler(new DroiError(DroiError.OK), callback);
@@ -268,12 +270,72 @@ export class DroiUser extends DroiObject {
         return callback ? null : promise;
     }
 
+    validateEmail(callback?: DroiSingleCallback): Promise<DroiError> {
+        let promise = RestUser.validateEmail()
+            .then( (_) => {
+                return ReturnSingleHandler(new DroiError(DroiError.OK), callback);
+            })
+            .catch( (error) => {
+                return ReturnSingleHandler(error, callback);
+            })
+
+        return callback ? null : promise;
+    }
+
+    validatePhoneNum(callback?: DroiSingleCallback): Promise<DroiError> {
+        let promise = RestUser.validatePhoneNum()
+        .then( (_) => {
+            return ReturnSingleHandler(new DroiError(DroiError.OK), callback);
+        })
+        .catch( (error) => {
+            return ReturnSingleHandler(error, callback);
+        })
+
+        return callback ? null : promise;    
+    }
+
+    confirmPhoneNumPin(pin: string, callback?: DroiSingleCallback): Promise<DroiError> {
+        let promise = RestUser.confirmPhoneNumPin(pin)
+        .then( (_) => {
+            return ReturnSingleHandler(new DroiError(DroiError.OK), callback);
+        })
+        .catch( (error) => {
+            return ReturnSingleHandler(error, callback);
+        })
+
+        return callback ? null : promise;            
+    }
+
     get Password(): string {
         return this.password;
     }
 
     set Password(password: string) {
         this.password = password;
+    }
+
+    get UserId(): string {
+        return this.getValue(DroiUser.KEY_USERID);
+    }
+
+    set UserId(id: string) {
+        this.setValue(DroiUser.KEY_USERID, id);
+    }
+
+    get Email(): string {
+        return this.getValue(DroiUser.KEY_EMAIL);
+    }
+
+    set Email(email: string) {
+        this.setValue(DroiUser.KEY_EMAIL, email);
+    }
+
+    get PhoneNum(): string {
+        return this.getValue(DroiUser.KEY_PHONENUM);
+    }
+
+    set PhoneNum(phone: string) {
+        this.setValue(DroiUser.KEY_PHONENUM, phone);
     }
 
     get sessionToken(): string {

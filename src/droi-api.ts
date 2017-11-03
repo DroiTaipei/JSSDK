@@ -194,6 +194,10 @@ export namespace RemoteServiceHelper {
                     if (typeof jdata.Message === 'string') {
                         message = jdata.Message;
                     }
+
+                    if (typeof jdata.Ticket === 'string') {
+                        retError.ticket = jdata.Ticket;
+                    }
                 }
             } catch (e) {
                 // bypass
