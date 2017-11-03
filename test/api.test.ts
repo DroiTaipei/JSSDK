@@ -1,5 +1,5 @@
 import { assert } from 'chai'
-import { describe, it, beforeEach, before } from 'mocha'
+import { describe, it, beforeEach, before, after } from 'mocha'
 // - 
 import * as DroiBaaS from '../src'
 import { RestObject } from '../src/rest/object'
@@ -8,6 +8,10 @@ import { RestUser } from '../src/rest/user'
 describe('Droi User API', () => {
     before( () => {
         DroiBaaS.DroiCore.initializeCore("ke8umbzhvkW9Zb6HAjzyw7j8pUJbZSEUlQAAWGoK", "Sxfqun4fK7zT09jGNu4cklSNS7XL_lOSq4zsTAf1nnewPMp0yS6CAh1eBI0ksg_S");
+    });
+
+    after( () => {
+
     });
 
     it('Anonymous login', async () => {
