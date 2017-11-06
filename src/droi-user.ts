@@ -61,8 +61,7 @@ export class DroiUser extends DroiObject {
 
         let obj = DroiObject.fromJson(JSON.parse(jdata.userData));
         let user = DroiUser.createUser();
-        user.properties = obj.properties;
-        user.permission = obj.permission;
+        user.cloneFrom(obj);
         user.session = jdata.session;
 
         return user;
@@ -77,7 +76,6 @@ export class DroiUser extends DroiObject {
         let obj: DroiObject = DroiObject.fromJson(jobj);
         let user = DroiUser.createUser();
         user.cloneFrom(obj);
-
     }    
 
     static getCurrentUser(): DroiUser {
@@ -137,8 +135,7 @@ export class DroiUser extends DroiObject {
             .then( (jresult) => {
                 let user = DroiUser.createUser();
                 let obj = DroiObject.fromJson(jresult["Data"]);
-                user.properties = obj.properties;
-                user.permission = obj.permission;
+                user.cloneFrom(obj);
                 user.session = {Token: jresult["Token"], ExpiredAt: jresult["ExpiredAt"]};
 
                 DroiUser.saveUserCache(user);
