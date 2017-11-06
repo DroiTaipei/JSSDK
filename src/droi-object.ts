@@ -32,6 +32,9 @@ class DroiObject {
      * @param tableName Table name of collection
      */
     static createObject( tableName : string ) : DroiObject {
+        if ( DroiObject.factoryies.hasOwnProperty( tableName ) ) {
+            return DroiObject.factoryies[tableName]();
+        }
         return new DroiObject( tableName );
     }
 
@@ -224,6 +227,7 @@ class DroiObject {
     }
 
     toJson( withRef : boolean = false ) : string {
+        // TODO: Permission
         let clone = DroiObject.exportProperties( this.properties, 0, withRef );
         
         // 
@@ -373,10 +377,15 @@ class DroiObject {
         throw new Error("Unable to copy obj! Its type isn't supported.");
     }
 
+    public static registerCreateFactory( tableName: string, factory: ()=>DroiObject ) {
+        DroiObject.factoryies[ tableName ] = factory;
+    }
+
     //
     protected permission : DroiPermission;
     protected properties : Dictionary = {};
     private dirtyFlags : number = DirtyFlag.DIRTY_FLAG_BODY;
+    private static factoryies : Dictionary = {};
 };
 
 export { DroiObject, Guid };

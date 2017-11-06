@@ -72,12 +72,6 @@ export class DroiUser extends DroiObject {
         DroiUser.currentUser = null;
     }
 
-    static fromJson( jobj : any ) : any {
-        let obj: DroiObject = DroiObject.fromJson(jobj);
-        let user = DroiUser.createUser();
-        user.cloneFrom(obj);
-    }    
-
     static getCurrentUser(): DroiUser {
         if (DroiUser.currentUser != null)
             return DroiUser.currentUser;

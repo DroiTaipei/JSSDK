@@ -3,6 +3,8 @@ import { Guid } from "./droi-object"
 import { DroiCallback } from "./droi-callback"
 import { DroiError } from "./droi-error"
 import { RemoteServiceHelper } from "./droi-api"
+import { DroiUser } from "./droi-user";
+import { DroiObject } from "./droi-object";
 
 const version = "1.0.14";
 
@@ -18,6 +20,7 @@ class DroiCore {
     static initializeCore(appid:string, apikey: string) {
         DroiCore.appId = appid;
         DroiCore.apiKey = apikey;
+        DroiObject.registerCreateFactory( "_User", ()=>DroiUser.createUser() );
     }
 
     /**
