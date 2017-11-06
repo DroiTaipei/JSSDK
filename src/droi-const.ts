@@ -38,6 +38,7 @@ class DroiConstant {
     static readonly DroiQuery_DELETE = "delete";
     static readonly DroiQuery_UPDATE = "update";
     static readonly DroiQuery_UPDATE_DATA = "updateData";
+    static readonly DroiQuery_TABLE_NAME = "tableName";
     static readonly DroiQuery_COUNT = "count";
 
     static readonly DroiQuery_WHERE = "where";

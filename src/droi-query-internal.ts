@@ -12,18 +12,24 @@ class DroiQueryInternal extends DroiQuery {
     static upsert( droiObject:DroiObject ) : DroiQueryInternal {
         let query = new DroiQueryInternal( droiObject.tableName() )
         query.queryCommand.put( DroiConstant.DroiQuery_INSERT, [droiObject] );
+        query.queryCommand.remove( DroiConstant.DroiQuery_SELECT );
+        query.queryCommand.put( DroiConstant.DroiQuery_TABLE_NAME, droiObject.tableName() );
         return query;
     }
 
     static delete( droiObject:DroiObject ) : DroiQueryInternal {
         let query = new DroiQueryInternal( droiObject.tableName() )
         query.queryCommand.put( DroiConstant.DroiQuery_DELETE, [droiObject] );
+        query.queryCommand.remove( DroiConstant.DroiQuery_SELECT );
+        query.queryCommand.put( DroiConstant.DroiQuery_TABLE_NAME, droiObject.tableName() );
         return query;
     }
 
     static updateData( droiObject:DroiObject ) : DroiQueryInternal {
         let query = new DroiQueryInternal( droiObject.tableName() )
         query.queryCommand.put( DroiConstant.DroiQuery_UPDATE_DATA, [droiObject] );
+        query.queryCommand.remove( DroiConstant.DroiQuery_SELECT );
+        query.queryCommand.put( DroiConstant.DroiQuery_TABLE_NAME, droiObject.tableName() );
         return query;
     }
 }
