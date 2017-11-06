@@ -5,60 +5,56 @@ import { MultimapEntry, Multimap } from "./droi-multimap"
 import { DroiCallback, DroiSingleCallback } from "./droi-callback";
 import { DroiDataProvider } from "./droi-data-provider";
 import { DroiConstant } from "./droi-const"
-// import { RestObject, RestCRUD } from "./rest/object"
-// import { RestUser } from "./rest/user"
+import { RestObject, RestCRUD } from "./rest/object"
+import { RestUser } from "./rest/user"
 // import { DroiCondition } from "./droi-condition"
 
 
-class CloudStorageDataProvider implements DroiDataProvider {
+export class CloudStorageDataProvider implements DroiDataProvider {
 
     upsert( commands: Multimap<string, any> ): Promise<DroiError> {
         return null;
     }
     
     query( commands: Multimap<string, any> ): Promise<Array<DroiObject>> {
-        return null;
-        // let tableName: string = null;
+        let tableName: string = null;
 
-        // let res: Array<DroiObject> = [];
-        // if (commands.containsKey(DroiConstant.DroiQuery_SELECT)) {
-        //     let list = commands.get(DroiConstant.DroiQuery_SELECT);
-        //     if (list == null || list.length != 1)
-        //         throw new DroiError(DroiError.INVALID_PARAMETER, "No table name in query.");
-        //     tableName = list[0];
-        // }
+        let res: Array<DroiObject> = [];
+        if (commands.containsKey(DroiConstant.DroiQuery_SELECT)) {
+            let list = commands.get(DroiConstant.DroiQuery_SELECT);
+            if (list == null || list.length != 1)
+                throw new DroiError(DroiError.INVALID_PARAMETER, "No table name in query.");
+            tableName = list[0];
+        }
 
-        // let restHandler: RestCRUD;
-        // let objHandler: typeof DroiObject;
+        let restHandler: RestCRUD;
 
-        // if (tableName === "_User") {
-        //     restHandler = RestUser.instance();
-        //     objHandler = DroiUser;
-        // } else { 
-        //     restHandler = RestObject.instance();
-        //     objHandler = DroiObject;
-        // }
-        // let where = this.generateWhere(commands);
-        // let order = this.generateOrder(commands);
-        // let offset = NaN;
-        // let limit = NaN;
+        if (tableName === "_User") {
+            restHandler = RestUser.instance();
+        } else { 
+            restHandler = RestObject.instance();
+        }
+        let where = this.generateWhere(commands);
+        let order = this.generateOrder(commands);
+        let offset = NaN;
+        let limit = NaN;
 
-        // if (commands.containsKey(DroiConstant.DroiQuery_OFFSET))
-        //     offset = commands.get(DroiConstant.DroiQuery_OFFSET)[0];
-        // if (commands.containsKey(DroiConstant.DroiQuery_LIMIT))
-        //     limit = commands.get(DroiConstant.DroiQuery_LIMIT)[0]; 
+        if (commands.containsKey(DroiConstant.DroiQuery_OFFSET))
+            offset = commands.get(DroiConstant.DroiQuery_OFFSET)[0];
+        if (commands.containsKey(DroiConstant.DroiQuery_LIMIT))
+            limit = commands.get(DroiConstant.DroiQuery_LIMIT)[0]; 
 
-        // return restHandler.query(tableName, where, offset, limit, order).then(
-        //     (jResult) => {
-        //         let result: Array<DroiObject> = [];
-        //         for (let jobj of jResult) {
-        //             let dobj = objHandler.fromJson(jobj);
-        //             if (dobj == null)
-        //                 throw new DroiError(DroiError.ERROR, `form droiobject fail. ${JSON.stringify(jobj)}`)
-        //             result.push(dobj);
-        //         }
-        //         return result;
-        //     });
+        return restHandler.query(tableName, where, offset, limit, order).then(
+            (jResult) => {
+                let result: Array<DroiObject> = [];
+                for (let jobj of jResult) {
+                    let dobj = DroiObject.fromJson(jobj);
+                    if (dobj == null)
+                        throw new DroiError(DroiError.ERROR, `form droiobject fail. ${JSON.stringify(jobj)}`)
+                    result.push(dobj);
+                }
+                return result;
+            });
     }
 
     updateData( commands: Multimap<string, any> ): Promise<DroiError> {
@@ -166,5 +162,3 @@ class CloudStorageDataProvider implements DroiDataProvider {
     }
 }
 
-
-export { CloudStorageDataProvider }

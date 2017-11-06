@@ -1,10 +1,9 @@
 import { DroiPersistSettings } from "./droi-persist-settings"
-import { Guid } from "./droi-object"
 import { DroiCallback } from "./droi-callback"
 import { DroiError } from "./droi-error"
 import { RemoteServiceHelper } from "./droi-api"
 import { DroiUser } from "./droi-user";
-import { DroiObject } from "./droi-object";
+import { Guid, DroiObject } from "./droi-object"
 
 const version = "1.0.14";
 
