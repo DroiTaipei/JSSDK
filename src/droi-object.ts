@@ -1,7 +1,6 @@
 import { DroiConstant } from './droi-const';
 import { DroiPermission } from './droi-permission';
 import { DroiError } from "./droi-error";
-import { DroiCallback, DroiSingleCallback } from "./droi-callback";
 import { DroiQueryInternal as DroiQuery } from "./droi-query-internal";
 
 class Dictionary {
@@ -125,20 +124,20 @@ class DroiObject {
         return this.properties[keyName];
     }
 
-    static saveAll( items : Array<DroiObject>, callback? : DroiSingleCallback ) :Promise<DroiError> {
+    static saveAll( items : Array<DroiObject> ) :Promise<DroiError> {
 
         return null;
     }
 
-    save( callback? : DroiSingleCallback ):Promise<DroiError> {
-        return this.funcTemplate( this.saveToStorage, callback);
+    save():Promise<DroiError> {
+        return this.funcTemplate( this.saveToStorage );
     }
 
-    delete( callback? : DroiSingleCallback ):Promise<DroiError> {
-        return this.funcTemplate( this.deleteFromStorage, callback);
+    delete():Promise<DroiError> {
+        return this.funcTemplate( this.deleteFromStorage);
     }
 
-    atomicAdd( field : string, amount : number, callback? : DroiSingleCallback ):Promise<DroiError> {
+    atomicAdd( field : string, amount : number ):Promise<DroiError> {
         return this.funcTemplate( async function () {
             //
             this.checkDirtyFlags();
@@ -150,10 +149,10 @@ class DroiObject {
             //query.updateObjectAtomic( this, this.objectId(), field, amount );
             let error = await query.run();
             return error;
-        }, callback );
+        } );
     }
 
-    private funcTemplate( func : () => Promise<DroiError>, callback? : DroiSingleCallback ):Promise<DroiError> {
+    private funcTemplate( func : () => Promise<DroiError> ):Promise<DroiError> {
         let handler = async (resolve, reject) => {
             // Execute func
             try {
@@ -175,19 +174,6 @@ class DroiObject {
             }                
         };
 
-        // Use Callback method
-        if (callback) {
-            handler(
-                () => {
-                    callback(new DroiError(DroiError.OK));
-                },
-                (error) => {
-                   callback( error );
-                }
-            )
-            return null;
-        }
-        
         // Use Promise method
         return new Promise(handler);        
     }
@@ -203,16 +189,14 @@ class DroiObject {
         // date = new Date( date.getTime() + TIME_SHIFT );
         this.properties[ DroiConstant.DROI_KEY_JSON_MODIFIED_TIME ] = date.toISOString();
         this.dirtyFlags |= DirtyFlag.DIRTY_FLAG_BODY;
-        let query = DroiQuery.create( this.tableName() );
-        query.upsert( this );
+         let query = DroiQuery.upsert( this );
         error = await query.run();
         return error;
     }
 
     private async deleteFromStorage() : Promise<DroiError> {
         let error = new DroiError(DroiError.OK);
-        let query = DroiQuery.create( this.tableName() );
-        query.delete( this );
+        let query = DroiQuery.delete( this );
         error = await query.run();
         return error;
     }

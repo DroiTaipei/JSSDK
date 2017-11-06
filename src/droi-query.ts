@@ -123,8 +123,9 @@ class DroiQuery {
     }
 
     private getTableName(): string {
-        // TODO
-        return "";
+        // 
+        let tableName = this.queryCommand.getElement( DroiConstant.DroiQuery_SELECT, 0 );
+        return tableName;
     }
 
     private throwIfTheCommandInvalid() {
