@@ -235,6 +235,16 @@ class DroiObject {
         return this.toJson( true );
     }
 
+    /**
+     * Clone DroiObject
+     * @param droiObject DroiObject
+     */
+    cloneFrom(droiObject: DroiObject) {
+        this.properties = droiObject.properties;
+        this.permission = droiObject.permission;
+        this.dirtyFlags = droiObject.dirtyFlags;
+    }
+
     static fromJson( jobj : any ) : any {
         let res = null;
 

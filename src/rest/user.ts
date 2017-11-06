@@ -4,8 +4,9 @@ import { DroiHttpMethod } from "../droi-http"
 import { DroiConstant } from "../droi-const"
 import { DroiUser } from "../droi-user"
 import { DroiError } from "../droi-error"
+import { RestCRUD } from "./object"
 
-export class RestUser {
+export class RestUser implements RestCRUD {
     private static readonly REST_USER_URL = "/users/v2";
     private static readonly REST_HTTPS = "https://api.droibaas.com/rest";
     private static readonly REST_HTTPS_SECURE = "/droi";
@@ -21,7 +22,32 @@ export class RestUser {
     static readonly USER_TYPE_GENERAL = "general";
     static readonly USER_TYPE_ANONYMOUS = "anonymous";
 
-    static signupUser(data: JSON): Promise<JSON> {
+    private static INSTANCE: RestUser = null;
+    
+    static instance(): RestUser {
+        if (RestUser.INSTANCE == null)
+        RestUser.INSTANCE = new RestUser();
+
+        return RestUser.INSTANCE;
+    }    
+
+    upsert(obj: string, objId:string, table: string): Promise<boolean> {
+        return null;
+    }
+
+    query(table: string, where?: string, offset?: number, limit?: number, order?: string): Promise<Array<JSON>> {
+        return null;
+    }
+
+    updateData(table: string, data: string, where?: string): Promise<boolean> {
+        return null;
+    }
+
+    delete(objId:string, table: string): Promise<boolean> {
+        return null;
+    }
+    
+    signupUser(data: JSON): Promise<JSON> {
         let secureAvaiable = false;
         
         let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_SIGNUP}`;
@@ -31,7 +57,7 @@ export class RestUser {
         return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN);
     }
 
-    static loginUser(userId: string, password: string): Promise<JSON> {
+    loginUser(userId: string, password: string): Promise<JSON> {
         let secureAvaiable = false;
         
         let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_LOGIN}`;
@@ -42,7 +68,7 @@ export class RestUser {
         return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN);
     }
 
-    static loginAnonymous(userData: DroiUser): Promise<JSON> {
+    loginAnonymous(userData: DroiUser): Promise<JSON> {
         let secureAvaiable = false;
         
         let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_LOGIN}`;
@@ -66,7 +92,7 @@ export class RestUser {
             });
     }
 
-    static logout(objId: string): Promise<boolean> {
+    logout(objId: string): Promise<boolean> {
         let secureAvaiable = false;
         
         let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_LOGOUT}`;
@@ -79,7 +105,7 @@ export class RestUser {
             });
     }
 
-    static changePassword(oldPassword: string, newPassword: string): Promise<boolean> {
+    changePassword(oldPassword: string, newPassword: string): Promise<boolean> {
         let secureAvaiable = false;
         
         let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_PASSWORD}`;
@@ -92,7 +118,7 @@ export class RestUser {
             });
     }
 
-    static validateEmail(): Promise<boolean> {
+    validateEmail(): Promise<boolean> {
         let secureAvaiable = false;
         
         let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_EMAIL}`;
@@ -104,7 +130,7 @@ export class RestUser {
             });
     }
 
-    static validatePhoneNum(): Promise<boolean> {
+    validatePhoneNum(): Promise<boolean> {
         let secureAvaiable = false;
         
         let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_SMS}`;
@@ -116,7 +142,7 @@ export class RestUser {
             });
     }
 
-    static confirmPhoneNumPin(pin: string): Promise<boolean> {
+    confirmPhoneNumPin(pin: string): Promise<boolean> {
         let secureAvaiable = false;
         
         let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_VALIDATE_SMS}`;

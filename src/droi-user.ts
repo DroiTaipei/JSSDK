@@ -41,7 +41,7 @@ export class DroiUser extends DroiObject {
         return new DroiUser();
     }
 
-    private constructor() {
+    protected constructor() {
         super("_User");
         this.session = null;
     }
@@ -73,6 +73,13 @@ export class DroiUser extends DroiObject {
         DroiUser.currentUser = null;
     }
 
+    static fromJson( jobj : any ) : any {
+        let obj: DroiObject = DroiObject.fromJson(jobj);
+        let user = DroiUser.createUser();
+        user.cloneFrom(obj);
+
+    }    
+
     static getCurrentUser(): DroiUser {
         if (DroiUser.currentUser != null)
             return DroiUser.currentUser;
@@ -96,7 +103,7 @@ export class DroiUser extends DroiObject {
         user.setValue("UserId", DroiCore.getInstallationId() + await DroiCore.getDeviceId());
         user.setValue("AuthData", {"anonymous": "1"});
 
-        let promise = RestUser.loginAnonymous(user)
+        let promise = RestUser.instance().loginAnonymous(user)
             .then( (jlogin) => {
                 let token = jlogin["Token"];
                 let expired = jlogin["ExpiredAt"];
@@ -126,7 +133,7 @@ export class DroiUser extends DroiObject {
             return ReturnHandler(new DroiError(DroiError.USER_ALREADY_LOGIN), null, callback);
         }
 
-        let promise = RestUser.loginUser(userId, sha256(password))
+        let promise = RestUser.instance().loginUser(userId, sha256(password))
             .then( (jresult) => {
                 let user = DroiUser.createUser();
                 let obj = DroiObject.fromJson(jresult["Data"]);
@@ -193,7 +200,7 @@ export class DroiUser extends DroiObject {
 
         let jresult;
         try {
-            jresult = await RestUser.signupUser(juser);
+            jresult = await RestUser.instance().signupUser(juser);
         } catch (e) {
             let error = e as DroiError;
             if (error.code == DroiConstant.DROI_API_RECORD_CONFLICT || error.code == DroiConstant.DROI_API_USER_EXISTS)
@@ -223,7 +230,7 @@ export class DroiUser extends DroiObject {
             return ReturnSingleHandler(new DroiError(DroiError.USER_NOT_AUTHORIZED), callback);
         }
 
-        let promise = RestUser.logout(this.objectId())
+        let promise = RestUser.instance().logout(this.objectId())
             .then( (_) => {
                 DroiUser.cleanUserCache();
                 return ReturnSingleHandler(new DroiError(DroiError.OK), callback);
@@ -259,7 +266,7 @@ export class DroiUser extends DroiObject {
     }
 
     changePassword(oldPassword: string, newPassword: string, callback?: DroiSingleCallback): Promise<DroiError> {
-        let promise = RestUser.changePassword(sha256(oldPassword), sha256(newPassword))
+        let promise = RestUser.instance().changePassword(sha256(oldPassword), sha256(newPassword))
             .then( (_) => {
                 return ReturnSingleHandler(new DroiError(DroiError.OK), callback);
             })
@@ -271,7 +278,7 @@ export class DroiUser extends DroiObject {
     }
 
     validateEmail(callback?: DroiSingleCallback): Promise<DroiError> {
-        let promise = RestUser.validateEmail()
+        let promise = RestUser.instance().validateEmail()
             .then( (_) => {
                 return ReturnSingleHandler(new DroiError(DroiError.OK), callback);
             })
@@ -283,7 +290,7 @@ export class DroiUser extends DroiObject {
     }
 
     validatePhoneNum(callback?: DroiSingleCallback): Promise<DroiError> {
-        let promise = RestUser.validatePhoneNum()
+        let promise = RestUser.instance().validatePhoneNum()
         .then( (_) => {
             return ReturnSingleHandler(new DroiError(DroiError.OK), callback);
         })
@@ -295,7 +302,7 @@ export class DroiUser extends DroiObject {
     }
 
     confirmPhoneNumPin(pin: string, callback?: DroiSingleCallback): Promise<DroiError> {
-        let promise = RestUser.confirmPhoneNumPin(pin)
+        let promise = RestUser.instance().confirmPhoneNumPin(pin)
         .then( (_) => {
             return ReturnSingleHandler(new DroiError(DroiError.OK), callback);
         })
@@ -304,6 +311,19 @@ export class DroiUser extends DroiObject {
         })
 
         return callback ? null : promise;            
+    }
+
+    cloneFrom(droiObject: DroiObject) {
+        super.cloneFrom(droiObject);
+        if (droiObject instanceof DroiUser) {
+            let user = droiObject as DroiUser;
+            this.UserId = user.UserId;
+            this.Password = user.Password;
+            this.Email = user.Email;
+            this.PhoneNum = user.PhoneNum;
+            this.session = user.session;
+            this.setValue(DroiUser.KEY_AUTHDATA, user.getValue(DroiUser.KEY_AUTHDATA));
+        }
     }
 
     get Password(): string {
