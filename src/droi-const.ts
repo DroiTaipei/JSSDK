@@ -76,6 +76,10 @@ class DroiConstant {
     static readonly DroiCondition_NOTENDSWITH = "$notEnds";
     static readonly DroiCondition_IN = "$in";
     static readonly DroiCondition_NOTIN = "$nin";    
+
+    // DroiPermission
+    public static PERMISSION_READ = 2;
+    public static PERMISSION_WRITE = 1;
 }
 
 export { DroiConstant };

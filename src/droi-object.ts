@@ -238,10 +238,16 @@ class DroiObject {
     }
 
     toJson( withRef : boolean = false ) : string {
-        // TODO: Permission
+        // 
         let clone = DroiObject.exportProperties( this.properties, 0, withRef );
         
-        // 
+        // Permission
+        if ( this.permission !== undefined ) {
+            clone.put( DroiConstant.DROI_KEY_JSON_PERMISSION, this.permission.toJsonObject() );
+        } else if ( DroiPermission.getDefaultPermission() !== undefined ) {
+            let perm = DroiPermission.getDefaultPermission();
+            clone.put( DroiConstant.DROI_KEY_JSON_PERMISSION, perm.toJsonObject() );
+        }
         return JSON.stringify( clone );        
     }
 
@@ -309,6 +315,11 @@ class DroiObject {
                 res = dict;
             }
         } 
+
+        // Check whether the permission ??
+        if ( jobj[DroiConstant.DROI_KEY_JSON_PERMISSION] !== undefined ) {
+            res.permission = DroiPermission.restorePermission( jobj[DroiConstant.DROI_KEY_JSON_PERMISSION] );
+        }
 
         return res;
     }
