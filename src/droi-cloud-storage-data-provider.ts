@@ -13,7 +13,25 @@ import { DroiCondition } from "./droi-condition"
 export class CloudStorageDataProvider implements DroiDataProvider {
 
     upsert( commands: Multimap<string, any> ): Promise<DroiError> {
-        return null;
+
+        //TODO: Process reference objs
+
+        let error = new DroiError(DroiError.OK);
+        let obj = commands.getElement(DroiConstant.DroiQuery_INSERT, 0)[0] as DroiObject;
+
+        // Not dirty, return OK directly
+        if (!obj.isDirty()) {
+            return Promise.resolve(error);
+        }
+
+        let tableName = commands.getElement(DroiConstant.DroiQuery_TABLE_NAME, 0);
+        let restHandler: RestCRUD = (tableName === RestUser.TABLE_NAME) ? RestUser.instance() : RestObject.instance();
+
+        return restHandler.upsert(obj.toJson(), obj.objectId(), tableName).then( 
+            (isOk) => {
+                return new DroiError(DroiError.OK);
+            });
+
     }
     
     query( commands: Multimap<string, any> ): Promise<Array<DroiObject>> {
@@ -27,13 +45,8 @@ export class CloudStorageDataProvider implements DroiDataProvider {
             tableName = list[0];
         }
 
-        let restHandler: RestCRUD;
+        let restHandler: RestCRUD = (tableName === RestUser.TABLE_NAME) ? RestUser.instance() : RestObject.instance();
 
-        if (tableName === "_User") {
-            restHandler = RestUser.instance();
-        } else { 
-            restHandler = RestObject.instance();
-        }
         let where = this.generateWhere(commands);
         let order = this.generateOrder(commands);
         let offset = NaN;

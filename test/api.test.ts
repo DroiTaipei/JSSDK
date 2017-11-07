@@ -96,22 +96,28 @@ describe('Droi User API', () => {
     });
 });
 
-// describe('Droi API Objects', () => {
-//     before( () => {
-//         DroiBaaS.DroiCore.initializeCore("ke8umbzhvkW9Zb6HAjzyw7j8pUJbZSEUlQAAWGoK", "Sxfqun4fK7zT09jGNu4cklSNS7XL_lOSq4zsTAf1nnewPMp0yS6CAh1eBI0ksg_S");
-//     });
+describe('Droi objects', () => {
+    before( () => {
+        DroiBaaS.DroiCore.initializeCore("ke8umbzhvkW9Zb6HAjzyw7j8pUJbZSEUlQAAWGoK", "Sxfqun4fK7zT09jGNu4cklSNS7XL_lOSq4zsTAf1nnewPMp0yS6CAh1eBI0ksg_S");
+    });
 
-//     it('Upsert', async () => {
-//         let obj = DroiBaaS.DroiObject.createObject("rest_object");
-//         obj.setValue("name", "skyer");
-//         let str = obj.toJson();
+    after( () => {
 
-//         try {
-//             let isOk = await RestObject.upsert(str, obj.objectId(), "rest_object");
-//             console.log(`upsert ${isOk}`);
-//         } catch (e) {
-//             console.log(`upsert fail. ${e}`);
-//             assert.equal(true, false);
-//         }
-//     });
-// });
+    });
+
+    it('Upsert object', async () => {
+        try {
+            let user = DroiBaaS.DroiUser.getCurrentUser();
+            if (user == null || !user.isLoggedIn())
+                await DroiBaaS.DroiUser.loginAnonymous();
+
+            let obj = DroiBaaS.DroiObject.createObject("js_test");
+            obj.setValue("name", "skyer");
+            obj.setValue("data", 1836449);
+            
+            let error = await obj.save();
+        } catch (error) {
+            throw error;
+        }
+    });
+});

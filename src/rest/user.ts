@@ -21,6 +21,7 @@ export class RestUser implements RestCRUD {
 
     static readonly USER_TYPE_GENERAL = "general";
     static readonly USER_TYPE_ANONYMOUS = "anonymous";
+    static readonly TABLE_NAME = "_User";
 
     private static INSTANCE: RestUser = null;
     
