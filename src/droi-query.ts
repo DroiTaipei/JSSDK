@@ -63,33 +63,16 @@ class DroiQuery {
 
             switch( this.queryAction ) {
                 case DroiConstant.DroiQuery_SELECT:
-                    callback = (resolve, reject) => {
-                        dp.query( this.queryCommand ).then( res => {
-                            resolve( res );
-                        }).catch( (droiError) => {
-                            reject( droiError );
-                        });
-                    };
-                    break;
+                    return dp.query( this.queryCommand );
                 case DroiConstant.DroiQuery_INSERT:
-                case DroiConstant.DroiQuery_UPDATE:                    
-                    callback = (resolve, reject) => {
-                            dp.upsert( this.queryCommand ).then( () => {
-                                resolve( null );
-                            }).catch( (droiError) => {
-                                reject( droiError );
-                            });
-                        };
-                        break;
-                case DroiConstant.DroiQuery_DELETE:
-                    callback =  (resolve, reject) => {
-                        dp.delete( this.queryCommand ).then( () => {
-                            resolve( null );
-                        }).catch( (droiError) => {
-                            reject( droiError );
+                case DroiConstant.DroiQuery_UPDATE:
+                    return dp.upsert( this.queryCommand ).then( () => {
+                            return null;
                         });
-                    };
-                    break;
+                case DroiConstant.DroiQuery_DELETE:
+                    return dp.delete( this.queryCommand ).then( () => {
+                        return null;
+                    })
             }
             
             return new Promise<Array<any>>( (resolve, reject) => callback );
@@ -149,7 +132,8 @@ class DroiQuery {
         // Check whether the action is correct
         let actionList = [ DroiConstant.DroiQuery_SELECT, DroiConstant.DroiQuery_INSERT, DroiConstant.DroiQuery_DELETE, DroiConstant.DroiQuery_UPDATE, DroiConstant.DroiQuery_UPDATE_DATA ];
         let fs_counter = 0;
-        for ( let action in actionList ) {
+
+        for ( let action of actionList ) {
             if ( this.queryCommand.containsKey(action) ) {
                 fs_counter++;
                 this.queryAction = action;
