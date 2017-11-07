@@ -141,23 +141,24 @@ class DroiObject {
     }
 
     atomicAdd( field : string, amount : number ):Promise<DroiError> {
-        return this.funcTemplate( async function () {
+        return this.funcTemplate( async function (self) {
             //
-            this.checkDirtyFlags();
-            if ( (this.dirtyFlags & DirtyFlag.DIRTY_FLAG_BODY) != 0 )
+            self.checkDirtyFlags();
+            if ( (self.dirtyFlags & DirtyFlag.DIRTY_FLAG_BODY) != 0 )
                 throw new DroiError( DroiError.ERROR, "DroiObject content dirty" );
 
-            let query = DroiQuery.create( this.tableName() ).atomic( this ).add( field, amount );
+            let query = DroiQuery.create( self.tableName() ).atomic( self ).add( field, amount );
             let error = await query.run();
             return error;
         } );
     }
 
-    private funcTemplate( func : () => Promise<DroiError> ):Promise<DroiError> {
+    private funcTemplate( func : (self) => Promise<DroiError> ):Promise<DroiError> {
+        let _self = this;
         let handler = async (resolve, reject) => {
             // Execute func
             try {
-                let error = await func();
+                let error = await func(_self);
                 if ( error.isOk ) {
                     resolve();
                 } else {
@@ -179,23 +180,25 @@ class DroiObject {
         return new Promise(handler);        
     }
 
-    private async saveToStorage() : Promise<DroiError> {
-        this.checkDirtyFlags();
+    private async saveToStorage(self) : Promise<DroiError> {
+        self.checkDirtyFlags();
         // 
-        if ( this.dirtyFlags == 0 )
-            return new DroiError( DroiError.OK );
+        if ( self.dirtyFlags == 0 ) {
+            return Promise.resolve(new DroiError( DroiError.OK ));
+        }
 
         let error = new DroiError(DroiError.OK);
         let date = new Date();
         // date = new Date( date.getTime() + TIME_SHIFT );
-        this.properties[ DroiConstant.DROI_KEY_JSON_MODIFIED_TIME ] = date.toISOString();
-        this.dirtyFlags |= DirtyFlag.DIRTY_FLAG_BODY;
-         let query = DroiQuery.upsert( this );
+        self.properties[ DroiConstant.DROI_KEY_JSON_MODIFIED_TIME ] = date.toISOString();
+        self.dirtyFlags |= DirtyFlag.DIRTY_FLAG_BODY;
+        let query = DroiQuery.upsert( self );
+        
         error = await query.run();
         return error;
     }
 
-    private async deleteFromStorage() : Promise<DroiError> {
+    private async deleteFromStorage(self) : Promise<DroiError> {
         let error = new DroiError(DroiError.OK);
         let query = DroiQuery.delete( this );
         error = await query.run();
@@ -218,9 +221,10 @@ class DroiObject {
     private checkDirtyFlags() : void {
         let referenceDirty = false;
 
+        let self = this;
         // Check all children
-        DroiObject.travelDroiObject( this, (droiObject) => {
-            if ( this == droiObject )
+        DroiObject.travelDroiObject( self, (droiObject) => {
+            if ( self == droiObject )
                 return;
 
             droiObject.checkDirtyFlags();
@@ -229,7 +233,7 @@ class DroiObject {
         });
 
         if ( referenceDirty ) {
-            this.dirtyFlags |= DirtyFlag.DIRTY_FLAG_REFERENCE;
+            self.dirtyFlags |= DirtyFlag.DIRTY_FLAG_REFERENCE;
         }
     }
 
