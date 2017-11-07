@@ -165,6 +165,7 @@ class DroiObject {
                     reject( error );
                 }
             } catch( e ) {
+                // console.log(e);
                 let error : DroiError;
                 if ( e instanceof DroiError )
                     error = e;
@@ -194,8 +195,7 @@ class DroiObject {
         self.dirtyFlags |= DirtyFlag.DIRTY_FLAG_BODY;
         let query = DroiQuery.upsert( self );
         
-        error = await query.run();
-        return error;
+        return query.run();
     }
 
     private async deleteFromStorage(self) : Promise<DroiError> {

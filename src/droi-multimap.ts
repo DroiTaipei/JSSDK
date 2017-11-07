@@ -56,7 +56,7 @@ export class ArrayListMultimap<K, V> implements Multimap<K, V> {
 
     public getElement(key: K, index:number): V {
         let res = this.get( key );
-        if ( res.length < index )
+        if ( index < res.length )
             return res[index];
         return null;
     }
