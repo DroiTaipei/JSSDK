@@ -206,6 +206,15 @@ class DroiObject {
         return (this.dirtyFlags != 0)?true:false;
     }
 
+    get permission(): DroiPermission {
+        return this.perm;
+    }
+
+    set permission( p: DroiPermission ) {
+        this.dirtyFlags |= DirtyFlag.DIRTY_FLAG_BODY;
+        this.perm = p;
+    }
+
     private checkDirtyFlags() : void {
         let referenceDirty = false;
 
@@ -380,7 +389,7 @@ class DroiObject {
     }
 
     //
-    protected permission : DroiPermission;
+    protected perm : DroiPermission;
     protected properties : Dictionary = {};
     private dirtyFlags : number = DirtyFlag.DIRTY_FLAG_BODY;
     private static factoryies : Dictionary = {};

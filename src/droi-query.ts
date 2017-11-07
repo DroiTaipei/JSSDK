@@ -22,44 +22,30 @@ class DroiQuery {
     }
 
     run() : Promise<DroiError> {
-        return new Promise( (resolve, reject) => {
-            this.runQuery().then( (res) => {
-                resolve(new DroiError( DroiError.OK ));
-            }).catch( (err) => {
-                reject(err);
-            })
+        return this.runQuery().then( (res) => {
+            return new DroiError( DroiError.OK );
         });
     }
 
     count() : Promise<number> {
         if ( !this.queryCommand.containsKey( DroiConstant.DroiQuery_SELECT) ) {
-            return new Promise( (resolve, reject) => {
-                let err = new DroiError( DroiError.INVALID_PARAMETER, "Only support Query command");
-                reject( err );
-            });
+            return Promise.reject( new DroiError( DroiError.INVALID_PARAMETER, "Only support Query command") );
         }
 
         this.queryCommand.put( DroiConstant.DroiQuery_COUNT, 1 );
-        return new Promise( (resolve, reject) => {
-            this.runQuery().then( (res) => {
+        return this.runQuery().then( (res) => {
                 if ( res.length <= 0 )
-                    reject( new DroiError( DroiError.ERROR ) );
+                    throw new DroiError( DroiError.ERROR );
                 let counter = res[0];
-                resolve(counter);
-            }).catch( (err) => {
-                reject(err);
-            })
-        });
+                return counter;
+            });
     }
 
     runQuery() : Promise<Array<any>> {
         try {
             this.throwIfTheCommandInvalid();
         } catch ( e ) {
-            return new Promise<Array<DroiObject>>( (resolve, reject) => {
-                let err: DroiError = new DroiError( DroiError.ERROR, e.message );
-                reject( err );
-            });
+            return Promise.reject( new DroiError( DroiError.ERROR, e.message ) );
         }
 
         // 
