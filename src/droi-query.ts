@@ -74,8 +74,6 @@ class DroiQuery {
                         return null;
                     })
             }
-            
-            return new Promise<Array<any>>( (resolve, reject) => callback );
         }
     }
 

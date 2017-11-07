@@ -7,24 +7,6 @@ import { DroiPersistSettings } from "./droi-persist-settings"
 import { DroiConstant } from "./droi-const"
 import * as sha256 from "sha256"
 
-function ReturnSingleHandler(error: DroiError, callback: DroiSingleCallback): Promise<DroiError> {
-    if (callback) {
-        callback(error);
-        return null;
-    } else {
-        return error.isOk ? Promise.resolve(error) : Promise.reject(error);
-    }
-}
-
-function ReturnHandler<T>(error: DroiError, value: T, callback: DroiCallback<T>): Promise<T> {
-    if (callback) {
-        callback(value, error);
-        return null;
-    } else {
-        return error.isOk ? Promise.resolve(value) : Promise.reject(error);
-    }
-}
-
 export class DroiUser extends DroiObject {
 
     private static readonly KEY_USERID = "UserId";
@@ -84,18 +66,18 @@ export class DroiUser extends DroiObject {
         return user;
     }
 
-    static async loginAnonymous(callback?: DroiCallback<DroiUser>): Promise<DroiUser> {
+    static async loginAnonymous(): Promise<DroiUser> {
         // Already logged in
         let user = DroiUser.getCurrentUser();
         if (user != null && user.isLoggedIn) {
-            return ReturnHandler(new DroiError(DroiError.USER_ALREADY_LOGIN), null, callback);
+            throw new DroiError(DroiError.USER_ALREADY_LOGIN);
         }
 
         user = DroiUser.createUser();
         user.setValue("UserId", DroiCore.getInstallationId() + await DroiCore.getDeviceId());
         user.setValue("AuthData", {"anonymous": "1"});
 
-        let promise = RestUser.instance().loginAnonymous(user)
+        return RestUser.instance().loginAnonymous(user)
             .then( (jlogin) => {
                 let token = jlogin["Token"];
                 let expired = jlogin["ExpiredAt"];
@@ -105,27 +87,22 @@ export class DroiUser extends DroiObject {
                 
                 DroiUser.saveUserCache(user);
 
-                return ReturnHandler(new DroiError(DroiError.OK), user, callback);
-            })
-            .catch( (error) => {
-                return ReturnHandler(error, null, callback);
+                return user;
             });
-
-        return (callback) ? null : promise;
     }
 
-    static login(userId: string, password: string, callback?: DroiCallback<DroiUser>): Promise<DroiUser> {
+    static login(userId: string, password: string): Promise<DroiUser> {
         if (userId == null || password == null) {
-            return ReturnHandler(new DroiError(DroiError.INVALID_PARAMETER, "Empty UserId or Password"), null, callback);
+            throw new DroiError(DroiError.INVALID_PARAMETER, "Empty UserId or Password");
         }
 
         // User already logged in
         let curUser = DroiUser.getCurrentUser();
         if (curUser != null && curUser.isLoggedIn() && !curUser.isAnonymous()) {
-            return ReturnHandler(new DroiError(DroiError.USER_ALREADY_LOGIN), null, callback);
+            throw new DroiError(DroiError.USER_ALREADY_LOGIN);
         }
 
-        let promise = RestUser.instance().loginUser(userId, sha256(password))
+        return RestUser.instance().loginUser(userId, sha256(password))
             .then( (jresult) => {
                 let user = DroiUser.createUser();
                 let obj = DroiObject.fromJson(jresult["Data"]);
@@ -134,19 +111,14 @@ export class DroiUser extends DroiObject {
 
                 DroiUser.saveUserCache(user);
                 DroiUser.currentUser = user;
-                return ReturnHandler(new DroiError(DroiError.OK), user, callback);
-            })
-            .catch( (error) => {
-                return ReturnHandler(error, null, callback);
+                return user;
             });
-
-        return callback ? null : promise;
     }
 
-    async signup(callback?: DroiSingleCallback): Promise<DroiError> {
+    async signup(): Promise<DroiError> {
         // Needed parameters check
         if (this.getValue(DroiUser.KEY_USERID) == null || this.password == null) {
-            return ReturnSingleHandler(new DroiError(DroiError.INVALID_PARAMETER, "Empty UserId or Password."), callback);
+            throw new DroiError(DroiError.INVALID_PARAMETER, "Empty UserId or Password.");
         }
 
         // Anonysmous => Normal User
@@ -154,7 +126,7 @@ export class DroiUser extends DroiObject {
         let currUser = DroiUser.getCurrentUser();
         if (currUser != null && currUser.isLoggedIn()) {
             if (! (currUser.objectId() === this.objectId() && currUser.isAnonymous()))
-                return ReturnSingleHandler(new DroiError(DroiError.USER_ALREADY_LOGIN), callback);
+                throw new DroiError(DroiError.USER_ALREADY_LOGIN);
             this.setValue(DroiUser.KEY_AUTHDATA, null);
             try {
                 await super.save();
@@ -169,16 +141,11 @@ export class DroiUser extends DroiObject {
                 this.setValue(DroiUser.KEY_USERID, DroiCore.getInstallationId() + await DroiCore.getDeviceId());
                 this.password = null;
 
-                return ReturnSingleHandler(error, callback);
+                throw error;
             }
 
             DroiUser.saveUserCache(this);
-            try {
-                let error = await this.changePassword("", this.password);
-                return ReturnSingleHandler(error, callback);
-            } catch (error) {
-                return ReturnSingleHandler(error, callback);
-            }
+            return this.changePassword("", this.password);
         }
 
         // Standard normal user signup
@@ -196,42 +163,26 @@ export class DroiUser extends DroiObject {
             let error = e as DroiError;
             if (error.code == DroiConstant.DROI_API_RECORD_CONFLICT || error.code == DroiConstant.DROI_API_USER_EXISTS)
                 error.code = DroiError.USER_ALREADY_EXISTS;
-            return ReturnSingleHandler(error, callback);
+            throw error;
         }
 
         this.session = {Token: jresult["Token"], ExpiredAt: jresult["ExpiredAt"]};
         DroiUser.currentUser = this;
         DroiUser.saveUserCache(this);
 
-        //TODO: pickup super.save flow.
-        //
-        // try {
-        //     let error = await super.save();
-        //     return ReturnSingleHandler(error, callback);
-        // } catch (error) {
-        //     return ReturnSingleHandler(error, callback);
-        // }
-
-        // Workaround here to ignore reference fields.
-        return ReturnSingleHandler(new DroiError(DroiError.OK), callback);
+        return super.save();
     }
 
-    logout(callback?: DroiSingleCallback): Promise<DroiError> {
+    logout(): Promise<DroiError> {
         if (!this.isLoggedIn()) {
-            return ReturnSingleHandler(new DroiError(DroiError.USER_NOT_AUTHORIZED), callback);
+            throw new DroiError(DroiError.USER_NOT_AUTHORIZED);
         }
 
-        let promise = RestUser.instance().logout(this.objectId())
+        return RestUser.instance().logout(this.objectId())
             .then( (_) => {
                 DroiUser.cleanUserCache();
-                return ReturnSingleHandler(new DroiError(DroiError.OK), callback);
-            })
-            .catch( (error) => {
-                DroiUser.cleanUserCache();
-                return ReturnSingleHandler(error, callback);
+                return new DroiError(DroiError.OK);
             });
-
-        return callback ? null : promise;
     }
 
     isLoggedIn(): boolean {
@@ -256,52 +207,32 @@ export class DroiUser extends DroiObject {
         return authData != null && authData[RestUser.USER_TYPE_ANONYMOUS] != null;
     }
 
-    changePassword(oldPassword: string, newPassword: string, callback?: DroiSingleCallback): Promise<DroiError> {
-        let promise = RestUser.instance().changePassword(sha256(oldPassword), sha256(newPassword))
+    changePassword(oldPassword: string, newPassword: string): Promise<DroiError> {
+        return RestUser.instance().changePassword(sha256(oldPassword), sha256(newPassword))
             .then( (_) => {
-                return ReturnSingleHandler(new DroiError(DroiError.OK), callback);
-            })
-            .catch( (error) => {
-                return ReturnSingleHandler(error, callback);
-            })
-
-        return callback ? null : promise;
+                return new DroiError(DroiError.OK);
+            });
     }
 
-    validateEmail(callback?: DroiSingleCallback): Promise<DroiError> {
-        let promise = RestUser.instance().validateEmail()
+    validateEmail(): Promise<DroiError> {
+        return RestUser.instance().validateEmail()
             .then( (_) => {
-                return ReturnSingleHandler(new DroiError(DroiError.OK), callback);
-            })
-            .catch( (error) => {
-                return ReturnSingleHandler(error, callback);
-            })
-
-        return callback ? null : promise;
+                return new DroiError(DroiError.OK);
+            });
     }
 
-    validatePhoneNum(callback?: DroiSingleCallback): Promise<DroiError> {
-        let promise = RestUser.instance().validatePhoneNum()
+    validatePhoneNum(): Promise<DroiError> {
+        return RestUser.instance().validatePhoneNum()
         .then( (_) => {
-            return ReturnSingleHandler(new DroiError(DroiError.OK), callback);
-        })
-        .catch( (error) => {
-            return ReturnSingleHandler(error, callback);
-        })
-
-        return callback ? null : promise;    
+            return new DroiError(DroiError.OK);
+        });
     }
 
-    confirmPhoneNumPin(pin: string, callback?: DroiSingleCallback): Promise<DroiError> {
-        let promise = RestUser.instance().confirmPhoneNumPin(pin)
+    confirmPhoneNumPin(pin: string): Promise<DroiError> {
+        return RestUser.instance().confirmPhoneNumPin(pin)
         .then( (_) => {
-            return ReturnSingleHandler(new DroiError(DroiError.OK), callback);
-        })
-        .catch( (error) => {
-            return ReturnSingleHandler(error, callback);
-        })
-
-        return callback ? null : promise;            
+            return new DroiError(DroiError.OK);
+        });
     }
 
     cloneFrom(droiObject: DroiObject) {
