@@ -128,11 +128,12 @@ describe('Droi objects', () => {
                 await DroiBaaS.DroiUser.loginAnonymous();
 
             let cond = DroiBaaS.DroiCondition.ltOrEq("data", 100);
-            let cond2 = DroiBaaS.DroiCondition.isNotNull("empty");
+            let cond2 = DroiBaaS.DroiCondition.isNull("empty");
 
             let list = await DroiBaaS.DroiQuery.create("js_test").where(cond.or(cond2)).runQuery();
             for (let obj of list) {
                 console.log(`Item id ${obj.objectId()}`);
+                await (obj as DroiBaaS.DroiObject).delete();
             }
         } catch (error) {
             throw error;

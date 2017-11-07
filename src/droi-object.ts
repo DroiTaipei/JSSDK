@@ -198,11 +198,10 @@ class DroiObject {
         return query.run();
     }
 
-    private async deleteFromStorage(self) : Promise<DroiError> {
+    private deleteFromStorage(self) : Promise<DroiError> {
         let error = new DroiError(DroiError.OK);
-        let query = DroiQuery.delete( this );
-        error = await query.run();
-        return error;
+        let query = DroiQuery.delete( self );
+        return query.run();
     }
 
     isDirty() : boolean {
