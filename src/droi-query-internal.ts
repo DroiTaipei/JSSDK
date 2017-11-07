@@ -32,6 +32,11 @@ class DroiQueryInternal extends DroiQuery {
         query.queryCommand.put( DroiConstant.DroiQuery_TABLE_NAME, droiObject.tableName() );
         return query;
     }
+
+    atomic( droiObject: DroiObject ): DroiQueryInternal {
+        this.queryCommand.put( DroiConstant.DroiQuery_ATOMIC, droiObject );
+        return this;
+    }
 }
 
 

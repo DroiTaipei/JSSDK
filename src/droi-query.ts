@@ -22,8 +22,13 @@ class DroiQuery {
     }
 
     run() : Promise<DroiError> {
-        
-        return;
+        return new Promise( (resolve, reject) => {
+            this.runQuery().then( (res) => {
+                resolve(new DroiError( DroiError.OK ));
+            }).catch( (err) => {
+                reject(err);
+            })
+        });
     }
 
     count() : Promise<number> {
@@ -57,7 +62,8 @@ class DroiQuery {
             });
         }
 
-        let dp = (this.getTableName() == "_User" || "_Group" )?null:CloudStorageDataProvider.create();
+        // 
+        let dp = CloudStorageDataProvider.create();
         if ( this.queryAction == DroiConstant.DroiQuery_UPDATE_DATA ) {
             // TODO
         } else {

@@ -147,9 +147,7 @@ class DroiObject {
             if ( (this.dirtyFlags & DirtyFlag.DIRTY_FLAG_BODY) != 0 )
                 throw new DroiError( DroiError.ERROR, "DroiObject content dirty" );
 
-            let query = DroiQuery.create( this.tableName() ).add( field, amount );
-            // TODO:
-            //query.updateObjectAtomic( this, this.objectId(), field, amount );
+            let query = DroiQuery.create( this.tableName() ).atomic( this ).add( field, amount );
             let error = await query.run();
             return error;
         } );
