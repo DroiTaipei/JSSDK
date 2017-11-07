@@ -120,4 +120,22 @@ describe('Droi objects', () => {
             throw error;
         }
     });
+
+    it('Query objects', async () => {
+        try {
+            let user = DroiBaaS.DroiUser.getCurrentUser();
+            if (user == null || !user.isLoggedIn())
+                await DroiBaaS.DroiUser.loginAnonymous();
+
+            let cond = DroiBaaS.DroiCondition.ltOrEq("data", 100);
+            let cond2 = DroiBaaS.DroiCondition.isNotNull("empty");
+
+            let list = await DroiBaaS.DroiQuery.create("js_test").where(cond.or(cond2)).runQuery();
+            for (let obj of list) {
+                console.log(`Item id ${obj.objectId()}`);
+            }
+        } catch (error) {
+            throw error;
+        }
+    });
 });

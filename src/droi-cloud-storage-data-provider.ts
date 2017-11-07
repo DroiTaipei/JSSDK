@@ -31,7 +31,6 @@ export class CloudStorageDataProvider implements DroiDataProvider {
             (isOk) => {
                 return new DroiError(DroiError.OK);
             });
-
     }
     
     query( commands: Multimap<string, any> ): Promise<Array<DroiObject>> {
@@ -75,7 +74,21 @@ export class CloudStorageDataProvider implements DroiDataProvider {
     }
     
     delete( commands: Multimap<string, any> ): Promise<DroiError> {
-        return null;
+        let error = new DroiError(DroiError.OK);
+        let obj = commands.getElement(DroiConstant.DroiQuery_DELETE, 0)[0] as DroiObject;
+
+        // Not dirty, return OK directly
+        if (!obj.isDirty()) {
+            return Promise.resolve(error);
+        }
+
+        let tableName = commands.getElement(DroiConstant.DroiQuery_TABLE_NAME, 0);
+        let restHandler: RestCRUD = (tableName === RestUser.TABLE_NAME) ? RestUser.instance() : RestObject.instance();
+
+        return restHandler.delete(obj.objectId(), tableName).then( 
+            (isOk) => {
+                return new DroiError(DroiError.OK);
+            });
     }
 
     private generateWhere(commands: Multimap<string, any>): string {
@@ -95,7 +108,7 @@ export class CloudStorageDataProvider implements DroiDataProvider {
                 else if (type === DroiConstant.DroiCondition_ISNOTNULL)
                     jcond[DroiConstant.DroiCondition_ISNULL] = true;
             } else {
-                jcond[arr[1] as string] = arr.get[2];
+                jcond[arr[1] as string] = arr[2];
             }
             jobj[arr[0] as string] = jcond;
         } else {
