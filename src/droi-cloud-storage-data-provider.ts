@@ -14,10 +14,17 @@ export class CloudStorageDataProvider implements DroiDataProvider {
 
     upsert( commands: Multimap<string, any> ): Promise<DroiError> {
 
-        //TODO: Process reference objs
-
         let error = new DroiError(DroiError.OK);
         let obj = commands.getElement(DroiConstant.DroiQuery_INSERT, 0)[0] as DroiObject;
+
+        // Travel all reference objects
+        DroiObject.travelDroiObject(obj, async (dobj) => {
+            if ( obj == dobj )
+                return;
+
+            if (dobj.isDirty())
+                await dobj.save();
+        });
 
         // Not dirty, return OK directly
         if (!obj.isDirty()) {

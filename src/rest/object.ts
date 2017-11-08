@@ -73,6 +73,9 @@ export class RestObject implements RestCRUD {
         if (order)
             queryStrings = `${queryStrings}offset=${encodeURIComponent(order)}&`
 
+        if (!secureAvaiable)
+            queryStrings = queryStrings + "include_depth=3&";
+
         if (queryStrings !== "")
             url = `${url}?${queryStrings.substring(0, queryStrings.length-1)}`;
 

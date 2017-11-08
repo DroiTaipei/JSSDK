@@ -242,10 +242,10 @@ class DroiObject {
         
         // Permission
         if ( this.permission !== undefined ) {
-            clone.put( DroiConstant.DROI_KEY_JSON_PERMISSION, this.permission.toJsonObject() );
+            clone[DroiConstant.DROI_KEY_JSON_PERMISSION] = this.permission.toJsonObject();
         } else if ( DroiPermission.getDefaultPermission() !== undefined ) {
             let perm = DroiPermission.getDefaultPermission();
-            clone.put( DroiConstant.DROI_KEY_JSON_PERMISSION, perm.toJsonObject() );
+            clone[DroiConstant.DROI_KEY_JSON_PERMISSION] = perm.toJsonObject();
         }
         return JSON.stringify( clone );        
     }
@@ -382,7 +382,7 @@ class DroiObject {
                 copy = { };
                 copy[ DroiConstant.DROI_KEY_JSON_OBJECTID ] = obj.objectId();
                 copy[ DroiConstant.DROI_KEY_JSON_DATA_TYPE ] = DroiConstant.DROI_KEY_JSON_REFERENCE_TYPE;
-                copy[ DroiConstant.DROI_KEY_JSON_TABLE_NAME ] = obj.tableName;
+                copy[ DroiConstant.DROI_KEY_JSON_TABLE_NAME ] = obj.tableName();
                 return copy;
             }
             

@@ -139,4 +139,27 @@ describe('Droi objects', () => {
             throw error;
         }
     });
+
+    it('Reference objects', async () => {
+        try {
+            let user = DroiBaaS.DroiUser.getCurrentUser();
+            if (user == null || !user.isLoggedIn())
+                await DroiBaaS.DroiUser.loginAnonymous();
+
+            // let obj1 = DroiBaaS.DroiObject.createObject("js_base");
+            // obj1.setValue("field1", "value1");
+
+            // let obj2 = DroiBaaS.DroiObject.createObject("js_test");
+            // obj2.setValue("ref", obj1);
+            // obj2.setValue("name", "ref");
+
+            // await obj2.save();
+
+            let list = await DroiBaaS.DroiQuery.create("js_test").runQuery();
+            let obj2 = (list[0] as DroiBaaS.DroiObject).getValue("ref") as DroiBaaS.DroiObject;
+            console.log(obj2.getValue("field1"));
+        } catch (error) {
+            throw error;
+        }
+    });
 });
