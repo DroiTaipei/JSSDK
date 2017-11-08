@@ -304,14 +304,32 @@ class DroiObject {
 
                 res = r;
             } else {
-                // Normal Dictionary structure
-                let dict = {};
-                for ( let keyName in jobj ) {
-                    let v = jobj[keyName];
-                    let o = DroiObject.fromJson( v ) || v;
-                    dict[keyName] = o;
+                // Check whether this is reference data value
+                if ( jobj[DroiConstant.DROI_KEY_JSON_DATA_TYPE] !== undefined ) {
+                    let dataTypeName = jobj[DroiConstant.DROI_KEY_JSON_DATA_TYPE];
+                    let r = null;
+                    if ( dataTypeName == DroiConstant.DROI_KEY_JSON_REFERENCE_TYPE ||
+                        dataTypeName == DroiConstant.DROI_KEY_JSON_FILE_TYPE ) {
+                        let refValue = jobj[DroiConstant.DROI_KEY_JSON_REFERENCE_VALUE];
+                        if ( refValue !== undefined ) {
+                            // Error -> null
+                            r = DroiObject.fromJson( refValue );
+                        }
+                    }
+                    res = r;
+                } 
+                
+                if ( res == null ) {
+                    // Normal Dictionary structure
+                    let dict = {};
+                    for ( let keyName in jobj ) {
+                        let v = jobj[keyName];
+                        let o = DroiObject.fromJson( v ) || v;
+                        dict[keyName] = o;
+                    }
+                    res = dict;
                 }
-                res = dict;
+                
             }
         } 
 
@@ -363,7 +381,7 @@ class DroiObject {
                 // export reference only..
                 copy = { };
                 copy[ DroiConstant.DROI_KEY_JSON_OBJECTID ] = obj.objectId();
-                copy[ DroiConstant.DROI_KEY_JSON_REFERENCE_TYPE ] = DroiConstant.DROI_KEY_JSON_DATA_TYPE;
+                copy[ DroiConstant.DROI_KEY_JSON_DATA_TYPE ] = DroiConstant.DROI_KEY_JSON_REFERENCE_TYPE;
                 copy[ DroiConstant.DROI_KEY_JSON_TABLE_NAME ] = obj.tableName;
                 return copy;
             }
