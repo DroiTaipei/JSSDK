@@ -181,7 +181,7 @@ class DroiObject {
         return new Promise(handler);        
     }
 
-    private async saveToStorage(self) : Promise<DroiError> {
+    private saveToStorage(self) : Promise<DroiError> {
         self.checkDirtyFlags();
         // 
         if ( self.dirtyFlags == 0 ) {
@@ -195,7 +195,10 @@ class DroiObject {
         self.dirtyFlags |= DirtyFlag.DIRTY_FLAG_BODY;
         let query = DroiQuery.upsert( self );
         
-        return query.run();
+        return query.run().then( (droiError) => {
+            self.dirtyFlags = 0;
+            return droiError;
+        });
     }
 
     private deleteFromStorage(self) : Promise<DroiError> {

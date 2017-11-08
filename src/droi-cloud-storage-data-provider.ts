@@ -12,19 +12,24 @@ import { DroiCondition } from "./droi-condition"
 
 export class CloudStorageDataProvider implements DroiDataProvider {
 
-    upsert( commands: Multimap<string, any> ): Promise<DroiError> {
+    async upsert( commands: Multimap<string, any> ): Promise<DroiError> {
 
         let error = new DroiError(DroiError.OK);
         let obj = commands.getElement(DroiConstant.DroiQuery_INSERT, 0)[0] as DroiObject;
 
         // Travel all reference objects
-        DroiObject.travelDroiObject(obj, async (dobj) => {
+        // !!NOTE!! do not do async/await in travelDroiObject callback. 
+        let referenceObjs: Array<DroiObject> = [];
+        DroiObject.travelDroiObject(obj, (dobj) => {
             if ( obj == dobj )
                 return;
-
-            if (dobj.isDirty())
-                await dobj.save();
+            referenceObjs.push(dobj);
         });
+
+        for (let dobj of referenceObjs) {
+            if (dobj.isDirty)
+                await dobj.save();
+        }
 
         // Not dirty, return OK directly
         if (!obj.isDirty()) {
