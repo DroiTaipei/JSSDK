@@ -5,8 +5,6 @@ import { DroiConstant } from './droi-const';
  * 
  */
 class DroiPermission {
-
-
     public static copyFrom( perm: DroiPermission ): DroiPermission {
         let newInstance = new DroiPermission();
         newInstance.creator = perm.creator;
@@ -136,7 +134,7 @@ class DroiPermission {
             newInstance.setPublicWritePermission( dict["pw"] );
         }
 
-        let callback = ( propName:string, dict, func: (user, falg) => void ) => (name, func) => {
+        let setPermission = ( propName:string, dict, func: (user, falg) => void ) => (name, func) => {
             if ( dict.hashOwnProperty(propName) ) {
                 for ( let name of dict[propName] ) {
                     func( name, true );
@@ -145,11 +143,11 @@ class DroiPermission {
         };
 
         // User Read/Write permission
-        callback( "ur", dict, newInstance.setUserReadPermission );
-        callback( "uw", dict, newInstance.setUserWritePermission );
+        setPermission( "ur", dict, newInstance.setUserReadPermission );
+        setPermission( "uw", dict, newInstance.setUserWritePermission );
         // Group Read/Write permission
-        callback( "gr", dict, newInstance.setGroupReadPermission );
-        callback( "gw", dict, newInstance.setGroupWritePermission );
+        setPermission( "gr", dict, newInstance.setGroupReadPermission );
+        setPermission( "gw", dict, newInstance.setGroupWritePermission );
         return newInstance;
     }
 
