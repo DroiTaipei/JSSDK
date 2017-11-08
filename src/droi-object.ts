@@ -344,10 +344,10 @@ class DroiObject {
         return res;
     }
 
-    public static travelDroiObject(obj:any, cb: (droiObject:DroiObject)=>void) : void {
+    public static travelDroiObject(obj:any, cb: (droiObject:DroiObject)=>void, depthLimit: number=3, depth: number=0) : void {
 
         // Handle the 3 simple types, and null or undefined
-        if (null == obj || "object" !== typeof obj) return;
+        if (null == obj || "object" !== typeof obj || depthLimit<=depth) return;
 
         let dobject = null;
         if ( obj instanceof DroiObject ) {
@@ -358,10 +358,10 @@ class DroiObject {
         // 
         if ( obj instanceof Array ) {
             for ( let item of obj )
-                DroiObject.travelDroiObject( item, cb );
+                DroiObject.travelDroiObject( item, cb, depthLimit, depth+1 );
         } else if ( obj instanceof Object ) {
             for ( let key in obj ) {
-                DroiObject.travelDroiObject( obj[key], cb );
+                DroiObject.travelDroiObject( obj[key], cb, depthLimit, depth+1 );
             }
         }
 
