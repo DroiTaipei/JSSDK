@@ -49,7 +49,7 @@ class DroiFile extends DroiObject {
     }
 
     getUris(): Promise< Array<string> > {
-        return RestFile.instance().getUri( this.objectId );
+        return RestFile.instance().getUri( this.objectId() );
     }
 
     update( buffer: Uint8Array, progress: (currentSize: number, totalSize: number) => void = null, mimeType: string = "application/octet-stream"): Promise< boolean > {
@@ -63,7 +63,7 @@ class DroiFile extends DroiObject {
     }
 
     delete():Promise<DroiError> {
-        return RestFile.instance().delete( this.objectId );
+        return RestFile.instance().delete( this.objectId() );
     }        
 
     isContentDirty(): boolean {
