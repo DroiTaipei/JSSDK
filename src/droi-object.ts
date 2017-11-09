@@ -2,6 +2,7 @@ import { DroiConstant } from './droi-const';
 import { DroiPermission } from './droi-permission';
 import { DroiError } from "./droi-error";
 import { DroiQueryInternal as DroiQuery } from "./droi-query-internal";
+import { DroiCondition } from './droi-condition';
 
 class Dictionary {
     [keyName: string]: any;
@@ -130,6 +131,14 @@ class DroiObject {
     static saveAll( items : Array<DroiObject> ) :Promise<DroiError> {
 
         return null;
+    }
+
+    static fetch( tableName: string, objectId: string ): Promise<DroiObject> {
+        return DroiQuery.create( tableName ).where( DroiCondition.cond( DroiConstant.DROI_KEY_JSON_OBJECTID, DroiConstant.DroiCondition_EQ, objectId) ).runQuery().then( (res) =>{
+            if ( res.length > 0 )
+                return res[0];
+            return null;
+        });
     }
 
     save():Promise<DroiError> {
