@@ -173,6 +173,18 @@ export class DroiUser extends DroiObject {
         return super.save();
     }
 
+    delete(): Promise<DroiError> {
+        return super.delete()
+            .then( (droiError) => {
+                DroiUser.cleanUserCache();
+                return droiError;
+            })
+            .catch( (error) => {
+                DroiUser.cleanUserCache();
+                return error;
+            });
+    }
+
     logout(): Promise<DroiError> {
         if (!this.isLoggedIn()) {
             throw new DroiError(DroiError.USER_NOT_AUTHORIZED);

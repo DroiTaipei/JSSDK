@@ -47,7 +47,7 @@ export class DroiHttp {
                         let response = new DroiHttpResponse();
                         response.status = xhr.status;
                         response.data = xhr.responseText;
-                        console.log(`OUTPUT: ${response.data}`);
+                        console.log(` Output: ${response.data}`);
                         let allheaders = xhr.getAllResponseHeaders().split("\r\n");
                         let headers: {[key: string]: string} = {};
                         response.headers = headers;
@@ -80,9 +80,9 @@ export class DroiHttp {
             xhr.ontimeout = errorHandler;
             xhr.onerror = errorHandler;
 
-            console.log(`url: ${request.url}`);
+            console.log(`    Url: ${request.method} ${request.url}`);
             console.log(`Headers: ${JSON.stringify(request.headers)}`);
-            console.log(`Input: ${request.data}`);    
+            console.log(`  Input: ${request.data}`);    
 
             // Init connection
             xhr.open(request.method, request.url);

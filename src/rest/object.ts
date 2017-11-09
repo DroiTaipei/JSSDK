@@ -9,7 +9,7 @@ export interface RestCRUD {
     // Query
     query(table: string, where?: string, offset?: number, limit?: number, order?: string): Promise<Array<JSON>>;
     // Update
-    updateData(table: string, data: string, where?: string): Promise<boolean>
+    updateData(table: string, data: string, where?: string, offset?: number, limit?: number, order?: string): Promise<boolean>;
     // Delete
     delete(objId:string, table: string): Promise<boolean>;
 }
@@ -19,6 +19,7 @@ export class RestObject implements RestCRUD {
     private static readonly REST_BULK_OBJECT_URL = "/bulk/v2";
     private static readonly REST_HTTPS = "https://api.droibaas.com/rest";
     private static readonly REST_HTTPS_SECURE = "/droi";
+    private static readonly REST_ATOMIC_ADD = "/increment";
 
     private static INSTANCE: RestObject = null;
 
@@ -59,25 +60,13 @@ export class RestObject implements RestCRUD {
         let url = `${secureAvaiable?RestObject.REST_HTTPS_SECURE:RestObject.REST_HTTPS}${RestObject.REST_OBJECT_URL}/${table}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
-        let queryStrings = "";
-
-        if (where)
-            queryStrings = `${queryStrings}where=${encodeURIComponent(where)}&`;
-
-        if (offset || !isNaN(offset))
-            queryStrings = `${queryStrings}offset=${offset}&`
-
-        if (limit || !isNaN(limit))
-            queryStrings = `${queryStrings}offset=${limit}&`
-
-        if (order)
-            queryStrings = `${queryStrings}offset=${encodeURIComponent(order)}&`
+        let queryStrings = RestObject.generatorQueryString(where, offset, limit, order);
 
         if (!secureAvaiable)
-            queryStrings = queryStrings + "include_depth=3&";
+            queryStrings = queryStrings + "&include_depth=3";
 
         if (queryStrings !== "")
-            url = `${url}?${queryStrings.substring(0, queryStrings.length-1)}`;
+            url = `${url}?${queryStrings}`;
 
         return callServer(url, DroiHttpMethod.GET, null, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN).then(
             (jresult) => {
@@ -88,12 +77,16 @@ export class RestObject implements RestCRUD {
         );
     }
 
-    updateData(table: string, data: string, where?: string): Promise<boolean> {
+    updateData(table: string, data: string, where?: string, offset?: number, limit?: number, order?: string): Promise<boolean> {
         let secureAvaiable = false;
         
         let url = `${secureAvaiable?RestObject.REST_HTTPS_SECURE:RestObject.REST_HTTPS}${RestObject.REST_OBJECT_URL}/${table}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
+        let queryStrings = RestObject.generatorQueryString(where, offset, limit, order);
+        if (queryStrings !== "")
+            url = url + `?${queryStrings}`;
+            
         return callServer(url, DroiHttpMethod.PATCH, data, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
             .then( (_) => {
                 return true;
@@ -125,5 +118,35 @@ export class RestObject implements RestCRUD {
             .then( (_) => {
                 return true;
             });
-    }    
+    }
+
+    atomicAdd(table: string, id: string, values: {[key: string]: any}): Promise<boolean> {
+        let secureAvaiable = false;
+        
+        let url = `${secureAvaiable?RestObject.REST_HTTPS_SECURE:RestObject.REST_HTTPS}${RestObject.REST_OBJECT_URL}/${table}/${id}${RestObject.REST_ATOMIC_ADD}`;
+        let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
+
+        return callServer(url, DroiHttpMethod.POST, JSON.stringify(values), null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
+            .then ( (_) => {
+                return true;
+            });
+    }
+
+    static generatorQueryString(where?: string, offset?: number, limit?: number, order?: string) {
+        let queryStrings = "";
+        
+        if (where)
+            queryStrings = `${queryStrings}where=${encodeURIComponent(where)}&`;
+
+        if (offset || !isNaN(offset))
+            queryStrings = `${queryStrings}offset=${offset}&`
+
+        if (limit || !isNaN(limit))
+            queryStrings = `${queryStrings}offset=${limit}&`
+
+        if (order)
+            queryStrings = `${queryStrings}offset=${encodeURIComponent(order)}&`
+        
+        return (queryStrings.length > 0) ? queryStrings.substring(0, queryStrings.length-1) : queryStrings;
+    }
 }

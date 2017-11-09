@@ -14,6 +14,14 @@ class DroiQuery {
         return new DroiQuery( tableName );
     }
 
+    static updateData( tableName : string ) : DroiQuery {
+        let query = new DroiQuery( tableName )
+        query.queryCommand.put( DroiConstant.DroiQuery_UPDATE_DATA, 0 );
+        query.queryCommand.remove( DroiConstant.DroiQuery_SELECT );
+        query.queryCommand.put( DroiConstant.DroiQuery_TABLE_NAME, tableName );
+        return query;
+    }
+
     protected constructor( tableName : string ) {
         this.queryCommand = new Multimap<string,any>();
         //
@@ -51,7 +59,9 @@ class DroiQuery {
         // 
         let dp = CloudStorageDataProvider.create();
         if ( this.queryAction == DroiConstant.DroiQuery_UPDATE_DATA ) {
-            // TODO
+            return dp.updateData(this.queryCommand).then( (_) => {
+                return null;
+            });
         } else {
             this.queryCommand.remove( DroiConstant.DroiQuery_SET );
             this.queryCommand.remove( DroiConstant.DroiQuery_ATOMIC );
@@ -115,7 +125,7 @@ class DroiQuery {
         return this;
     }
 
-    set( field:string, value:number ) : DroiQuery {
+    set( field:string, value:any ) : DroiQuery {
         this.queryCommand.put( DroiConstant.DroiQuery_SET, [field, value] );
         return this;
     }

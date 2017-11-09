@@ -156,7 +156,7 @@ class DroiObject {
             if ( (self.dirtyFlags & DirtyFlag.DIRTY_FLAG_BODY) != 0 )
                 throw new DroiError( DroiError.ERROR, "DroiObject content dirty" );
 
-            let query = DroiQuery.create( self.tableName() ).atomic( self ).add( field, amount );
+            let query = DroiQuery.updateData(self.tableName()).atomic(self).add(field, amount);
             let error = await query.run();
             return error;
         } );

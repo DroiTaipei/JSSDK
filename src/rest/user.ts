@@ -4,7 +4,7 @@ import { DroiHttpMethod } from "../droi-http"
 import { DroiConstant } from "../droi-const"
 import { DroiUser } from "../droi-user"
 import { DroiError } from "../droi-error"
-import { RestCRUD } from "./object"
+import { RestObject, RestCRUD } from "./object"
 
 export class RestUser implements RestCRUD {
     private static readonly REST_USER_URL = "/users/v2";
@@ -33,19 +33,54 @@ export class RestUser implements RestCRUD {
     }    
 
     upsert(obj: string, objId:string, table: string): Promise<boolean> {
-        return null;
+        let secureAvaiable = false;
+        
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}/${objId}`;
+        let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
+
+        return callServer(url, DroiHttpMethod.PUT, obj, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
+            .then( (_) => {
+                return true;
+            });
     }
 
     query(table: string, where?: string, offset?: number, limit?: number, order?: string): Promise<Array<JSON>> {
-        return null;
+        let secureAvaiable = false;
+        
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}`;
+        let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
+
+        let queryStrings = RestObject.generatorQueryString(where, offset, limit, order);
+
+        if (!secureAvaiable)
+            queryStrings = queryStrings + "&include_depth=3";
+
+        if (queryStrings !== "")
+            url = `${url}?${queryStrings}`;
+
+        return callServer(url, DroiHttpMethod.GET, null, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN).then(
+            (jresult) => {
+                if (jresult instanceof Array)
+                    return jresult as Array<JSON>;
+                throw new DroiError(DroiError.INVALID_PARAMETER, "json is not array in query result");
+            }
+        );
     }
 
-    updateData(table: string, data: string, where?: string): Promise<boolean> {
-        return null;
+    updateData(table: string, data: string, where?: string, offset?: number, limit?: number, order?: string): Promise<boolean> {
+        return RestObject.instance().updateData(table, data, where, offset, limit, order);
     }
 
     delete(objId:string, table: string): Promise<boolean> {
-        return null;
+        let secureAvaiable = false;
+        
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}/${objId}`;
+        let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
+        
+        return callServer(url, DroiHttpMethod.DELETE, null, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
+            .then( (_) => {
+                return true;
+            });
     }
     
     signupUser(data: JSON): Promise<JSON> {

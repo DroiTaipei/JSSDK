@@ -82,7 +82,55 @@ export class CloudStorageDataProvider implements DroiDataProvider {
     }
 
     updateData( commands: Multimap<string, any> ): Promise<DroiError> {
-        return null;
+        let error = new DroiError(DroiError.OK);
+        let isAtomic = commands.containsKey(DroiConstant.DroiQuery_ATOMIC);
+        let tableName = commands.getElement(DroiConstant.DroiQuery_TABLE_NAME, 0);
+
+        let restHandler: RestCRUD = (tableName === RestUser.TABLE_NAME) ? RestUser.instance() : RestObject.instance();
+
+        if (isAtomic) {
+            let obj = commands.getElement(DroiConstant.DroiQuery_ATOMIC, 0) as DroiObject;
+            let list = commands.getElement(DroiConstant.DroiQuery_ADD, 0);
+            let data = {};
+            data[list[0]] = list[1];
+            return RestObject.instance().atomicAdd(tableName, obj.objectId(), data)
+                .then( (_) => {
+                    return new DroiError(DroiError.OK);
+                });
+        } else {
+            let listAdd = commands.get(DroiConstant.DroiQuery_ADD);
+            let listSet = commands.get(DroiConstant.DroiQuery_SET);
+            let jcmd: {[key: string]: any} = {};
+
+            if (listAdd != null) {
+                for (let list of listAdd) {
+                    jcmd[list[0]] = {"__op": "Increment", "amount": list[1]};
+                }
+            } else if (listSet != null) {
+                for (let list of listSet) {
+                    jcmd[list[0]] = list[1];
+                }
+            }
+
+            if (Object.keys(jcmd).length == 0) {
+                throw new DroiError(DroiError.INVALID_PARAMETER, "No set / add in updating");
+            }
+
+            let where = this.generateWhere(commands);
+            let order = this.generateOrder(commands);
+            let offset = NaN;
+            let limit = NaN;
+    
+            if (commands.containsKey(DroiConstant.DroiQuery_OFFSET))
+                offset = commands.get(DroiConstant.DroiQuery_OFFSET)[0];
+            if (commands.containsKey(DroiConstant.DroiQuery_LIMIT))
+                limit = commands.get(DroiConstant.DroiQuery_LIMIT)[0];     
+
+            return restHandler.updateData(tableName, JSON.stringify(jcmd), where, offset, limit, order)
+                .then( (_) => {
+                    return new DroiError(DroiError.OK);
+                });
+        }
     }
     
     delete( commands: Multimap<string, any> ): Promise<DroiError> {
