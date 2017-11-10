@@ -21,7 +21,11 @@ class DroiFile extends DroiObject {
         super( "_File" );
 
         name = name || "DroiFile-".concat(this.objectId());
+        this.contentBuffer = buffer;
+        this.contentDirty = true;
+        this.mimeType = mimeType;
 
+        //
         this.setValue( DroiFile.DROI_KEY_FILE_NAME, name );
         this.setValue( DroiFile.DROI_KEY_FILE_FID, 0 );
 
@@ -31,7 +35,7 @@ class DroiFile extends DroiObject {
             this.setValue( DroiFile.DROI_KEY_FILE_SIZE, buffer.length );
         } else {
             this.setValue( DroiFile.DROI_KEY_FILE_MD5, 0 );
-            this.setValue( DroiFile.DROI_KEY_FILE_SIZE, buffer.length );
+            this.setValue( DroiFile.DROI_KEY_FILE_SIZE, 0 );
         }
     }
 
@@ -52,14 +56,29 @@ class DroiFile extends DroiObject {
         return RestFile.instance().getUri( this.objectId() );
     }
 
-    update( buffer: Uint8Array, progress: (currentSize: number, totalSize: number) => void = null, mimeType: string = "application/octet-stream"): Promise< boolean > {
-        // TODO:
+    update( buffer: Uint8Array, progress: (currentSize: number, totalSize: number) => void = null, mimeType: string = "application/octet-stream"): Promise< DroiError > {
+        // TODO
         return;
     }
 
-    save(progress: (currentSize: number, totalSize: number) => void = null): Promise<DroiError> {
-        // TODO
-        return;
+    async save(progress: (currentSize: number, totalSize: number) => void = null): Promise<DroiError> {
+        // Check whether the parameter is correct..
+        if ( this.contentDirty && (this.contentBuffer == null || this.contentBuffer.length == 0) ) {
+            return Promise.reject( new DroiError( DroiError.ERROR, "The size is zero.") );
+        }
+
+        try {
+            let error = await this.saveInternal( this.contentBuffer, progress );
+            if ( error.isOk == false ) {
+                return Promise.reject( error );
+            }
+            //
+        } catch (e) {
+            return Promise.reject( e );
+        }
+
+
+        return super.save();
     }
 
     delete():Promise<DroiError> {
@@ -70,7 +89,30 @@ class DroiFile extends DroiObject {
         return this.contentDirty
     }
 
+    private async saveInternal( buffer: Uint8Array, progress: (currentSize: number, totalSize: number) => void ): Promise< DroiError > {
+        // TODO:
+        if ( buffer == null || buffer.length == 0 ) {
+            return Promise.reject( new DroiError( DroiError.ERROR, "File content is empty. (No update)"));
+        }
+
+        if ( this.contentDirty == false ) {
+            return Promise.resolve( new DroiError( DroiError.OK ) );
+        }
+
+        // Get upload token from DroiBaaS
+        let tokenResults = await RestFile.instance().getUploadToken( this.objectId(), this.Name, this.mimeType, this.Size, this.MD5 );
+
+        //
+        let fileToken = tokenResults["Token"];
+        let uploadUrl = tokenResults["UploadUrl"];
+        let sessionId = tokenResults["SessionId"];
+
+        return;
+    }
+
     private contentDirty: boolean = true;
+    private contentBuffer: Uint8Array = null;
+    private mimeType;
 }
 
 
