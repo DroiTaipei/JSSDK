@@ -8,7 +8,11 @@ import { RestObject, RestCRUD } from "./object"
 
 export enum ResetPasswordType {
     EMAIL = "EMAIL", PHONE = "PHONE", ALL = "ALL"
-}    
+}
+
+export enum OtpType {
+    EMAIL = "EMAIL", PHONE = "PHOME"
+}
 
 export class RestUser implements RestCRUD {
     private static readonly REST_USER_URL = "/users/v2";
@@ -16,6 +20,7 @@ export class RestUser implements RestCRUD {
     private static readonly REST_HTTPS_SECURE = "/droi";
 
     private static readonly REST_USER_LOGIN = "/login";
+    private static readonly REST_USER_OTP_LOGIN = "/otp/login";
     private static readonly REST_USER_SIGNUP = "/signup";
     private static readonly REST_USER_LOGOUT = "/logout";
     private static readonly REST_USER_PASSWORD = "/password";
@@ -95,7 +100,7 @@ export class RestUser implements RestCRUD {
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
         let jdata = {Data: data, Type: RestUser.USER_TYPE_GENERAL, InstallationId: DroiCore.getInstallationId()};
 
-        return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN);
+        return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, null);
     }
 
     loginUser(userId: string, password: string): Promise<JSON> {
@@ -106,7 +111,7 @@ export class RestUser implements RestCRUD {
 
         let jdata = {Type: RestUser.USER_TYPE_GENERAL, InstallationId: DroiCore.getInstallationId(), UserId: userId, Password: password};
 
-        return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN);
+        return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, null);
     }
 
     loginAnonymous(userData: DroiUser): Promise<JSON> {
@@ -144,6 +149,31 @@ export class RestUser implements RestCRUD {
             .then( (_) => {
                 return true;
             });
+    }
+
+    requestOTP(userId: string, contact: string, type: OtpType): Promise<boolean> {
+        let secureAvaiable = false;
+        
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_OTP_LOGIN}`;
+        let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
+
+        let jdata = {UserId: userId, Contact: contact, ContactType: type};
+        return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, null)
+        .then( (_) => {
+            return true;
+        });
+    }
+
+    loginOTP(otp: string, type: OtpType, newUser: JSON): Promise<JSON> {
+        let secureAvaiable = false;
+        
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_LOGIN}`;
+        let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
+
+        let jotp = {Code: otp, ContactType: type};
+        let jdata = {OTP: jotp, Data: newUser, Type: "otp", InstallationId: DroiCore.getInstallationId()};
+
+        return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, null);
     }
 
     changePassword(oldPassword: string, newPassword: string): Promise<boolean> {

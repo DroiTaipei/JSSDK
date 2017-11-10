@@ -2,7 +2,7 @@ import { DroiObject } from "./droi-object"
 import { DroiCallback, DroiSingleCallback } from "./droi-callback"
 import { DroiError } from "./droi-error"
 import { DroiCore } from "./droi-core"
-import { RestUser, ResetPasswordType } from "./rest/user"
+import { RestUser, ResetPasswordType, OtpType } from "./rest/user"
 import { DroiPersistSettings } from "./droi-persist-settings"
 import { DroiConstant } from "./droi-const"
 import * as sha256 from "sha256"
@@ -118,11 +118,44 @@ export class DroiUser extends DroiObject {
             });
     }
 
+    static loginOTP(contact: string, type: OtpType, otpCode: string, userId?: string): Promise<DroiUser> {
+        userId = userId || "droiotp_" + contact;
+
+        let user = DroiUser.createUser();
+        user.UserId = userId;
+        if (type == OtpType.EMAIL) {
+            user.Email = contact;
+        } else {
+            user.PhoneNum = contact;
+        }
+
+        return RestUser.instance().loginOTP(otpCode, type, JSON.parse(user.toJson()))
+            .then( (jdata) => {
+                let user = DroiUser.createUser();
+                let obj = DroiObject.fromJson(jdata["Data"]);
+                user.cloneFrom(obj);
+                user.session = {Token: jdata["Token"], ExpiredAt: jdata["ExpiredAt"]};
+
+                DroiUser.saveUserCache(user);
+                DroiUser.currentUser = user;
+                return user;
+            });
+    }
+
     static resetPassword(userId: string, type: ResetPasswordType): Promise<DroiError> {
         return RestUser.instance().resetPassword(userId, type)
             .then( (_) => {
                 return new DroiError(DroiError.OK);
             });
+    }
+
+    static requestOTP(contact: string, type: OtpType, userId?: string): Promise<DroiError> {
+        userId = userId || "droiotp_" + contact;
+
+        return RestUser.instance().requestOTP(userId, contact, type)
+            .then( (_) => {
+                return new DroiError(DroiError.OK);
+            })
     }
 
     async signup(): Promise<DroiError> {
