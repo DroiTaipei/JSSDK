@@ -2,7 +2,7 @@ import { DroiObject } from "./droi-object"
 import { DroiCallback, DroiSingleCallback } from "./droi-callback"
 import { DroiError } from "./droi-error"
 import { DroiCore } from "./droi-core"
-import { RestUser } from "./rest/user"
+import { RestUser, ResetPasswordType } from "./rest/user"
 import { DroiPersistSettings } from "./droi-persist-settings"
 import { DroiConstant } from "./droi-const"
 import * as sha256 from "sha256"
@@ -13,6 +13,9 @@ export class DroiUser extends DroiObject {
     private static readonly KEY_AUTHDATA = "AuthData";
     private static readonly KEY_EMAIL = "Email";
     private static readonly KEY_PHONENUM = "PhoneNum";
+    private static readonly KEY_ENABLE = "Enable";
+    private static readonly KEY_EMAIL_VERIFIED = "EmailVerified";
+    private static readonly KEY_PHONE_VERIFIED = "PhoneNumVerified";
 
     private session: {[key: string]: string};
     private password: string;
@@ -112,6 +115,13 @@ export class DroiUser extends DroiObject {
                 DroiUser.saveUserCache(user);
                 DroiUser.currentUser = user;
                 return user;
+            });
+    }
+
+    static resetPassword(userId: string, type: ResetPasswordType): Promise<DroiError> {
+        return RestUser.instance().resetPassword(userId, type)
+            .then( (_) => {
+                return new DroiError(DroiError.OK);
             });
     }
 
@@ -217,6 +227,18 @@ export class DroiUser extends DroiObject {
     isAnonymous(): boolean {
         let authData = this.getValue(DroiUser.KEY_AUTHDATA);
         return authData != null && authData[RestUser.USER_TYPE_ANONYMOUS] != null;
+    }
+
+    isEnable(): boolean {
+        return this.getValue(DroiUser.KEY_ENABLE) || false;
+    }
+
+    isEmailVerified(): boolean {
+        return this.getValue(DroiUser.KEY_EMAIL_VERIFIED) || false;
+    }
+
+    isPhoneNumVerified(): boolean {
+        return this.getValue(DroiUser.KEY_PHONE_VERIFIED) || false;
     }
 
     changePassword(oldPassword: string, newPassword: string): Promise<DroiError> {

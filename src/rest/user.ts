@@ -6,6 +6,10 @@ import { DroiUser } from "../droi-user"
 import { DroiError } from "../droi-error"
 import { RestObject, RestCRUD } from "./object"
 
+export enum ResetPasswordType {
+    EMAIL = "EMAIL", PHONE = "PHONE", ALL = "ALL"
+}    
+
 export class RestUser implements RestCRUD {
     private static readonly REST_USER_URL = "/users/v2";
     private static readonly REST_HTTPS = "https://api.droibaas.com/rest";
@@ -18,6 +22,7 @@ export class RestUser implements RestCRUD {
     private static readonly REST_USER_EMAIL = "/email";
     private static readonly REST_USER_SMS = "/sms";
     private static readonly REST_USER_VALIDATE_SMS = "/validate/sms";
+    private static readonly REST_USER_RESET_PASSWORD = "/otp/password";
 
     static readonly USER_TYPE_GENERAL = "general";
     static readonly USER_TYPE_ANONYMOUS = "anonymous";
@@ -149,6 +154,19 @@ export class RestUser implements RestCRUD {
 
         let jdata = {Old: oldPassword, New: newPassword};
         return callServer(url, DroiHttpMethod.PUT, JSON.stringify(jdata), null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
+            .then( (_) => {
+                return true;
+            });
+    }
+
+    resetPassword(userId: string, type: ResetPasswordType): Promise<boolean> {
+        let secureAvaiable = false;
+        
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_RESET_PASSWORD}`;
+        let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
+
+        let jdata = {UserId: userId, ContactType: type};
+        return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, null)
             .then( (_) => {
                 return true;
             });
