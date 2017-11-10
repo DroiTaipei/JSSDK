@@ -29,7 +29,6 @@ async function clearNormalUser(): Promise<boolean> {
 }
 
 describe('Droi User API', function() {
-
     this.timeout(20000);
 
     before( () => {

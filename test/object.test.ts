@@ -4,6 +4,8 @@ import { describe, it, beforeEach, afterEach, before, after } from 'mocha'
 import * as DroiBaaS from '../src'
 
 describe('Droi objects', () => {
+    this.timeout(60000);
+    
     before( async () => {
         DroiBaaS.DroiCore.initializeCore("ke8umbzhvkW9Zb6HAjzyw7j8pUJbZSEUlQAAWGoK", "Sxfqun4fK7zT09jGNu4cklSNS7XL_lOSq4zsTAf1nnewPMp0yS6CAh1eBI0ksg_S");
         await DroiBaaS.DroiUser.loginAnonymous();

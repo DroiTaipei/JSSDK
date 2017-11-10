@@ -136,7 +136,7 @@ export namespace RemoteServiceHelper {
         );
     }
 
-    export function callServerSecure(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder, callback?: DroiCallback<JSON>): Promise<JSON> {
+    export function callServerSecure(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder): Promise<JSON> {
         return null;
     }
 
