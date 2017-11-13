@@ -52,7 +52,7 @@ export class CloudStorageDataProvider implements DroiDataProvider {
         if (commands.containsKey(DroiConstant.DroiQuery_SELECT)) {
             let list = commands.get(DroiConstant.DroiQuery_SELECT);
             if (list == null || list.length != 1)
-                throw new DroiError(DroiError.INVALID_PARAMETER, "No table name in query.");
+                return Promise.reject(new DroiError(DroiError.INVALID_PARAMETER, "No table name in query."));
             tableName = list[0];
         }
 
@@ -113,7 +113,7 @@ export class CloudStorageDataProvider implements DroiDataProvider {
             }
 
             if (Object.keys(jcmd).length == 0) {
-                throw new DroiError(DroiError.INVALID_PARAMETER, "No set / add in updating");
+                return Promise.reject(new DroiError(DroiError.INVALID_PARAMETER, "No set / add in updating"));
             }
 
             let where = this.generateWhere(commands);

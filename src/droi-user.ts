@@ -73,7 +73,7 @@ export class DroiUser extends DroiObject {
         // Already logged in
         let user = DroiUser.getCurrentUser();
         if (user != null && user.isLoggedIn) {
-            throw new DroiError(DroiError.USER_ALREADY_LOGIN);
+            return Promise.reject(new DroiError(DroiError.USER_ALREADY_LOGIN));
         }
 
         user = DroiUser.createUser();
@@ -96,13 +96,13 @@ export class DroiUser extends DroiObject {
 
     static login(userId: string, password: string): Promise<DroiUser> {
         if (userId == null || password == null) {
-            throw new DroiError(DroiError.INVALID_PARAMETER, "Empty UserId or Password");
+            return Promise.reject(new DroiError(DroiError.INVALID_PARAMETER, "Empty UserId or Password"));
         }
 
         // User already logged in
         let curUser = DroiUser.getCurrentUser();
         if (curUser != null && curUser.isLoggedIn() && !curUser.isAnonymous()) {
-            throw new DroiError(DroiError.USER_ALREADY_LOGIN);
+            return Promise.reject(new DroiError(DroiError.USER_ALREADY_LOGIN));
         }
 
         return RestUser.instance().loginUser(userId, sha256(password))
@@ -161,7 +161,7 @@ export class DroiUser extends DroiObject {
     async signup(): Promise<DroiError> {
         // Needed parameters check
         if (this.getValue(DroiUser.KEY_USERID) == null || this.password == null) {
-            throw new DroiError(DroiError.INVALID_PARAMETER, "Empty UserId or Password.");
+            return Promise.reject(new DroiError(DroiError.INVALID_PARAMETER, "Empty UserId or Password."));
         }
 
         // Anonysmous => Normal User
@@ -169,7 +169,7 @@ export class DroiUser extends DroiObject {
         let currUser = DroiUser.getCurrentUser();
         if (currUser != null && currUser.isLoggedIn()) {
             if (! (currUser.objectId() === this.objectId() && currUser.isAnonymous()))
-                throw new DroiError(DroiError.USER_ALREADY_LOGIN);
+                return Promise.reject(new DroiError(DroiError.USER_ALREADY_LOGIN));
             this.setValue(DroiUser.KEY_AUTHDATA, null);
             try {
                 await super.save();
@@ -184,7 +184,7 @@ export class DroiUser extends DroiObject {
                 this.setValue(DroiUser.KEY_USERID, DroiCore.getInstallationId() + await DroiCore.getDeviceId());
                 this.password = null;
 
-                throw error;
+                return Promise.reject(error);
             }
 
             DroiUser.saveUserCache(this);
@@ -206,7 +206,7 @@ export class DroiUser extends DroiObject {
             let error = e as DroiError;
             if (error.code == DroiConstant.DROI_API_RECORD_CONFLICT || error.code == DroiConstant.DROI_API_USER_EXISTS)
                 error.code = DroiError.USER_ALREADY_EXISTS;
-            throw error;
+            return Promise.reject(error);
         }
 
         this.session = {Token: jresult["Token"], ExpiredAt: jresult["ExpiredAt"]};
@@ -230,7 +230,7 @@ export class DroiUser extends DroiObject {
 
     logout(): Promise<DroiError> {
         if (!this.isLoggedIn()) {
-            throw new DroiError(DroiError.USER_NOT_AUTHORIZED);
+            return Promise.reject(new DroiError(DroiError.USER_NOT_AUTHORIZED));
         }
 
         return RestUser.instance().logout(this.objectId())
