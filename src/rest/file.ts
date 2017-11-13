@@ -3,6 +3,7 @@ import { DroiError } from "../droi-error"
 import { DroiCore } from "../index";
 import { DroiHttpMethod, DroiHttp, DroiHttpRequest, DroiHttpResponse } from "../droi-http"
 
+
 class RestFile {
     private static readonly REST_HTTP_SECURE = "/droifu/v2/file";  // For secure connection
     private static readonly REST_HTTPS = "https://api.droibaas.com/rest/files/v2";  // For openapi (https)
@@ -47,12 +48,15 @@ class RestFile {
     }
 
     getUploadToken( objectId: string, name: string, mimeType: string, size: number, md5: string ): Promise< JSON > {
+
+        console.log("getUploadToken");
         let secureAvaiable = false;
         
-        let url = `${secureAvaiable?RestFile.REST_HTTP_SECURE:RestFile.REST_HTTPS}/${objectId}`;
+        let url = secureAvaiable ? `${secureAvaiable?RestFile.REST_HTTP_SECURE:RestFile.REST_HTTPS}/${objectId}` : `${secureAvaiable?RestFile.REST_HTTP_SECURE:RestFile.REST_HTTPS}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
+        let method = secureAvaiable ? DroiHttpMethod.PUT : DroiHttpMethod.POST;
         let input = JSON.stringify({ "Name":name, "Type":mimeType, "Size":size, "MD5":md5 });
-        return callServer(url, DroiHttpMethod.PUT, input, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN).then( (res) => {
+        return callServer(url, method, input, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN).then( (res) => {
                 let fileToken = res["Token"];
                 let uploadUrl = res["UploadUrl"];
                 let sessionId = res["SessionId"];
@@ -61,23 +65,60 @@ class RestFile {
                 return res;
         });
     }
+    private createData( parameters: object, boundary: string, name: string, data: Uint8Array, mimeType: string  ): Buffer {
+        let head: string = "";        
+        // Add parameters
+        for ( let key in parameters ) {
+            head = head.concat(`--${boundary}\r\n`,
+                `Content-Disposition: form-data; name="${key}"\r\n\r\n`,
+                `${parameters[key]}\r\n`);
+        }
+
+        // Add data
+        head = head.concat(`--${boundary}\r\n`,
+            `Content-Disposition: form-data; name="file"; filename="${name}"\r\n`,
+            `Content-Type: ${mimeType}\r\n\r\n`);
+
+        let tail: string = `\r\n--${boundary}--\r\n`;
+
+        let totalSize = head.length + tail.length + data.length; 
+
+        let res = new Buffer( totalSize );
+
+        // Copy head
+        let i=0;
+        for ( ; i<head.length; i++ ) {
+            res[i] = head.charCodeAt(i) & 0xff;
+        }
+
+        // Copy binary data
+        for ( let j=0; j<data.length; j++, i++ )
+            res[i] = data[j];
+
+        // copy tail
+        for ( let j=0; j<tail.length; j++, i++ ) 
+            res[i] = tail.charCodeAt(j) & 0xff;
+        
+        return res;
+    }
+
 
     upload( uploadUrl: string, fileToken: string, sessionId: string, objectId: string, name: string, mimeType: string, data:Uint8Array, progressCB: (currentSize: number, totalSize: number) => void ): Promise<DroiHttpResponse> {
         let promiseHandler = (resolve, reject) => {
             let statusText: string = null;
-            let fd = new FormData();
-            fd.append( "key", name );
-            fd.append( "token", fileToken );
-            fd.append("x:AppId", DroiCore.getAppId() );
-            fd.append("x:Id", objectId );
-            fd.append("x:SessionId", sessionId );
-            fd.append("file", new Blob([data], {type: mimeType}) );
-    
+            let boundary = "Boundary-".concat( objectId );
+            let cs = this.createData( { "key": name,
+                "token": fileToken, 
+                "x:AppId": DroiCore.getAppId(),
+                "x:Id": objectId,
+                "x:SessionId": sessionId
+            }, boundary, name, data, mimeType );     
+                   
             let xhr = new XMLHttpRequest();
 
             // Progress callback
             if ( progressCB != null ) {
-                xhr.upload.addEventListener( 'progress', (oEvent) => {
+                xhr.addEventListener( 'progress', (oEvent) => {
                     if ( oEvent.lengthComputable )
                         progressCB( oEvent.loaded, oEvent.total );
                 });
@@ -85,17 +126,14 @@ class RestFile {
     
             // Result
             let resultBack = (response: DroiHttpResponse) => {
-                // callback or promise
-                let error: DroiError = new DroiError(DroiError.OK);
-                if (statusText && statusText != "") {
-                    error.code = DroiError.ERROR;
-                    error.appendMessage = `[HTTPS] ${statusText}`;
+
+                let error = RemoteServiceHelper.translateDroiError(response, null);
+                if (!error.isOk) {
+                    reject(error);
+                    return;
                 }
 
-                if (error.isOk)
-                    resolve(response);
-                else
-                    reject(error);
+                resolve(response);
             }
 
             // Error Handler
@@ -142,9 +180,11 @@ class RestFile {
 
             // Init connection
             xhr.open( "post", uploadUrl );
-
+            let header = `multipart/form-data; boundary=${boundary}`;
+            xhr.setRequestHeader("Content-Type", header );
+            
             //
-            xhr.send( fd );            
+            xhr.send( cs );
         };
         
         return new Promise<DroiHttpResponse>( promiseHandler );

@@ -7,6 +7,7 @@ export * from "./droi-condition"
 export * from "./droi-cloud"
 export { DroiHttpMethod } from "./droi-http"
 export * from "./droi-error"
+export * from "./droi-file"
 
 // trick for bypass typescript checking
 declare var require: any;

@@ -174,7 +174,7 @@ export namespace RemoteServiceHelper {
         }    
     }
 
-    function translateDroiError(resp: DroiHttpResponse, ticket: string): DroiError {
+    export function translateDroiError(resp: DroiHttpResponse, ticket: string): DroiError {
         let retError = new DroiError(DroiError.OK, null, ticket);
         let code = -1;
         let errorCode = 0;

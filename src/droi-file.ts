@@ -3,6 +3,7 @@ import { DroiError } from "./droi-error"
 import { DroiCore } from "./droi-core"
 import { Md5 } from 'ts-md5/dist/md5'
 import { RestFile } from './rest/file'
+import { DroiConstant } from "./droi-const";
 
 class DroiFile extends DroiObject {
     static createFile(buffer: Uint8Array = null, name: string = null, mimeType: string = "application/octet-stream"): DroiFile {
@@ -72,13 +73,12 @@ class DroiFile extends DroiObject {
             if ( error.isOk == false ) {
                 return Promise.reject( error );
             }
+
+            return await super.save();
             //
         } catch (e) {
             return Promise.reject( e );
         }
-
-
-        return super.save();
     }
 
     delete():Promise<DroiError> {
@@ -100,19 +100,50 @@ class DroiFile extends DroiObject {
         }
 
         // Get upload token from DroiBaaS
-        let tokenResults = await RestFile.instance().getUploadToken( this.objectId(), this.Name, this.mimeType, this.Size, this.MD5 );
+        try {
+            let tokenResults = await RestFile.instance().getUploadToken( this.objectId(), this.Name, this.mimeType, this.Size, this.MD5 );
 
-        //
-        let fileToken = tokenResults["Token"];
-        let uploadUrl = tokenResults["UploadUrl"];
-        let sessionId = tokenResults["SessionId"];
+            //
+            let fileToken = tokenResults["Token"];
+            let uploadUrl = tokenResults["UploadUrl"];
+            let sessionId = tokenResults["SessionId"];
+            if ( tokenResults["Id"] !== undefined ) {
+                console.log("Id: " + tokenResults["Id"] );
+                this.setValue( DroiConstant.DROI_KEY_JSON_OBJECTID, tokenResults["Id"] )
+            }
+            
 
-        return;
+            // Upload data to CDN
+            let response = await RestFile.instance().upload( uploadUrl, fileToken, sessionId, this.objectId(), this.Name, this.mimeType, this.contentBuffer, progress );
+
+            //
+            let result = JSON.parse(response.data).Result;
+            if ( result["FId"] !== undefined ) {
+                this.setValue( DroiFile.DROI_KEY_FILE_FID, result["FId"] );
+            }
+
+            if ( result["CDN"] !== undefined ) {
+                // _MongoDmd = new HashMap<String, Object>();
+                // if ( tmp != null ) {
+                //     _MongoDmd.put( "CDN", tmp );
+                // }
+
+                let Dmd = { "CDN":result["CDN"] };
+                this.setValue( DroiFile.DROI_KEY_FILE_EXTRA, Dmd );
+            }
+
+            this.contentDirty = false;
+            return Promise.resolve( new DroiError( DroiError.OK ) );
+        } catch( e ) {
+            console.log(" There is an error." + e );
+            return Promise.reject( e );
+        }
+
     }
 
     private contentDirty: boolean = true;
     private contentBuffer: Uint8Array = null;
-    private mimeType;
+    private mimeType: string;
 }
 
 

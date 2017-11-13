@@ -11,6 +11,7 @@
     "test": "mocha -r ts-node/register test/**/*.test.*"
   },
   "dependencies": {
+    "@types/node": "^8.0.51",
     "cuint": "^0.2.2",
     "dom-storage": "^2.0.2",
     "gulp-bump": "^2.8.0",
