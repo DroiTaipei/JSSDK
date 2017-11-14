@@ -3,6 +3,7 @@ import { DroiError } from "../droi-error"
 import { DroiCore } from "../index";
 import { DroiHttpMethod, DroiHttp, DroiHttpRequest, DroiHttpResponse } from "../droi-http"
 import { DroiLog } from "../droi-log"
+import * as Request from "superagent"
 
 class RestFile {
     private static readonly REST_HTTP_SECURE = "/droifu/v2/file";  // For secure connection
@@ -66,129 +67,42 @@ class RestFile {
                 return res;
         });
     }
-    private createData( parameters: object, boundary: string, name: string, data: Uint8Array, mimeType: string  ): Buffer {
-        let head: string = "";        
-        // Add parameters
-        for ( let key in parameters ) {
-            head = head.concat(`--${boundary}\r\n`,
-                `Content-Disposition: form-data; name="${key}"\r\n\r\n`,
-                `${parameters[key]}\r\n`);
-        }
-
-        // Add data
-        head = head.concat(`--${boundary}\r\n`,
-            `Content-Disposition: form-data; name="file"; filename="${name}"\r\n`,
-            `Content-Type: ${mimeType}\r\n\r\n`);
-
-        let tail: string = `\r\n--${boundary}--\r\n`;
-
-        let totalSize = head.length + tail.length + data.length; 
-
-        let res = new Buffer( totalSize );
-
-        // Copy head
-        let i=0;
-        for ( ; i<head.length; i++ ) {
-            res[i] = head.charCodeAt(i) & 0xff;
-        }
-
-        // Copy binary data
-        for ( let j=0; j<data.length; j++, i++ )
-            res[i] = data[j];
-
-        // copy tail
-        for ( let j=0; j<tail.length; j++, i++ ) 
-            res[i] = tail.charCodeAt(j) & 0xff;
-        
-        return res;
-    }
-
 
     upload( uploadUrl: string, fileToken: string, sessionId: string, objectId: string, name: string, mimeType: string, data:Uint8Array, progressCB: (currentSize: number, totalSize: number) => void ): Promise<DroiHttpResponse> {
-        let promiseHandler = (resolve, reject) => {
-            let statusText: string = null;
-            let boundary = "Boundary-".concat( objectId );
-            let cs = this.createData( { "key": name,
-                "token": fileToken, 
-                "x:AppId": DroiCore.getAppId(),
-                "x:Id": objectId,
-                "x:SessionId": sessionId
-            }, boundary, name, data, mimeType );     
-                   
-            let xhr = new XMLHttpRequest();
+        let buffer: any = null;
 
-            // Progress callback
-            if ( progressCB != null ) {
-                xhr.addEventListener( 'progress', (oEvent) => {
-                    if ( oEvent.lengthComputable )
-                        progressCB( oEvent.loaded, oEvent.total );
-                });
-            }
-    
-            // Result
-            let resultBack = (response: DroiHttpResponse) => {
+        //TODO: Test Blob in browser
+        if (typeof Buffer !== "undefined")
+            buffer = new Buffer(data);
+        else
+            buffer = new Blob([data]);
 
-                let error = RemoteServiceHelper.translateDroiError(response, null);
-                if (!error.isOk) {
-                    reject(error);
-                    return;
-                }
+        let req = Request
+            .post(uploadUrl)
+            .field("key", name)
+            .field("token", fileToken)
+            .field("x:AppId", DroiCore.getAppId())
+            .field("x:Id", objectId)
+            .field("x:SessionId", sessionId)
+            .attach("file", buffer, {filename: name, contentType: mimeType})
+            .on("progress", (event) => {
+                if (progressCB != null)
+                    progressCB(event.loaded, event.total);
+            });
 
-                resolve(response);
-            }
-
-            // Error Handler
-            let errorHandler = (e) => {
-                // Already handled in Node
-                if (statusText && statusText != "") {
-                    return;
-                }
-                //
-                statusText = `Error type: ${e.type}`;
+        return req.then( (resp) => {
                 let response = new DroiHttpResponse();
-                response.status = xhr.status;
-                response.data = xhr.responseText;
-                resultBack(response);
-            };
-
-            xhr.ontimeout = errorHandler;
-            xhr.onerror = errorHandler;
-
-
-            // Result callback
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState == 4) {
-                    statusText = xhr.statusText;
-                    if (xhr.status != 0 || (statusText && statusText != "")) {
-                        let response = new DroiHttpResponse();
-                        response.status = xhr.status;
-                        response.data = xhr.responseText;
-                        DroiLog.d("DroiFileApi", ` Output: ${response.data}`);
-                        let allheaders = xhr.getAllResponseHeaders().split("\r\n");
-                        let headers: {[key: string]: string} = {};
-                        response.headers = headers;
-
-                        for (let header of allheaders) {
-                            if (header == "")
-                                continue;
-                            let parts = header.split(":");
-                            headers[parts[0].trim()] = parts[1].trim();
-                        }
-                        resultBack(response);
-                    }
-                }
-            };
-
-            // Init connection
-            xhr.open( "post", uploadUrl );
-            let header = `multipart/form-data; boundary=${boundary}`;
-            xhr.setRequestHeader("Content-Type", header );
-            
-            //
-            xhr.send( cs );
-        };
-        
-        return new Promise<DroiHttpResponse>( promiseHandler );
+                response.status = resp.status;
+                response.data = resp.text;
+                response.headers = resp.header;
+                return response;
+            })
+            .catch( (reason) => {
+                let code = DroiError.SERVER_NOT_REACHABLE;
+                if (reason.code == "ETIMEDOUT")
+                    code = DroiError.TIMEOUT;
+                return Promise.reject(new DroiError(code, reason.toString()));
+            });
     }
 
     private static readonly LOG_TAG = "DroiFileApi";
