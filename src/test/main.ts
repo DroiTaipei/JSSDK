@@ -18,7 +18,7 @@ let func = () => {
     };
     
     df.save(  cb ).then( (err) => {
-        console.log( "Finish");
+        console.log( "Finish" );
         setTimeout( () => {
             df.update( data2 ).then( (res) => {
                 console.log( "Finish2");

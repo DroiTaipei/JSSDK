@@ -173,7 +173,7 @@ class DroiObject {
             try {
                 let error = await func(_self);
                 if ( error.isOk ) {
-                    resolve();
+                    resolve( error );
                 } else {
                     reject( error );
                 }
