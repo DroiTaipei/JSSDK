@@ -1,5 +1,6 @@
 import { DroiCallback } from "./droi-callback"
 import { DroiError } from "./droi-error"
+import * as Request from "superagent"
 
 export enum DroiHttpMethod {
     GET = "GET", POST = "POST", PUT = "PUT", PATCH = "PATCH", DELETE = "DELETE"
@@ -20,84 +21,34 @@ export class DroiHttpResponse {
 
 export class DroiHttp {
     static sendRequest(request: DroiHttpRequest): Promise<DroiHttpResponse> {
-        let promiseHandler = (resolve, reject) => {
-            let statusText: string = null;
-            let xhr = new XMLHttpRequest();            
 
-            // Arrow function to return response for callback or promise
-            let resultBack = (response: DroiHttpResponse) => {
-                // callback or promise
-                let error: DroiError = new DroiError(DroiError.OK);
-                if (statusText && statusText != "") {
-                    error.code = DroiError.ERROR;
-                    error.appendMessage = `[HTTPS] ${statusText}`;
-                }
+        let req = Request(request.method, request.url)
+            .type("application/json")
+        
+        if (request.headers != null)
+            req.set(request.headers);
 
-                if (error.isOk)
-                    resolve(response);
-                else
-                    reject(error);
-            }
+        if (request.data != null)
+            req.send(request.data);
 
-            // Result callback
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState == 4) {
-                    statusText = xhr.statusText;
-                    if (xhr.status != 0 || (statusText && statusText != "")) {
-                        let response = new DroiHttpResponse();
-                        response.status = xhr.status;
-                        response.data = xhr.responseText;
-                        console.log(` Output: ${response.data}`);
-                        let allheaders = xhr.getAllResponseHeaders().split("\r\n");
-                        let headers: {[key: string]: string} = {};
-                        response.headers = headers;
-
-                        for (let header of allheaders) {
-                            if (header == "")
-                                continue;
-                            let parts = header.split(":");
-                            headers[parts[0].trim()] = parts[1].trim();
-                        }
-
-                        resultBack(response);
-                    }
-                }
-            };
-
-            let errorHandler = (e) => {
-                // Already handled in Node
-                if (statusText && statusText != "") {
-                    return;
-                }
-                
-                statusText = `Error type: ${e.type}`;
+        console.log(`    Url: ${request.method} ${request.url}`);
+        console.log(`Headers: ${JSON.stringify(request.headers)}`);
+        console.log(`  Input: ${request.data}`);    
+            
+        return req
+            .then( (resp) => {
+                console.log(` Output: ${resp.text}`);
                 let response = new DroiHttpResponse();
-                response.status = xhr.status;
-                response.data = xhr.responseText;
-                resultBack(response);
-            };
-
-            xhr.ontimeout = errorHandler;
-            xhr.onerror = errorHandler;
-
-            console.log(`    Url: ${request.method} ${request.url}`);
-            console.log(`Headers: ${JSON.stringify(request.headers)}`);
-            console.log(`  Input: ${request.data}`);    
-
-            // Init connection
-            xhr.open(request.method, request.url);
-
-            // Put headers
-            if (request.headers) {
-                for (let key of Object.keys(request.headers)) {
-                    xhr.setRequestHeader(key, request.headers[key]);
-                }
-            }
-
-            // Send request
-            xhr.send(request.data);
-        };
-
-        return new Promise<DroiHttpResponse>(promiseHandler);
+                response.status = resp.status;
+                response.data = resp.text;
+                response.headers = resp.header;
+                return response;
+            })
+            .catch( (reason) => {
+                let code = DroiError.SERVER_NOT_REACHABLE;
+                if (reason.code == "ETIMEDOUT")
+                    code = DroiError.TIMEOUT;
+                return Promise.reject(new DroiError(code, reason.toString()));
+            });
     }
 }
