@@ -4,10 +4,15 @@ import { DroiCore } from "./droi-core"
 import { Md5 } from 'ts-md5/dist/md5'
 import { RestFile } from './rest/file'
 import { DroiConstant } from "./droi-const";
+import { DroiLog } from "./droi-log"
 
 class DroiFile extends DroiObject {
     static createFile(buffer: Uint8Array = null, name: string = null, mimeType: string = "application/octet-stream"): DroiFile {
         let df: DroiFile = new DroiFile( buffer, name, mimeType );
+
+        // Reset newFile flag
+        if ( buffer == null && name == null )
+            df.newFile = false;
         return df;
     }
 
@@ -53,13 +58,41 @@ class DroiFile extends DroiObject {
         return this.getValue( DroiFile.DROI_KEY_FILE_NAME );
     }
 
-    getUris(): Promise< Array<string> > {
+    getUris( forceUpdate: boolean ): Promise< Array<string> > {
+        // Return value from Dmd extra data set
+        if ( !forceUpdate) {
+            let Dmd = this.getValue(DroiFile.DROI_KEY_FILE_EXTRA);
+            if ( Dmd !== undefined && Dmd !== null ) {
+                let uri = Dmd["CDN"];
+                if ( uri !== undefined )
+                    return Promise.resolve( [uri] );
+            }
+        }        
+        
         return RestFile.instance().getUri( this.objectId() );
     }
 
     update( buffer: Uint8Array, progress: (currentSize: number, totalSize: number) => void = null, mimeType: string = "application/octet-stream"): Promise< DroiError > {
-        // TODO
-        return;
+        if ( buffer == null || buffer.length == 0 ) {
+            return Promise.reject( new DroiError( DroiError.ERROR, "The size is zero.") );
+        }
+
+        let md5 = new Md5().start().appendByteArray( buffer ).end();
+        if ( md5 == this.MD5 ) {
+            return Promise.resolve( new DroiError( DroiError.OK ) );
+        }
+
+        this.mimeType = mimeType;
+        this.contentBuffer = buffer;
+
+        this.contentDirty = true;
+        this.mimeType = mimeType;
+
+        //
+        this.setValue( DroiFile.DROI_KEY_FILE_MD5, md5 );
+        this.setValue( DroiFile.DROI_KEY_FILE_SIZE, buffer.length );
+        
+        return this.save( progress );
     }
 
     async save(progress: (currentSize: number, totalSize: number) => void = null): Promise<DroiError> {
@@ -74,6 +107,8 @@ class DroiFile extends DroiObject {
                 return Promise.reject( error );
             }
 
+            this.newFile = false;
+            this.contentDirty = false;
             return await super.save();
             //
         } catch (e) {
@@ -90,7 +125,6 @@ class DroiFile extends DroiObject {
     }
 
     private async saveInternal( buffer: Uint8Array, progress: (currentSize: number, totalSize: number) => void ): Promise< DroiError > {
-        // TODO:
         if ( buffer == null || buffer.length == 0 ) {
             return Promise.reject( new DroiError( DroiError.ERROR, "File content is empty. (No update)"));
         }
@@ -101,19 +135,21 @@ class DroiFile extends DroiObject {
 
         // Get upload token from DroiBaaS
         try {
-            let tokenResults = await RestFile.instance().getUploadToken( this.objectId(), this.Name, this.mimeType, this.Size, this.MD5 );
+            let tokenResults = await RestFile.instance().getUploadToken( this.objectId(), this.Name, this.mimeType, this.Size, this.MD5, this.newFile );
 
             //
             let fileToken = tokenResults["Token"];
             let uploadUrl = tokenResults["UploadUrl"];
             let sessionId = tokenResults["SessionId"];
             if ( tokenResults["Id"] !== undefined ) {
-                console.log("Id: " + tokenResults["Id"] );
-                this.setValue( DroiConstant.DROI_KEY_JSON_OBJECTID, tokenResults["Id"] )
+                DroiLog.d( DroiFile.LOG_TAG, "Original Id is " + this.objectId() );
+                console.log("New Id: " + tokenResults["Id"] );
+                this.setObjectId( tokenResults["Id"] );
             }
             
 
             // Upload data to CDN
+            DroiLog.d( DroiFile.LOG_TAG, "Upload data to CDN" );
             let response = await RestFile.instance().upload( uploadUrl, fileToken, sessionId, this.objectId(), this.Name, this.mimeType, this.contentBuffer, progress );
 
             //
@@ -123,13 +159,9 @@ class DroiFile extends DroiObject {
             }
 
             if ( result["CDN"] !== undefined ) {
-                // _MongoDmd = new HashMap<String, Object>();
-                // if ( tmp != null ) {
-                //     _MongoDmd.put( "CDN", tmp );
-                // }
-
                 let Dmd = { "CDN":result["CDN"] };
                 this.setValue( DroiFile.DROI_KEY_FILE_EXTRA, Dmd );
+                DroiLog.d( DroiFile.LOG_TAG, "The CDN link is " + result["CDN"] );
             }
 
             this.contentDirty = false;
@@ -144,6 +176,8 @@ class DroiFile extends DroiObject {
     private contentDirty: boolean = true;
     private contentBuffer: Uint8Array = null;
     private mimeType: string;
+    private newFile: boolean = true;
+    private static readonly LOG_TAG: string = "DroiFile";
 }
 
 

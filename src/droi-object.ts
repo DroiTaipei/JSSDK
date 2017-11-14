@@ -56,6 +56,10 @@ class DroiObject {
         return this.properties[DroiConstant.DROI_KEY_JSON_OBJECTID];
     }
 
+    protected setObjectId( objectId: string ) {
+        this.properties[ DroiConstant.DROI_KEY_JSON_OBJECTID ] = objectId;
+    }
+
     creationTime() : Date {
         var ct : string = this.properties[ DroiConstant.DROI_KEY_JSON_CREATION_TIME ];
         let res = new Date( ct );

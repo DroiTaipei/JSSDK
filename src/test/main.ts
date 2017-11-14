@@ -5,8 +5,11 @@ DroiBaaS.DroiCore.initializeCore( "ggnvmbzhQMYu7bh3w5GNWKiFpOvYXvTWlQBkVR4o", "L
 
 let func = () => {
     let data = new Uint8Array(1048576);
+    let data2 = new Uint8Array(1048576/2);
     for ( let idx =0; idx<data.length; idx++ )
         data[idx] = idx;
+    for ( let idx =0; idx<data2.length; idx++ )
+        data2[idx] = idx+2;
     console.log("Test begin");
     let df = DroiBaaS.DroiFile.createFile( data, "test" );
     
@@ -16,14 +19,14 @@ let func = () => {
     
     df.save(  cb ).then( (err) => {
         console.log( "Finish");
-
         setTimeout( () => {
-        df.delete().then( (err) => {
-            console.log("Delete finish")
-        }).catch( (err) => {
-            console.log( "Delete Failed. " + err );
-        });
-        }, 2000 );
+            df.update( data2 ).then( (res) => {
+                console.log( "Finish2");
+            }).catch( (error) => {
+                console.log( "Failed. 2" + err );
+                
+            });
+        }, 12000);
     } ).catch( (err) => {
         console.log( "Failed. " + err );
     } );    

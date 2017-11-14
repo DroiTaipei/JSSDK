@@ -2,7 +2,7 @@ import { RemoteServiceHelper } from "../droi-api"
 import { DroiError } from "../droi-error"
 import { DroiCore } from "../index";
 import { DroiHttpMethod, DroiHttp, DroiHttpRequest, DroiHttpResponse } from "../droi-http"
-
+import { DroiLog } from "../droi-log"
 
 class RestFile {
     private static readonly REST_HTTP_SECURE = "/droifu/v2/file";  // For secure connection
@@ -12,7 +12,7 @@ class RestFile {
 
     static instance(): RestFile {
         if (RestFile.INSTANCE == null)
-        RestFile.INSTANCE = new RestFile();
+            RestFile.INSTANCE = new RestFile();
 
         return RestFile.INSTANCE;
     }
@@ -47,14 +47,15 @@ class RestFile {
         });
     }
 
-    getUploadToken( objectId: string, name: string, mimeType: string, size: number, md5: string ): Promise< JSON > {
+    getUploadToken( objectId: string, name: string, mimeType: string, size: number, md5: string, newFile: boolean ): Promise< JSON > {
 
-        console.log("getUploadToken");
+        DroiLog.d( RestFile.LOG_TAG, "getUploadToken");
         let secureAvaiable = false;
         
-        let url = secureAvaiable ? `${secureAvaiable?RestFile.REST_HTTP_SECURE:RestFile.REST_HTTPS}/${objectId}` : `${secureAvaiable?RestFile.REST_HTTP_SECURE:RestFile.REST_HTTPS}`;
+        let url = (secureAvaiable||!newFile) ? `${secureAvaiable?RestFile.REST_HTTP_SECURE:RestFile.REST_HTTPS}/${objectId}` : `${secureAvaiable?RestFile.REST_HTTP_SECURE:RestFile.REST_HTTPS}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
-        let method = secureAvaiable ? DroiHttpMethod.PUT : DroiHttpMethod.POST;
+        let method = secureAvaiable ? DroiHttpMethod.PUT : (newFile?DroiHttpMethod.POST:DroiHttpMethod.PATCH);
+
         let input = JSON.stringify({ "Name":name, "Type":mimeType, "Size":size, "MD5":md5 });
         return callServer(url, method, input, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN).then( (res) => {
                 let fileToken = res["Token"];
@@ -162,7 +163,7 @@ class RestFile {
                         let response = new DroiHttpResponse();
                         response.status = xhr.status;
                         response.data = xhr.responseText;
-                        console.log(` Output: ${response.data}`);
+                        DroiLog.d("DroiFileApi", ` Output: ${response.data}`);
                         let allheaders = xhr.getAllResponseHeaders().split("\r\n");
                         let headers: {[key: string]: string} = {};
                         response.headers = headers;
@@ -189,6 +190,8 @@ class RestFile {
         
         return new Promise<DroiHttpResponse>( promiseHandler );
     }
+
+    private static readonly LOG_TAG = "DroiFileApi";
 }
 
 
