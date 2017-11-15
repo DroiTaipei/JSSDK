@@ -33,7 +33,7 @@ describe('Droi File', function() {
 
     it( 'Create File', async ()=> {
         let error = await file.save( (curr, total) => {
-            console.log(`${curr}/${total}`);
+            assert( curr <= total );
         });
         assert( error.isOk );
         assert( file.Size == data.length );
@@ -56,7 +56,7 @@ describe('Droi File', function() {
         for ( let idx =0; idx<data.length; idx++ )
             data[idx] = idx;    
         let err = await file.update( data, (curr, total) => {
-            console.log(`${curr}/${total}`);
+            assert( curr <= total );
         });
         assert( err.isOk );
         assert( file.Size == data.length );
