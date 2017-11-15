@@ -3,7 +3,10 @@ export enum LogLevel {
 }
 
 export class DroiLog {
-    static LOG_LEVEL = LogLevel.Debug;
+    private static LOG_LEVEL = LogLevel.Debug;
+    private static ISCOLOR = true;
+    private static COLORS_16_MAP = ["1;37", "1;34", "1;32", "33", "31"];
+
     private static LOG_LEVEL_STR = ["V", "D", "I", "W", "E"];
 
     static setLogLevel(level: LogLevel) {
@@ -12,6 +15,14 @@ export class DroiLog {
 
     static getLogLevel(): LogLevel {
         return DroiLog.LOG_LEVEL;
+    }
+
+    static enableColor() {
+        DroiLog.ISCOLOR = true;
+    }
+
+    static disableColor() {
+        DroiLog.ISCOLOR = false;
     }
 
     static v(tag: string, msg: string) {
@@ -38,6 +49,11 @@ export class DroiLog {
         if (DroiLog.LOG_LEVEL > level)
             return;
         let levelStr = DroiLog.LOG_LEVEL_STR[level];
-        console.log(`${new Date().toString()} ${levelStr}/${tag}: ${msg}`)
+        let outmsg = `${new Date().toString()} ${levelStr}/${tag}: ${msg}`;
+        if (DroiLog.ISCOLOR) {
+            let color = DroiLog.COLORS_16_MAP[level];
+            outmsg = `\x1b[${color}m${outmsg}\x1b[0;37m`;
+        }
+        console.log(outmsg);
     }
  }
