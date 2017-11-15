@@ -19,6 +19,7 @@
 			"name": "Run mocha(DroiFile)",
 			// Type of configuration. Possible values: "node", "mono".
             "type": "node",            
+            "console": "integratedTerminal",
             //
             "request": "launch",
 			// Workspace relative or absolute path to the program.

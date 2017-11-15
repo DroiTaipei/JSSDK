@@ -142,8 +142,7 @@ class DroiFile extends DroiObject {
             let uploadUrl = tokenResults["UploadUrl"];
             let sessionId = tokenResults["SessionId"];
             if ( tokenResults["Id"] !== undefined ) {
-                DroiLog.d( DroiFile.LOG_TAG, "Original Id is " + this.objectId() );
-                console.log("New Id: " + tokenResults["Id"] );
+                DroiLog.d(DroiFile.LOG_TAG, "Replace by new Id: " + tokenResults["Id"] );
                 this.setObjectId( tokenResults["Id"] );
             }
             
@@ -167,7 +166,7 @@ class DroiFile extends DroiObject {
             this.contentDirty = false;
             return Promise.resolve( new DroiError( DroiError.OK ) );
         } catch( e ) {
-            console.log(" There is an error." + e );
+            DroiLog.e( DroiFile.LOG_TAG, " There is an error." + e );
             return Promise.reject( e );
         }
 
