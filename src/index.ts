@@ -8,15 +8,6 @@ export * from "./droi-cloud"
 export { DroiHttpMethod } from "./droi-http"
 export * from "./droi-error"
 export * from "./droi-file"
+import * as DroiPolyFill from "./droi-polyfill"
 
-// trick for bypass typescript checking
-declare var require: any;
-declare var global: any;
-declare var localStorage: any;
-
-if (typeof localStorage === 'undefined') {
-    if (typeof global !== 'undefined') {
-        let storage = require('dom-storage');
-        global['localStorage'] = new storage('./data.json', {strict: true});
-    }
-}
+DroiPolyFill.setupPolyfill();
