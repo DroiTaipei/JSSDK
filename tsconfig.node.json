@@ -1,6 +1,5 @@
 {
     "compilerOptions": {
-        "mapRoot": "./map",
         "outDir": "./built",
         "allowJs": true,
         "target": "es5",
@@ -9,6 +8,9 @@
     },
     "include": [
         "./src/**/*"
+    ],
+    "exclude": [
+        "./src/test/**"
     ]
 }
 

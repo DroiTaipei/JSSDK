@@ -23,11 +23,16 @@
     "ts-md5": "^1.2.2"
   },
   "devDependencies": {
+    "browserify": "^14.5.0",
     "chai": "^4.1.2",
     "gulp": "^3.9.1",
     "gulp-typescript": "^3.2.3",
+    "gulp-uglify": "^3.0.0",
     "mocha": "^4.0.1",
     "ts-node": "^3.3.0",
-    "typescript": "^2.5.3"
+    "tsify": "^3.0.3",
+    "typescript": "^2.5.3",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
   }
 }

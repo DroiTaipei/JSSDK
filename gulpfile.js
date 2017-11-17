@@ -1,41 +1,42 @@
 var gulp = require("gulp");
 var ts = require("gulp-typescript");
-var fs = require('fs');
-var bump = require('gulp-bump');
-var semver = require('semver');
 
-
-var getPackageJson = function () {
-    return JSON.parse(fs.readFileSync('./package.json', 'utf8'));
-  };
-  
-// bump versions on package/bower/manifest
-gulp.task('bump', function () {
-    // reget package
-    var pkg = getPackageJson();
-    // increment version
-    var newVer = semver.inc(pkg.version, 'patch');
-   
-    // uses gulp-filter
-    gulp.src('./package.json')
-      .pipe(bump({
-        version: newVer
-      }))
-      .pipe(gulp.dest('./'));
-
-    return gulp.src('./src/droi-core.ts')
-      .pipe(bump({
-        version: newVer
-      }))
-      .pipe(gulp.dest('./src'));
-  });
-
-gulp.task("default", function () {
-    gulp.run('bump');
-    var tsResult = gulp.src("src/*.ts")
-        .pipe(ts({
-              noImplicitAny: true,
-              out: "output.js"
-        }));
-    return tsResult.js.pipe(gulp.dest("local"));
+gulp.task("node", function () {
+  var tsProject = ts.createProject("tsconfig.node.json");
+  return tsProject.src()  
+  .pipe(tsProject())
+  .js.pipe(gulp.dest("node_local"));
 });
+
+gulp.task("copy-html", function () {
+  var paths = {
+    pages: ['src/*.html']
+};
+
+return gulp.src(paths.pages)
+      .pipe(gulp.dest("wwwroot"));
+});
+
+var browserify = require("browserify");
+var source = require('vinyl-source-stream');
+var tsify = require("tsify");
+var uglify = require('gulp-uglify');
+var buffer = require('vinyl-buffer');
+
+gulp.task("www", ["copy-html"], function () {
+  return browserify({
+      basedir: '.',
+      debug: true,
+      entries: ['src/test/main.ts'],
+      cache: {},
+      packageCache: {}
+  })
+  .plugin(tsify, { p:"tsconfig.www.json" })
+  .bundle()
+  .pipe(source('bundle.js'))  // gives streaming vinyl file object
+  .pipe(buffer()) // <----- convert from streaming to buffered vinyl file object
+  .pipe(uglify()) // now gulp-uglify works 
+  .pipe(gulp.dest("wwwroot"));
+});
+
+

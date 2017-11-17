@@ -15,10 +15,12 @@
             ]            
         },
         {
-			// Name of configuration; appears in the launch configuration drop down menu.
+            // Name of configuration; appears in the launch configuration drop down menu.
+            "env": {
+                "TS_NODE_PROJECT":"tsconfig.node.json"
+            },
 			"name": "Run mocha(DroiFile)",
 			// Type of configuration. Possible values: "node", "mono".
-            "type": "node",            
             "console": "integratedTerminal",
             //
             "request": "launch",
@@ -27,8 +29,8 @@
             "preLaunchTask": "tsc: build - tsconfig.node.json",
 			// Automatically stop program after launch.
 			"stopOnEntry": false,
-			// Command line arguments passed to the program.
-			"args": ["--no-timeouts", "--colors", "-r", "ts-node/register", "${workspaceFolder}/test/file.test.ts"]
+            // Command line arguments passed to the program.
+            "args": ["--no-timeouts", "--colors", "-r", "ts-node/register", "${workspaceFolder}/test/file.test.ts"]
 		}
     ]
 }

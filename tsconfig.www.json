@@ -1,7 +1,6 @@
 {
     "compilerOptions": {
-        "mapRoot": "./map",
-        "outDir": "./www_built",
+        "outDir": "./wwwroot",
         "module": "commonjs",
         "allowJs": true,
         "target": "es5",
