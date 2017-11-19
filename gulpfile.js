@@ -10,7 +10,7 @@ gulp.task("node", function () {
 
 gulp.task("copy-html", function () {
   var paths = {
-    pages: ['src/*.html']
+    pages: ['test/*.html']
 };
 
 return gulp.src(paths.pages)
@@ -27,7 +27,7 @@ gulp.task("www", ["copy-html"], function () {
   return browserify({
       basedir: '.',
       debug: true,
-      entries: ['src/index.ts'],
+      entries: ['test/www.test.ts'],
       cache: {},
       packageCache: {}
   })
