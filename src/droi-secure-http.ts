@@ -438,19 +438,72 @@ export class DroiHttpSecure {
             let outEncoding = resp.headers[DroiConstant.HTTP_HEADER_CONTENT_ENCODING.toLowerCase()];
             let outData = resp.data;
 
+            if (droiStatus < 0) {
+                let needRetry = true;
+                switch (droiStatus) {
+                    // Zone code error, just invalidate zonecode
+                    case DroiConstant.X_DROI_STAT_ZONE_EXPIRED_INVALID:
+                    case DroiConstant.X_DROI_STAT_ZONECODE_EXPIRED:
+                    case DroiConstant.X_DROI_STAT_ZONECODE_MISSING:
+                        ipList.zoneCode = null;
+                        ipList.invalidate();
+                        break;
+                    // Just retry, do not validate again.
+                    case DroiConstant.X_DROI_STAT_ILLEGAL_CLIENT_KEY:
+                    case DroiConstant.X_DROI_STAT_BACKEND_NETWORK_ERROR:
+                    case DroiConstant.X_DROI_STAT_RSA_PUBKEY_ERROR:
+                        break;
+                    // Attack! just return or No retry and not clear key
+                    case DroiConstant.X_DROI_STAT_RB_TS_VERIFY_ERROR:
+                    case DroiConstant.X_DROI_STAT_RB_LZ4_DECOMPRESS_ERROR:
+                        needRetry = false;
+                        break;
+                    // Timestamp timeout.
+                    case DroiConstant.X_DROI_STAT_KEY_SERVER_ISSUE_REKEY:
+                    case DroiConstant.X_DROI_STAT_TS_TIMEOUT:
+                        TUTIL.setTimeStampValid(false);
+                        DroiPersistSettings.removeItem(DroiPersistSettings.KEY_KL_TIMESTAMPV2);
+                        break;
+                    case DroiConstant.X_DROI_STAT_RB_DECRYPT_ERROR:
+                    case DroiConstant.X_DROI_STAT_RB_GUNZIP_ERROR:
+                        if (rb_error)
+                            needRetry = false;
+                        else {
+                            DroiHttpSecure.invalidAndEraseKey();
+                            rb_error = true;
+                        }
+                        break;
+                    default:
+                        DroiHttpSecure.invalidAndEraseKey();
+                        break;
+                }
+
+                if (needRetry)
+                    continue;
+                else
+                    break;
+            }
+
             if (outEncoding == null) {
                 error.code = DroiError.ERROR;
                 error.appendMessage = "No response encoding.";
                 break;
             }
 
-            if (outData != null) {
-                encBuffer = TUTIL.string_to_bytes(outData);
-                let decBuffer = TUTIL.aesDecrypt(encBuffer);
-                if (outEncoding.indexOf("gzip") > 0) {
-                    decBuffer = TUTIL.decompress(decBuffer);
+            try {
+                if (outData != null) {
+                    encBuffer = TUTIL.string_to_bytes(outData);
+                    let decBuffer = TUTIL.aesDecrypt(encBuffer);
+                    if (outEncoding.indexOf("gzip") > 0) {
+                        decBuffer = TUTIL.decompress(decBuffer);
+                    }
+                    resp.data = TUTIL.bytes_to_string(decBuffer);
                 }
-                resp.data = TUTIL.bytes_to_string(decBuffer);
+            } catch ( error ) {
+                error.code = DroiError.ERROR;
+                error.appendMessage = error.toString();
+                DroiHttpSecure.invalidAndEraseKey();
+                continue;
             }
 
             response.status = status;
