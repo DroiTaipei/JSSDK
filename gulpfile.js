@@ -27,7 +27,7 @@ gulp.task("www", ["copy-html"], function () {
   return browserify({
       basedir: '.',
       debug: true,
-      entries: ['test/www.test.ts'],
+      entries: ['src/index.ts'],
       cache: {},
       packageCache: {}
   })
@@ -39,4 +39,19 @@ gulp.task("www", ["copy-html"], function () {
   .pipe(gulp.dest("wwwroot"));
 });
 
+gulp.task("www-test", ["copy-html"], function () {
+  return browserify({
+      basedir: '.',
+      debug: true,
+      entries: ['test/www.test.ts'],
+      cache: {},
+      packageCache: {}
+  })
+  .plugin(tsify, { p:"tsconfig.www.json" })
+  .bundle()
+  .pipe(source('bundle.js'))  // gives streaming vinyl file object
+  .pipe(buffer()) // <----- convert from streaming to buffered vinyl file object
+  .pipe(uglify()) // now gulp-uglify works 
+  .pipe(gulp.dest("wwwroot"));
+});
 
