@@ -8,7 +8,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "test": "mocha -r ts-node/register test/**/*.test.*"
+    "test": "TS_NODE_PROJECT=tsconfig.node.json mocha --no-timeouts -r ts-node/register test/node/*.test.*"
   },
   "dependencies": {
     "@types/node": "^8.0.51",

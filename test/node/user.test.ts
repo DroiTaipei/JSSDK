@@ -1,6 +1,6 @@
 import { describe, before, after, it, beforeEach, afterEach} from "mocha"
-import * as DroiBaaS from "../src"
-import { OtpType } from "../src/rest/user";
+import * as DroiBaaS from "../../src"
+import { OtpType } from "../../src/rest/user";
 
 const NORMAL_USER_NAME = "skyer";
 const NORMAL_USER_PASSWORD = "123456";
@@ -58,7 +58,7 @@ describe('Droi User API', function() {
         }
     });
 
-    describe.only('Auto', function() {
+    describe('Auto', function() {
         it('Anonymous login', async () => {
             endActions.push(clearAnonymousUser);
             await DroiBaaS.DroiUser.loginAnonymous();
@@ -80,14 +80,14 @@ describe('Droi User API', function() {
         });    
     });
 
-    describe('Manually', function() {
-        it('RequestOTP mail', async function() {
-            await DroiBaaS.DroiUser.requestOTP(NORMAL_USER_EMAIL, OtpType.EMAIL);
-        })
+    // describe('Manually', function() {
+    //     it('RequestOTP mail', async function() {
+    //         await DroiBaaS.DroiUser.requestOTP(NORMAL_USER_EMAIL, OtpType.EMAIL);
+    //     })
 
-        it('LoginOTP mail', async function() {
-            endActions.push(clearOtpUser);
-            let user = await DroiBaaS.DroiUser.loginOTP(NORMAL_USER_EMAIL, OtpType.EMAIL, "");
-        });
-    });
+    //     it('LoginOTP mail', async function() {
+    //         endActions.push(clearOtpUser);
+    //         let user = await DroiBaaS.DroiUser.loginOTP(NORMAL_USER_EMAIL, OtpType.EMAIL, "");
+    //     });
+    // });
 });

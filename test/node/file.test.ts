@@ -1,7 +1,7 @@
 import { assert } from 'chai'
 import { describe, it, beforeEach, afterEach, before, after } from 'mocha'
 // - 
-import * as DroiBaaS from '../src'
+import * as DroiBaaS from '../../src'
 
 describe('Droi File', function() {
     this.timeout(60000);

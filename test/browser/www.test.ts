@@ -1,4 +1,4 @@
-import * as DroiBaaS from "../src/index";
+import * as DroiBaaS from "../../src/index";
 
 function showHello(divName, name) {
     const elt = document.getElementById(divName);

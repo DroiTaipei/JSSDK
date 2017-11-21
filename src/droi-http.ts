@@ -44,10 +44,11 @@ export class DroiHttp {
             
         return req
             .then( (resp) => {
-                DroiLog.d(DroiHttp.LOG_TAG, ` Output: ${TUTIL.bytes_to_string(resp.body)}`);
+                let text = TUTIL.bytes_to_string(new Uint8Array(resp.body));
+                DroiLog.d(DroiHttp.LOG_TAG, ` Output: ${text}`);
                 let response = new DroiHttpResponse();
                 response.status = resp.status;
-                response.data = TUTIL.bytes_to_string(resp.body);
+                response.data = text;
                 response.headers = resp.header;
                 return response;
             })
