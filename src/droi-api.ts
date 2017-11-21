@@ -4,7 +4,7 @@
 
 import { DroiError } from "./droi-error"
 import { DroiHttpMethod, DroiHttp, DroiHttpRequest, DroiHttpResponse } from "./droi-http"
-import { DroiHttpSecureResponse } from "./droi-secure-http"
+import { DroiHttpSecureResponse, DroiHttpSecure } from "./droi-secure-http"
 import { DroiCallback } from "./droi-callback"
 import { DroiCore } from "./droi-core"
 import { DroiConstant } from "./droi-const"
@@ -16,7 +16,6 @@ export namespace RemoteServiceHelper {
     const FETCH_DEVICE_ID_URL = "https://api.droibaas.com/uregister";
     // const FETCH_DEVICE_ID_URL = "https://api.droibaas.com/uregister?format=hex";
     // const FETCH_DEVICE_ID_URL = "http://10.128.81.202/uregister?format=hex";
-
     export interface HeaderMap {
         [key: string]: string;
     }
@@ -119,8 +118,27 @@ export namespace RemoteServiceHelper {
         );
     }
 
-    export function callServerSecure(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder): Promise<JSON> {
-        return null;
+    export async function callServerSecure(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder): Promise<JSON> {
+        if (!headers)
+            headers = {};
+
+        let request = new DroiHttpRequest();
+        request.url = urlPath;
+        request.method = method;
+        request.data = input;
+        request.headers = headers;
+
+        await appendDefaultHeaders(request, tokenHolder);
+                
+        return DroiHttpSecure.sendRequest(request).then(
+            (response) => {
+                let error = translateDroiError(response, null);
+                if (!error.isOk)
+                    throw error;
+
+                return JSON.parse(response.data).Result;
+            },
+        );
     }
 
     export function fetchHttpsDeviceId(): Promise<DeviceIdFormat> {
@@ -140,7 +158,8 @@ export namespace RemoteServiceHelper {
 
     async function appendDefaultHeaders(request: DroiHttpRequest, tokenHolder: TokenHolder) {
         request.headers[DroiConstant.DROI_KEY_HTTP_APP_ID] = DroiCore.getAppId();
-        request.headers[DroiConstant.DROI_KEY_HTTP_API_KEY] = DroiCore.getApiKey();
+        if (!DroiHttpSecure.isEnable())
+            request.headers[DroiConstant.DROI_KEY_HTTP_API_KEY] = DroiCore.getApiKey();
         
         try {
             request.headers[DroiConstant.DROI_KEY_HTTP_DEVICE_ID] = await DroiCore.getDeviceId();
@@ -188,7 +207,6 @@ export namespace RemoteServiceHelper {
         }
 
         if (resp instanceof DroiHttpSecureResponse) {
-            errorCode = (resp as DroiHttpSecureResponse).errorCode;
             droiStatusCode = (resp as DroiHttpSecureResponse).droiStatusCode;
         }
 
@@ -208,7 +226,6 @@ export namespace RemoteServiceHelper {
                 retError.appendMessage = `status: ${status}`;
             }
         }
-        //TODO Handle error case
         else if (droiStatusCode != 0) {
             retError.code = DroiError.INTERNAL_SERVER_ERROR;
             retError.appendMessage = `server code: ${droiStatusCode}`;

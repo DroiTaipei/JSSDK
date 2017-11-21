@@ -1,6 +1,7 @@
 import { DroiHttpMethod } from "../droi-http";
 import { RemoteServiceHelper } from "../droi-api"
 import { DroiConstant } from "../droi-const";
+import { DroiHttpSecure } from "../droi-secure-http";
 
 export class RestCloudCode {
     private static readonly REST_HTTPS = "https://api.droibaas.com";
@@ -16,7 +17,7 @@ export class RestCloudCode {
     }
 
     callApi(apiKey: string, apiPath: string, method: DroiHttpMethod, params: string, token?: string): Promise<string> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
         let url = `${secureAvaiable?RestCloudCode.REST_HTTPS_SECURE:RestCloudCode.REST_HTTPS}${apiPath}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;

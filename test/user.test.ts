@@ -40,7 +40,10 @@ describe('Droi User API', function() {
     this.timeout(20000);
 
     before( () => {
+        // Production
         DroiBaaS.DroiCore.initializeCore("ke8umbzhvkW9Zb6HAjzyw7j8pUJbZSEUlQAAWGoK", "Sxfqun4fK7zT09jGNu4cklSNS7XL_lOSq4zsTAf1nnewPMp0yS6CAh1eBI0ksg_S");
+        // Alpha
+        // DroiBaaS.DroiCore.initializeCore("u47umbzhT74eZkJuuvaSi2fvlob8rpCKlQBAN38f", "Sxfqun4fK7zT09jGNu4cklSNS7XL_lOSq4zsTAf1nnewPMp0yS6CAh1eBI0ksg_S");
     });
 
     let endActions: Array<()=>Promise<boolean>> = [];
@@ -55,7 +58,7 @@ describe('Droi User API', function() {
         }
     });
 
-    describe('Auto', function() {
+    describe.only('Auto', function() {
         it('Anonymous login', async () => {
             endActions.push(clearAnonymousUser);
             await DroiBaaS.DroiUser.loginAnonymous();

@@ -2,6 +2,7 @@ import { DroiCallback } from "../droi-callback"
 import { RemoteServiceHelper } from "../droi-api"
 import { DroiHttpMethod } from "../droi-http"
 import { DroiError } from "../droi-error"
+import { DroiHttpSecure } from "../droi-secure-http";
 
 export interface RestCRUD {
     // Create
@@ -31,7 +32,7 @@ export class RestObject implements RestCRUD {
     }
 
     upsert(obj: string, objId:string, table: string): Promise<boolean> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
 
         let url = `${secureAvaiable?RestObject.REST_HTTPS_SECURE:RestObject.REST_HTTPS}${RestObject.REST_OBJECT_URL}/${table}/${objId}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
@@ -43,7 +44,7 @@ export class RestObject implements RestCRUD {
     }
 
     delete(objId:string, table: string): Promise<boolean> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
         let url = `${secureAvaiable?RestObject.REST_HTTPS_SECURE:RestObject.REST_HTTPS}${RestObject.REST_OBJECT_URL}/${table}/${objId}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
@@ -55,7 +56,7 @@ export class RestObject implements RestCRUD {
     }
 
     query(table: string, where?: string, offset?: number, limit?: number, order?: string): Promise<Array<JSON>> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
         let url = `${secureAvaiable?RestObject.REST_HTTPS_SECURE:RestObject.REST_HTTPS}${RestObject.REST_OBJECT_URL}/${table}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
@@ -78,7 +79,7 @@ export class RestObject implements RestCRUD {
     }
 
     updateData(table: string, data: string, where?: string, offset?: number, limit?: number, order?: string): Promise<boolean> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
         let url = `${secureAvaiable?RestObject.REST_HTTPS_SECURE:RestObject.REST_HTTPS}${RestObject.REST_OBJECT_URL}/${table}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
@@ -94,7 +95,7 @@ export class RestObject implements RestCRUD {
     }
 
     bulkUpsert(table: string, data: string): Promise<boolean> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
         let url = `${secureAvaiable?RestObject.REST_HTTPS_SECURE:RestObject.REST_HTTPS}${RestObject.REST_BULK_OBJECT_URL}/${table}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
@@ -106,7 +107,7 @@ export class RestObject implements RestCRUD {
     }
 
     bulkDelete(table: string, data: string): Promise<boolean> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
         let url = `${secureAvaiable?RestObject.REST_HTTPS_SECURE:RestObject.REST_HTTPS}${RestObject.REST_BULK_OBJECT_URL}/${table}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
@@ -121,7 +122,7 @@ export class RestObject implements RestCRUD {
     }
 
     atomicAdd(table: string, id: string, values: {[key: string]: any}): Promise<boolean> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
         let url = `${secureAvaiable?RestObject.REST_HTTPS_SECURE:RestObject.REST_HTTPS}${RestObject.REST_OBJECT_URL}/${table}/${id}${RestObject.REST_ATOMIC_ADD}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;

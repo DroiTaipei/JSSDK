@@ -28,6 +28,7 @@ export class DroiError {
     static readonly BANDWIDTH_LIMIT_EXCEED = 1070019;
     static readonly APPLICATION_ID_UNCORRECTED = 1070101;
     static readonly NATIVE_LIBRARY_NOT_LOADED = 1070103;
+    static readonly DROI_SECURE_NOT_SUPPORT = 1070104;
     static readonly TIME_UNCORRECTED = 1070201;
     static readonly TIMEOUT = 1070202;
     static readonly USER_ALREADY_LOGIN = 1070301;
@@ -77,6 +78,7 @@ export class DroiError {
         result[DroiError.UPLOAD_FAILED] = "Upload file failed.";
         result[DroiError.FIELD_NOT_FOUND] = "Field not found.";
         result[DroiError.NATIVE_LIBRARY_NOT_LOADED] = "Native plugin is not loaded.";
+        result[DroiError.DROI_SECURE_NOT_SUPPORT] = "The current runtime not support DroiSecure";
 
         return result;
     }

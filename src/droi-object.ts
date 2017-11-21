@@ -28,6 +28,8 @@ enum DirtyFlag {
  */
 class DroiObject {
 
+    static TIME_SHIFT: number = 0;
+
     /**
      * Create DroiObject instance by specific table name
      * @param tableName Table name of collection
@@ -110,7 +112,7 @@ class DroiObject {
                 dict[item] = value[item];
             }
             val = dict;
-        } else if ( typeof value === 'string' || typeof value === 'number' )
+        } else if ( typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean')
             val = value;
 
         // Return the value

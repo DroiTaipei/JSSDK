@@ -1,6 +1,10 @@
 import { DroiCallback } from "./droi-callback"
 import { DroiError } from "./droi-error"
 import * as Request from "superagent"
+import * as TUTILNS  from "../droi_secure/src";
+import { DroiLog } from "./droi-log";
+
+let TUTIL = TUTILNS.TUTIL();
 
 export enum DroiHttpMethod {
     GET = "GET", POST = "POST", PUT = "PUT", PATCH = "PATCH", DELETE = "DELETE"
@@ -10,7 +14,7 @@ export class DroiHttpRequest {
     url: string;
     method: DroiHttpMethod;
     headers?: {[key: string]: string};
-    data?: string;
+    data?: any;
 }
 
 export class DroiHttpResponse {
@@ -20,10 +24,13 @@ export class DroiHttpResponse {
 }
 
 export class DroiHttp {
+
+    private static readonly LOG_TAG = "DroiHttp";
+
     static sendRequest(request: DroiHttpRequest): Promise<DroiHttpResponse> {
 
         let req = Request(request.method, request.url)
-            .type("application/json")
+            .responseType("arraybuffer")
         
         if (request.headers != null)
             req.set(request.headers);
@@ -31,16 +38,16 @@ export class DroiHttp {
         if (request.data != null)
             req.send(request.data);
 
-        console.log(`    Url: ${request.method} ${request.url}`);
-        console.log(`Headers: ${JSON.stringify(request.headers)}`);
-        console.log(`  Input: ${request.data}`);    
+        DroiLog.d(DroiHttp.LOG_TAG, `    Url: ${request.method} ${request.url}`);
+        DroiLog.d(DroiHttp.LOG_TAG, `Headers: ${JSON.stringify(request.headers)}`);
+        DroiLog.d(DroiHttp.LOG_TAG, `  Input: ${request.data}`);    
             
         return req
             .then( (resp) => {
-                console.log(` Output: ${resp.text}`);
+                DroiLog.d(DroiHttp.LOG_TAG, ` Output: ${TUTIL.bytes_to_string(resp.body)}`);
                 let response = new DroiHttpResponse();
                 response.status = resp.status;
-                response.data = resp.text;
+                response.data = TUTIL.bytes_to_string(resp.body);
                 response.headers = resp.header;
                 return response;
             })

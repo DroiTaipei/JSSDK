@@ -13,7 +13,7 @@ export class DroiUser extends DroiObject {
     private static readonly KEY_AUTHDATA = "AuthData";
     private static readonly KEY_EMAIL = "Email";
     private static readonly KEY_PHONENUM = "PhoneNum";
-    private static readonly KEY_ENABLE = "Enable";
+    private static readonly KEY_ENABLE = "Enabled";
     private static readonly KEY_EMAIL_VERIFIED = "EmailVerified";
     private static readonly KEY_PHONE_VERIFIED = "PhoneNumVerified";
 
@@ -29,6 +29,9 @@ export class DroiUser extends DroiObject {
     protected constructor() {
         super("_User");
         this.session = null;
+        this.setValue(DroiUser.KEY_ENABLE, true);
+        this.setValue(DroiUser.KEY_EMAIL_VERIFIED, false);
+        this.setValue(DroiUser.KEY_PHONE_VERIFIED, false);
     }
 
     private static saveUserCache(user: DroiUser) {

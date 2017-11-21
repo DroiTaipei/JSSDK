@@ -5,6 +5,7 @@ import { DroiConstant } from "../droi-const"
 import { DroiUser } from "../droi-user"
 import { DroiError } from "../droi-error"
 import { RestObject, RestCRUD } from "./object"
+import { DroiHttpSecure } from "../droi-secure-http"
 
 export enum ResetPasswordType {
     EMAIL = "EMAIL", PHONE = "PHONE", ALL = "ALL"
@@ -15,7 +16,7 @@ export enum OtpType {
 }
 
 export class RestUser implements RestCRUD {
-    private static readonly REST_USER_URL = "/users/v2";
+    private static readonly REST_USER_URL = "users/v2";
     private static readonly REST_HTTPS = "https://api.droibaas.com/rest";
     private static readonly REST_HTTPS_SECURE = "/droi";
 
@@ -43,9 +44,9 @@ export class RestUser implements RestCRUD {
     }    
 
     upsert(obj: string, objId:string, table: string): Promise<boolean> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
-        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}/${objId}`;
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}/${RestUser.REST_USER_URL}/${objId}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
         return callServer(url, DroiHttpMethod.PUT, obj, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
@@ -55,9 +56,9 @@ export class RestUser implements RestCRUD {
     }
 
     query(table: string, where?: string, offset?: number, limit?: number, order?: string): Promise<Array<JSON>> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
-        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}`;
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}/${RestUser.REST_USER_URL}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
         let queryStrings = RestObject.generatorQueryString(where, offset, limit, order);
@@ -82,9 +83,9 @@ export class RestUser implements RestCRUD {
     }
 
     delete(objId:string, table: string): Promise<boolean> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
-        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}/${objId}`;
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}/${RestUser.REST_USER_URL}/${objId}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
         
         return callServer(url, DroiHttpMethod.DELETE, null, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
@@ -94,9 +95,9 @@ export class RestUser implements RestCRUD {
     }
     
     signupUser(data: JSON): Promise<JSON> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
-        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_SIGNUP}`;
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:(RestUser.REST_HTTPS+'/')}${RestUser.REST_USER_URL}${RestUser.REST_USER_SIGNUP}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
         let jdata = {Data: data, Type: RestUser.USER_TYPE_GENERAL, InstallationId: DroiCore.getInstallationId()};
 
@@ -104,9 +105,9 @@ export class RestUser implements RestCRUD {
     }
 
     loginUser(userId: string, password: string): Promise<JSON> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
-        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_LOGIN}`;
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:(RestUser.REST_HTTPS+'/')}${RestUser.REST_USER_URL}${RestUser.REST_USER_LOGIN}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
         let jdata = {Type: RestUser.USER_TYPE_GENERAL, InstallationId: DroiCore.getInstallationId(), UserId: userId, Password: password};
@@ -115,9 +116,9 @@ export class RestUser implements RestCRUD {
     }
 
     loginAnonymous(userData: DroiUser): Promise<JSON> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
-        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_LOGIN}`;
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:(RestUser.REST_HTTPS+'/')}${RestUser.REST_USER_URL}${RestUser.REST_USER_LOGIN}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
         let data = `{"Type": "anonymous", "InstallationId": "${DroiCore.getInstallationId()}"}`;
 
@@ -132,16 +133,16 @@ export class RestUser implements RestCRUD {
                 if (! (result instanceof DroiError))
                     return result;
 
-                url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_SIGNUP}`;
+                url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:(RestUser.REST_HTTPS+'/')}${RestUser.REST_USER_URL}${RestUser.REST_USER_SIGNUP}`;
                 let jdata = {Data: JSON.parse(userData.toJson()), Type: "anonymous", InstallationId: DroiCore.getInstallationId()};
                 return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, null);
             });
     }
 
     logout(objId: string): Promise<boolean> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
-        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_LOGOUT}`;
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:(RestUser.REST_HTTPS+'/')}${RestUser.REST_USER_URL}${RestUser.REST_USER_LOGOUT}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
         let data = JSON.stringify({_Id: objId});
@@ -152,9 +153,9 @@ export class RestUser implements RestCRUD {
     }
 
     requestOTP(userId: string, contact: string, type: OtpType): Promise<boolean> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
-        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_OTP_LOGIN}`;
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:(RestUser.REST_HTTPS+'/')}${RestUser.REST_USER_URL}${RestUser.REST_USER_OTP_LOGIN}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
         let jdata = {UserId: userId, Contact: contact, ContactType: type};
@@ -165,9 +166,9 @@ export class RestUser implements RestCRUD {
     }
 
     loginOTP(otp: string, type: OtpType, newUser: JSON): Promise<JSON> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
-        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_LOGIN}`;
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:(RestUser.REST_HTTPS+'/')}${RestUser.REST_USER_URL}${RestUser.REST_USER_LOGIN}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
         let jotp = {Code: otp, ContactType: type};
@@ -177,9 +178,9 @@ export class RestUser implements RestCRUD {
     }
 
     changePassword(oldPassword: string, newPassword: string): Promise<boolean> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
-        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_PASSWORD}`;
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:(RestUser.REST_HTTPS+'/')}${RestUser.REST_USER_URL}${RestUser.REST_USER_PASSWORD}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
         let jdata = {Old: oldPassword, New: newPassword};
@@ -190,9 +191,9 @@ export class RestUser implements RestCRUD {
     }
 
     resetPassword(userId: string, type: ResetPasswordType): Promise<boolean> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
-        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_RESET_PASSWORD}`;
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:(RestUser.REST_HTTPS+'/')}${RestUser.REST_USER_URL}${RestUser.REST_USER_RESET_PASSWORD}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
         let jdata = {UserId: userId, ContactType: type};
@@ -203,9 +204,9 @@ export class RestUser implements RestCRUD {
     }
 
     validateEmail(): Promise<boolean> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
-        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_EMAIL}`;
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:(RestUser.REST_HTTPS+'/')}${RestUser.REST_USER_URL}${RestUser.REST_USER_EMAIL}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
         return callServer(url, DroiHttpMethod.POST, null, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
@@ -215,9 +216,9 @@ export class RestUser implements RestCRUD {
     }
 
     validatePhoneNum(): Promise<boolean> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
-        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_SMS}`;
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:(RestUser.REST_HTTPS+'/')}${RestUser.REST_USER_URL}${RestUser.REST_USER_SMS}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
         return callServer(url, DroiHttpMethod.POST, null, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN)
@@ -227,9 +228,9 @@ export class RestUser implements RestCRUD {
     }
 
     confirmPhoneNumPin(pin: string): Promise<boolean> {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
-        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:RestUser.REST_HTTPS}${RestUser.REST_USER_URL}${RestUser.REST_USER_VALIDATE_SMS}`;
+        let url = `${secureAvaiable?RestUser.REST_HTTPS_SECURE:(RestUser.REST_HTTPS+'/')}${RestUser.REST_USER_URL}${RestUser.REST_USER_VALIDATE_SMS}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
         let jdata = {PinCode: pin};
 

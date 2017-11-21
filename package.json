@@ -13,6 +13,8 @@
   "dependencies": {
     "@types/node": "^8.0.51",
     "@types/superagent": "^3.5.6",
+    "atob": "^2.0.3",
+    "btoa": "^1.1.2",
     "cuint": "^0.2.2",
     "dom-storage": "^2.0.2",
     "express": "^4.16.2",

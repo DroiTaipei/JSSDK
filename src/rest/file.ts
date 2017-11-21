@@ -3,6 +3,7 @@ import { DroiError } from "../droi-error"
 import { DroiCore } from "../index";
 import { DroiHttpMethod, DroiHttp, DroiHttpRequest, DroiHttpResponse } from "../droi-http"
 import { DroiLog } from "../droi-log"
+import { DroiHttpSecure } from "../droi-secure-http"
 import * as Request from "superagent"
 
 class RestFile {
@@ -20,7 +21,7 @@ class RestFile {
 
 
     getUri( objectId: string ): Promise< Array<string> > {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
         let url = `${secureAvaiable?RestFile.REST_HTTP_SECURE:RestFile.REST_HTTPS}/${objectId}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
@@ -38,7 +39,7 @@ class RestFile {
     }
 
     delete( objectId: string ): Promise< DroiError > {
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
         let url = `${secureAvaiable?RestFile.REST_HTTP_SECURE:RestFile.REST_HTTPS}/${objectId}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
@@ -51,7 +52,7 @@ class RestFile {
     getUploadToken( objectId: string, name: string, mimeType: string, size: number, md5: string, newFile: boolean ): Promise< JSON > {
 
         DroiLog.d( RestFile.LOG_TAG, "getUploadToken");
-        let secureAvaiable = false;
+        let secureAvaiable = DroiHttpSecure.isEnable();
         
         let url = (secureAvaiable||!newFile) ? `${secureAvaiable?RestFile.REST_HTTP_SECURE:RestFile.REST_HTTPS}/${objectId}` : `${secureAvaiable?RestFile.REST_HTTP_SECURE:RestFile.REST_HTTPS}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;

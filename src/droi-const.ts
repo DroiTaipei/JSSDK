@@ -1,5 +1,40 @@
 
 class DroiConstant {
+    // Droi Secure
+    static readonly IP_LIST_URL = "http://175.25.22.149:18080/v2/ip_list"; // Production
+    // static readonly IP_LIST_URL = "http://10.128.81.202:18080/v2/ip_list"; // Alpha - Nevada
+    static readonly VALIDATE_RESOURCE = "/validate";
+    static readonly HTTP_HEADER_DROI_ID = "X-Droi-ID";
+	static readonly HTTP_HEADER_DROI_STATUS = "X-Droi-Status";
+	static readonly HTTP_HEADER_DROI_OTP = "X-Droi-Otp";
+	static readonly HTTP_HEADER_DROI_TS = "X-Droi-TS";
+    static readonly HTTP_HEADER_DROI_ZC = "X-Droi-ZC";
+    static readonly HTTP_HEADER_CONTENT_ENCODING = "Content-Encoding";
+    static readonly HTTP_HEADER_REQUEST_ID = "Drid";    
+    static readonly TIME_DIFF_THRESHOLD = 20 * 60 * 1000;
+    static readonly COMMUNICATION_PROTOCOL_VERSION = 2;
+	static readonly DROI_STATUS_CORRECT = 1;
+    static readonly DROI_STATUS_FAILED = 2;
+    static readonly X_DROI_STAT_OK = 0;
+	static readonly X_DROI_STAT_KEY_SERVER_NETWORK_ERROR = -1;
+	static readonly X_DROI_STAT_ID_SERVER_NETWORK_ERROR = -2;
+	static readonly X_DROI_STAT_ILLEGAL_CLIENT_KEY = -3; //*special case: show alert, client is banned
+	static readonly X_DROI_STAT_VALIDATE_AGAIN = -4;  // mallformed key info
+	static readonly X_DROI_STAT_TS_TIMEOUT = -5;
+	static readonly X_DROI_STAT_RB_DECRYPT_ERROR = -6;
+	static readonly X_DROI_STAT_RB_GUNZIP_ERROR = -7;
+	static readonly X_DROI_STAT_RB_TS_VERIFY_ERROR = -8;
+	static readonly X_DROI_STAT_GENKEY_VALIDATE_COR_ERROR = -9;
+	static readonly X_DROI_STAT_GENKEY_VALIDATE_FAI_ERROR = -10;
+	static readonly X_DROI_STAT_BACKEND_NETWORK_ERROR = -11;
+	static readonly X_DROI_STAT_KEY_SERVER_ISSUE_REKEY = -12;
+	static readonly X_DROI_STAT_SERVER_INTERNAL_ERROR = -13;
+	static readonly X_DROI_STAT_RSA_PUBKEY_ERROR = -14; //*special case: MUST update SDK
+	static readonly X_DROI_STAT_RB_LZ4_DECOMPRESS_ERROR = -15;
+    static readonly X_DROI_STAT_ZONECODE_MISSING = -21;
+    static readonly X_DROI_STAT_ZONECODE_EXPIRED = -22;
+    static readonly X_DROI_STAT_ZONE_EXPIRED_INVALID = -23;
+
     static readonly DROI_KEY_JSON_CLASSNAME = "_ClassName";
     static readonly DROI_KEY_JSON_TABLE_NAME = "_TableName";
     static readonly DROI_KEY_JSON_OBJECTID = "_Id";
