@@ -3,6 +3,8 @@ import { DroiError } from "./droi-error"
 import * as Request from "superagent"
 import * as TUTILNS  from "../droi_secure/src";
 import { DroiLog } from "./droi-log";
+// import * as btoa from "btoa"
+// import * as atob from "atob"
 
 let TUTIL = TUTILNS.TUTIL();
 
@@ -29,8 +31,23 @@ export class DroiHttp {
 
     static sendRequest(request: DroiHttpRequest): Promise<DroiHttpResponse> {
 
-        let req = Request(request.method, request.url)
-            .responseType("arraybuffer")
+       let req = Request(request.method, request.url)
+        // let req = Request('POST', 'http://localhost:5432')
+            .responseType("arraybuffer");
+
+        // req.set('X-Path', request.url);
+        // req.set('X-Method', request.method);
+
+        // let body = {}
+        // if (request.data != null) {
+        //     body["Body"] = btoa(request.data);
+        // }
+
+        // if (request.headers != null) {
+        //     body["Header"] = request.headers;
+        // }
+
+        // req.send(body);
         
         if (request.headers != null)
             req.set(request.headers);

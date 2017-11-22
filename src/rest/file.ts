@@ -72,11 +72,7 @@ class RestFile {
     upload( uploadUrl: string, fileToken: string, sessionId: string, objectId: string, name: string, mimeType: string, data:Uint8Array, progressCB: (currentSize: number, totalSize: number) => void ): Promise<DroiHttpResponse> {
         let buffer: any = null;
 
-        //TODO: Test Blob in browser
-        if (typeof Buffer !== "undefined")
-            buffer = new Buffer(data);
-        else
-            buffer = new Blob([data]);
+        buffer = new Buffer(data);
 
         let req = Request
             .post(uploadUrl)
