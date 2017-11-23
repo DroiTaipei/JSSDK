@@ -1,24 +1,16 @@
 import { DroiError } from "./droi-error";
+import { RestCloudCache } from "./rest/cloudcache";
 
 export class DroiCloudCache {
-    private static INSTANCE: DroiCloudCache = null;
-    
-    static instance(): DroiCloudCache {
-        if (DroiCloudCache.INSTANCE == null)
-            DroiCloudCache.INSTANCE = new DroiCloudCache();
-
-        return DroiCloudCache.INSTANCE;
+    static getValue(key: string): Promise<string> {
+        return RestCloudCache.instance().get(key);
     }
 
-    getValue(key: string): Promise<string> {
-        return null;
+    static setValue(key: string, value: string, ttl?: number): Promise<DroiError> {
+        return RestCloudCache.instance().set(key, value, ttl);
     }
 
-    setValue(key: string, value: string): Promise<DroiError> {
-        return null;
-    }
-
-    removeValue(key: string): Promise<DroiError> {
-        return null;
+    static removeValue(key: string): Promise<DroiError> {
+        return RestCloudCache.instance().remove(key);
     }
 }

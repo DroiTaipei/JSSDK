@@ -276,6 +276,29 @@ export class DroiHttpSecure {
         return DroiHttpSecure.DROI_SECURE_ENABLE;
     }
 
+    static getUId(): Promise<Array<string>> {
+        if (!DroiHttpSecure.isEnable())
+            return Promise.reject(new DroiError(DroiError.DROI_SECURE_NOT_SUPPORT));
+        
+        let keyInvalid = DroiHttpSecure.isKeyInvalid();
+        if (!keyInvalid) {
+            return Promise.resolve([TUTIL.getKlKeyUID_u().toString(), TUTIL.getKlKeyUID_l().toString()]);
+        } else {
+            return DroiHttpSecure.pickIpList(DroiCore.getAppId())
+                .then( (ipList) => {
+                    let ipElement = ipList.getCurrent();
+                    TUTIL.setFakeKlKeyUID_u_UID_l(TUTIL.getKlKeyUID_u().toString(), TUTIL.getKlKeyUID_l().toString());
+                    return DroiHttpSecure.refreshKey(ipElement, true).then( (result) => {
+                        if (result.error.isOk) {
+                            return [TUTIL.getKlKeyUID_u().toString(), TUTIL.getKlKeyUID_l().toString()];
+                        } else {
+                            throw Promise.reject(result.error);
+                        }
+                    })
+                })
+        }
+    }
+
     static async sendRequest(request: DroiHttpRequest): Promise<DroiHttpSecureResponse> {
         // Reject if not support droi secure
         if (!DroiHttpSecure.isEnable()) {
@@ -361,9 +384,11 @@ export class DroiHttpSecure {
             }
 
             if (keyInvalid || !timeValid) {
-                if (keyInvalid)
-                    TUTIL.setFakeKlKeyUID_u_UID_l(TUTIL.getKlKeyUID_u().toString(), TUTIL.getKlKeyUID_l().toString());
-                else if (!timeValid)
+                if (keyInvalid) {
+                    let uidu = DroiPersistSettings.getItem(DroiPersistSettings.KEY_DEVICE_ID_HIGH) || TUTIL.getKlKeyUID_u().toString();
+                    let uidl = DroiPersistSettings.getItem(DroiPersistSettings.KEY_DEVICE_ID_LOW) || TUTIL.getKlKeyUID_l().toString(); 
+                    TUTIL.setFakeKlKeyUID_u_UID_l(uidu, uidl);
+                } else if (!timeValid)
                     DroiHttpSecure.invalidAndEraseKey();
 
                 let refreshResult = await DroiHttpSecure.refreshKey(ipElement, true);

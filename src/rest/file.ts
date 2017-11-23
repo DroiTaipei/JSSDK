@@ -60,6 +60,8 @@ class RestFile {
 
         let input = JSON.stringify({ "Name":name, "Type":mimeType, "Size":size, "MD5":md5 });
         return callServer(url, method, input, null, RemoteServiceHelper.TokenHolder.AUTO_TOKEN).then( (res) => {
+                res = res as JSON;
+                
                 let fileToken = res["Token"];
                 let uploadUrl = res["UploadUrl"];
                 let sessionId = res["SessionId"];

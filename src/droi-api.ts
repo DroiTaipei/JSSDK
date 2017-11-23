@@ -95,7 +95,7 @@ export namespace RemoteServiceHelper {
         }
     }
 
-    export async function callServer(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder): Promise<JSON> {
+    export async function callServer(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder): Promise<JSON|string> {
         if (!headers)
             headers = {};
 
@@ -118,7 +118,7 @@ export namespace RemoteServiceHelper {
         );
     }
 
-    export async function callServerSecure(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder): Promise<JSON> {
+    export async function callServerSecure(urlPath: string, method: DroiHttpMethod, input: string, headers:HeaderMap, tokenHolder: TokenHolder): Promise<JSON|string> {
         if (!headers)
             headers = {};
 
@@ -142,18 +142,24 @@ export namespace RemoteServiceHelper {
     }
 
     export function fetchHttpsDeviceId(): Promise<DeviceIdFormat> {
-        let request = new DroiHttpRequest();
-        request.url = FETCH_DEVICE_ID_URL;
-        request.method = DroiHttpMethod.GET;
+        if (!DroiHttpSecure.isEnable()) {
+            let request = new DroiHttpRequest();
+            request.url = FETCH_DEVICE_ID_URL;
+            request.method = DroiHttpMethod.GET;
 
-        return DroiHttp.sendRequest(request)
-            .then( (response) => {
-                // let regex = /.*\[\"([0-9A-Z]+)\",\s*(\d+)/g;
-                let regex = /.*\[(\d+),\s*(\d+),\s*(\d+)/g;
-                let match = regex.exec(response.data);
-                // return DeviceIdFormat.parseId(match[1]);
-                return DeviceIdFormat.parse(match[1], match[2]);
+            return DroiHttp.sendRequest(request)
+                .then( (response) => {
+                    // let regex = /.*\[\"([0-9A-Z]+)\",\s*(\d+)/g;
+                    let regex = /.*\[(\d+),\s*(\d+),\s*(\d+)/g;
+                    let match = regex.exec(response.data);
+                    // return DeviceIdFormat.parseId(match[1]);
+                    return DeviceIdFormat.parse(match[1], match[2]);
+                });
+        } else {
+            return DroiHttpSecure.getUId().then( (uids) => {
+                return DeviceIdFormat.parse(uids[0], uids[1]);
             });
+        }
     }
 
     async function appendDefaultHeaders(request: DroiHttpRequest, tokenHolder: TokenHolder) {

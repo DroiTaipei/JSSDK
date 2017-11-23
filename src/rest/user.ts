@@ -101,7 +101,9 @@ export class RestUser implements RestCRUD {
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
         let jdata = {Data: data, Type: RestUser.USER_TYPE_GENERAL, InstallationId: DroiCore.getInstallationId()};
 
-        return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, null);
+        return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, null).then( (res) => {
+            return res as JSON;
+        });
     }
 
     loginUser(userId: string, password: string): Promise<JSON> {
@@ -112,7 +114,9 @@ export class RestUser implements RestCRUD {
 
         let jdata = {Type: RestUser.USER_TYPE_GENERAL, InstallationId: DroiCore.getInstallationId(), UserId: userId, Password: password};
 
-        return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, null);
+        return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, null).then( (res) => {
+            return res as JSON;
+        });
     }
 
     loginAnonymous(userData: DroiUser): Promise<JSON> {
@@ -174,7 +178,9 @@ export class RestUser implements RestCRUD {
         let jotp = {Code: otp, ContactType: type};
         let jdata = {OTP: jotp, Data: newUser, Type: "otp", InstallationId: DroiCore.getInstallationId()};
 
-        return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, null);
+        return callServer(url, DroiHttpMethod.POST, JSON.stringify(jdata), null, null).then( (res) => {
+            return res as JSON;
+        });
     }
 
     changePassword(oldPassword: string, newPassword: string): Promise<boolean> {

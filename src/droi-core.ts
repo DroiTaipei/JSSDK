@@ -34,45 +34,20 @@ class DroiCore {
     /**
      * Get device id
      */
-    static getDeviceId(callback?: DroiCallback<string>) : Promise<string> {
+    static getDeviceId() : Promise<string> {
         let did = DroiPersistSettings.getItem(DroiPersistSettings.KEY_DEVICE_ID);
         // Already fetched device id.
         if (did) {
-            if (callback)
-                callback(did, new DroiError(DroiError.OK));
-            else {
-                return Promise.resolve(did);
-            }
+            return Promise.resolve(did);
         }
 
-        //TODO check Droi Secure
-        let isDroiSecureEnabled = false;
-
-        if (!isDroiSecureEnabled) {
-            let promise = RemoteServiceHelper.fetchHttpsDeviceId()
-                .then( (didFormat) => {
-                    DroiPersistSettings.setItem(DroiPersistSettings.KEY_DEVICE_ID, didFormat.string);
-                    DroiPersistSettings.setItem(DroiPersistSettings.KEY_DEVICE_ID_HIGH, didFormat.uidh);
-                    DroiPersistSettings.setItem(DroiPersistSettings.KEY_DEVICE_ID_LOW, didFormat.uidl);
-                    if (callback) {
-                        callback(didFormat.string, new DroiError(DroiError.OK));
-                    }
-                    return didFormat.string;
-                })
-                .catch ( (error) => {
-                    if (callback) {
-                        callback(null, error);
-                    }
-                    return Promise.reject(error);
-                });
-
-            if (callback) {
-                return null;
-            } else {
-                return promise;
-            }
-        }
-
+        return RemoteServiceHelper.fetchHttpsDeviceId()
+            .then( (didFormat) => {
+                DroiPersistSettings.setItem(DroiPersistSettings.KEY_DEVICE_ID, didFormat.string);
+                DroiPersistSettings.setItem(DroiPersistSettings.KEY_DEVICE_ID_HIGH, didFormat.uidh);
+                DroiPersistSettings.setItem(DroiPersistSettings.KEY_DEVICE_ID_LOW, didFormat.uidl);
+                return didFormat.string;
+            })
     }
 
     /**
