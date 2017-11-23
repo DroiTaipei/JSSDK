@@ -63,7 +63,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.send_header('Content-Length', str(len(outdata)))
         self.send_header('Content-Type', 'application/octet-stream')
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header('Access-Control-Expose-Headers', acceptHeader[:-1]+',Content-Length,Content-Type,Connection') 
+        self.send_header('Access-Control-Expose-Headers', 'Drid,X-Droi-Status,X-Droi-Otp,X-Droi-TS,X-Droi-PTS,Content-Encoding') 
         self.end_headers()
         self.wfile.write(outdata)
         conn.close()
