@@ -10,7 +10,7 @@ gulp.task("node", function () {
 
 gulp.task("copy-html", function () {
   var paths = {
-    pages: ['test/browser/*.html']
+    pages: ['test/browser/*.html', 'test/browser/*.js', 'node_modules/mocha/mocha.*']
 };
 
 return gulp.src(paths.pages)
@@ -27,29 +27,13 @@ gulp.task("www", ["copy-html"], function () {
   return browserify({
       basedir: '.',
       debug: true,
-      entries: ['src/index.ts'],
+      entries: ['./index.browser.ts'],
       cache: {},
       packageCache: {}
   })
   .plugin(tsify, { p:"tsconfig.www.json" })
   .bundle()
-  .pipe(source('bundle.js'))  // gives streaming vinyl file object
-  .pipe(buffer()) // <----- convert from streaming to buffered vinyl file object
-  .pipe(uglify()) // now gulp-uglify works 
-  .pipe(gulp.dest("wwwroot"));
-});
-
-gulp.task("www-test", ["copy-html"], function () {
-  return browserify({
-      basedir: '.',
-      debug: true,
-      entries: ['test/browser/www.test.ts'],
-      cache: {},
-      packageCache: {}
-  })
-  .plugin(tsify, { p:"tsconfig.www.json" })
-  .bundle()
-  .pipe(source('bundle.js'))  // gives streaming vinyl file object
+  .pipe(source('droi-baas.js'))  // gives streaming vinyl file object
   .pipe(buffer()) // <----- convert from streaming to buffered vinyl file object
   .pipe(uglify()) // now gulp-uglify works 
   .pipe(gulp.dest("wwwroot"));

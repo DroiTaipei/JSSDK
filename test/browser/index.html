@@ -3,9 +3,18 @@
     <head>
         <meta charset="UTF-8" />
         <title>Hello World!</title>
+        <link href="./mocha.css" rel="stylesheet"/>
     </head>
     <body>
-        <p id="greeting">Loading ...</p>
-        <script src="./bundle.js"></script>
+        <div id="mocha"></div>
+        <script src="./droi-baas.js"></script>
+        <script src="./mocha.js"></script>
+        <script>mocha.setup('bdd')</script>
+
+        <script src="./object.test.js"></script>
+
+        <script>
+            mocha.run();
+        </script>
     </body>
 </html>
