@@ -424,7 +424,7 @@ export class DroiHttpSecure {
             req.headers["Content-Type"] = "application/octet-stream";
             req.headers[DroiConstant.HTTP_HEADER_DROI_ID] = DroiHttpSecure.setDroiHttpRequestHeader(kid, ktype, kver, DroiConstant.COMMUNICATION_PROTOCOL_VERSION, rsaver, dataLen, uidu, uidl);
             req.headers[DroiConstant.HTTP_HEADER_CONTENT_ENCODING] = encoding;
-            req.headers["Accept-Encoding"] = "gzip";
+            // req.headers["Accept-Encoding"] = "gzip";
             if (ipList.zoneCode)
                 req.headers[DroiConstant.HTTP_HEADER_DROI_ZC] = ipList.zoneCode;
             let headerTs = TUTIL.getTimeStampHeader();
