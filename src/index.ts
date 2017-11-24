@@ -10,6 +10,7 @@ export * from "./droi-error"
 export * from "./droi-file"
 export * from "./droi-preference"
 export * from "./droi-cloudcache"
+export * from "./droi-group"
 import * as DroiPolyFill from "./droi-polyfill"
 
 DroiPolyFill.setupPolyfill();

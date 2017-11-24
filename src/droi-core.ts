@@ -5,6 +5,7 @@ import { RemoteServiceHelper } from "./droi-api"
 import { DroiUser } from "./droi-user";
 import { DroiFile } from "./droi-file";
 import { Guid, DroiObject } from "./droi-object"
+import { DroiGroup } from "./droi-group";
 
 const version = "1.0.14";
 
@@ -22,6 +23,7 @@ class DroiCore {
         DroiCore.apiKey = apikey;
         DroiObject.registerCreateFactory( "_User", ()=>DroiUser.createUser() );
         DroiObject.registerCreateFactory( "_File", ()=>DroiFile.createFile() );
+        DroiObject.registerCreateFactory( "_Group", ()=>DroiGroup.createGroup() );
     }
 
     /**

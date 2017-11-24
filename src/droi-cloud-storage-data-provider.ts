@@ -8,9 +8,19 @@ import { DroiConstant } from "./droi-const"
 import { RestObject, RestCRUD } from "./rest/object"
 import { RestUser } from "./rest/user"
 import { DroiCondition } from "./droi-condition"
+import { RestGroup } from "./rest/group";
 
 
 export class CloudStorageDataProvider implements DroiDataProvider {
+
+    private getRestHandler(tableName: string): RestCRUD {
+        if (tableName === RestUser.TABLE_NAME)
+            return RestUser.instance();
+        else if (tableName === RestGroup.TABLE_NAME)
+            return RestGroup.instance();
+        else
+            return RestObject.instance();
+    }
 
     async upsert( commands: Multimap<string, any> ): Promise<DroiError> {
 
@@ -37,7 +47,7 @@ export class CloudStorageDataProvider implements DroiDataProvider {
         }
 
         let tableName = commands.getElement(DroiConstant.DroiQuery_TABLE_NAME, 0);
-        let restHandler: RestCRUD = (tableName === RestUser.TABLE_NAME) ? RestUser.instance() : RestObject.instance();
+        let restHandler = this.getRestHandler(tableName);
 
         return restHandler.upsert(obj.toJson(), obj.objectId(), tableName).then( 
             (isOk) => {
@@ -56,7 +66,7 @@ export class CloudStorageDataProvider implements DroiDataProvider {
             tableName = list[0];
         }
 
-        let restHandler: RestCRUD = (tableName === RestUser.TABLE_NAME) ? RestUser.instance() : RestObject.instance();
+        let restHandler = this.getRestHandler(tableName);
 
         let where = this.generateWhere(commands);
         let order = this.generateOrder(commands);
@@ -86,7 +96,7 @@ export class CloudStorageDataProvider implements DroiDataProvider {
         let isAtomic = commands.containsKey(DroiConstant.DroiQuery_ATOMIC);
         let tableName = commands.getElement(DroiConstant.DroiQuery_TABLE_NAME, 0);
 
-        let restHandler: RestCRUD = (tableName === RestUser.TABLE_NAME) ? RestUser.instance() : RestObject.instance();
+        let restHandler = this.getRestHandler(tableName);
 
         if (isAtomic) {
             let obj = commands.getElement(DroiConstant.DroiQuery_ATOMIC, 0) as DroiObject;
@@ -143,7 +153,7 @@ export class CloudStorageDataProvider implements DroiDataProvider {
         }
 
         let tableName = commands.getElement(DroiConstant.DroiQuery_TABLE_NAME, 0);
-        let restHandler: RestCRUD = (tableName === RestUser.TABLE_NAME) ? RestUser.instance() : RestObject.instance();
+        let restHandler = this.getRestHandler(tableName);
 
         return restHandler.delete(obj.objectId(), tableName).then( 
             (isOk) => {
