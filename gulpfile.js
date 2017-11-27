@@ -39,6 +39,7 @@ var source = require('vinyl-source-stream');
 var tsify = require("tsify");
 var uglify = require('gulp-uglify');
 var buffer = require('vinyl-buffer');
+var sourcemaps = require('gulp-sourcemaps');
 
 gulp.task("www", function () {
   return browserify({
@@ -52,7 +53,9 @@ gulp.task("www", function () {
   .bundle()
   .pipe(source('droi-baas-min.js'))  // gives streaming vinyl file object
   .pipe(buffer()) // <----- convert from streaming to buffered vinyl file object
-  .pipe(uglify()) // now gulp-uglify works 
+  .pipe(sourcemaps.init({loadMaps: true}))
+  .pipe(uglify()) // now gulp-uglify works
+  .pipe(sourcemaps.write('.')) 
   .pipe(gulp.dest("release"));
 });
 

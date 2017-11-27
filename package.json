@@ -35,6 +35,7 @@
     "gulp-bump": "^2.8.0",
     "gulp-concat": "^2.6.1",
     "gulp-rename": "^1.2.2",
+    "gulp-sourcemaps": "^2.6.1",
     "gulp-typescript": "^3.2.3",
     "gulp-uglify": "^3.0.0",
     "mocha": "^4.0.1",
