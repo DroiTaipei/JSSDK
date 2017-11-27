@@ -1,5 +1,5 @@
-import { describe, before, after, it, beforeEach, afterEach} from "mocha"
-import * as DroiBaaS from "../../src"
+const { describe, before, after, it, beforeEach, afterEach} = require("mocha")
+const DroiBaaS = require("../src")
 
 describe('Droi settings', function() {
     before(function() {

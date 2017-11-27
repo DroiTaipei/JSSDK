@@ -116,7 +116,8 @@ export class CloudStorageDataProvider implements DroiDataProvider {
                 for (let list of listAdd) {
                     jcmd[list[0]] = {"__op": "Increment", "amount": list[1]};
                 }
-            } else if (listSet != null) {
+            }
+            if (listSet != null) {
                 for (let list of listSet) {
                     jcmd[list[0]] = list[1];
                 }

@@ -1,3 +1,6 @@
 [submodule "droi_secure"]
 	path = droi_secure
 	url = git@github.com:DroiTaipei/System_Protocol_JS.git
+[submodule "src/droi-secure"]
+	path = src/droi-secure
+	url = git@github.com:DroiTaipei/System_Protocol_JS.git

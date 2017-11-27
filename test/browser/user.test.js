@@ -1,13 +1,9 @@
-import { describe, before, after, it, beforeEach, afterEach} from "mocha"
-import * as DroiBaaS from "../../src"
-import { OtpType } from "../../src/rest/user";
-
 const NORMAL_USER_NAME = "skyer";
 const NORMAL_USER_PASSWORD = "123456";
 const NORMAL_USER_EMAIL = "skyer.tai@droi.com.tw";
 const NORMAL_USER_PHONE = "886937011180";
 
-async function clearAnonymousUser(): Promise<boolean> {
+async function clearAnonymousUser() {
     let user = DroiBaaS.DroiUser.getCurrentUser();
     if (user != null && user.isLoggedIn())
         await user.logout();
@@ -18,7 +14,7 @@ async function clearAnonymousUser(): Promise<boolean> {
     });
 }
 
-async function clearNormalUser(): Promise<boolean> {
+async function clearNormalUser() {
     let user = DroiBaaS.DroiUser.getCurrentUser();
     if (user != null && user.isLoggedIn())
         await user.logout();
@@ -29,7 +25,7 @@ async function clearNormalUser(): Promise<boolean> {
     });
 }
 
-async function clearOtpUser(): Promise<boolean> {
+async function clearOtpUser() {
     let user = DroiBaaS.DroiUser.getCurrentUser();
     return user.delete().then ( (_) => {
         return true;
@@ -46,7 +42,7 @@ describe('Droi User API', function() {
         // DroiBaaS.DroiCore.initializeCore("u47umbzhT74eZkJuuvaSi2fvlob8rpCKlQBAN38f", "Sxfqun4fK7zT09jGNu4cklSNS7XL_lOSq4zsTAf1nnewPMp0yS6CAh1eBI0ksg_S");
     });
 
-    let endActions: Array<()=>Promise<boolean>> = [];
+    let endActions = [];
 
     beforeEach( () => {
         endActions = [];

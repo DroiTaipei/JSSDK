@@ -1,7 +1,7 @@
 import { DroiCallback } from "./droi-callback"
 import { DroiError } from "./droi-error"
 import * as Request from "superagent"
-import * as TUTILNS  from "../droi_secure/src";
+import * as TUTILNS  from "./droi-secure/src";
 import { DroiLog } from "./droi-log";
 // import * as btoa from "btoa"
 // import * as atob from "atob"

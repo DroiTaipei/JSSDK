@@ -10,7 +10,9 @@
         "./src/**/*"
     ],
     "exclude": [
-        "./src/test/**"
+        "./src/test/**",
+        "./src/droi-secure/test/**",
+        "./src/droi-secure/webpack.config.js"
     ]
 }
 

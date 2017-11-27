@@ -1,7 +1,7 @@
 // DroiSecure http implemention
 
 import { DroiHttpResponse, DroiHttpMethod, DroiHttpRequest, DroiHttp } from "./droi-http"
-import * as TUTILNS from "../droi_secure/src"
+import * as TUTILNS from "./droi-secure/src"
 import { DroiError, DroiCore, DroiObject } from "./index"
 import { DroiPersistSettings } from "./droi-persist-settings"
 import { DroiLog } from "./droi-log";
@@ -260,6 +260,7 @@ class IpList {
 
 export class DroiHttpSecureResponse extends DroiHttpResponse {
     droiStatusCode: number;
+    requestId: string;
 }
 
 export class DroiHttpSecure {    
@@ -462,6 +463,8 @@ export class DroiHttpSecure {
             let drid = resp.headers[DroiConstant.HTTP_HEADER_REQUEST_ID.toLowerCase()] || "";
             let outEncoding = resp.headers[DroiConstant.HTTP_HEADER_CONTENT_ENCODING.toLowerCase()];
             let outData = resp.data;
+
+            response.requestId = drid;
 
             if (droiStatus < 0) {
                 let needRetry = true;

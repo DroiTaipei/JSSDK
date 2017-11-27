@@ -1,8 +1,6 @@
-import { describe, before, after, it, beforeEach, afterEach} from "mocha"
-import * as DroiBaaS from "../../src"
-import { DroiPermission } from "../../src";
-
 describe('Group', function() {
+    this.timeout(60000);
+
     before( async () => {
         DroiBaaS.DroiCore.initializeCore("rnitmbzhCkr4YpyljuoQpvufVr6_mpHwlQDOWywR", "ie9e4K9aVni7-Kh06qdJd5PgvMtNmswApFIMPoV1xpfWtTFHSqU0GMeIilBqEIlG");
     });
@@ -63,7 +61,7 @@ describe('Group', function() {
         g1.addUser(user.objectId());
         await g1.save();
 
-        let perm = new DroiPermission();
+        let perm = new DroiBaaS.DroiPermission();
         perm.setGroupReadPermission(g1.objectId(), true);
         perm.setGroupWritePermission(g1.objectId(), true);
 

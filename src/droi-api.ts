@@ -109,7 +109,7 @@ export namespace RemoteServiceHelper {
                 
         return DroiHttp.sendRequest(request).then<JSON>(
             (response): JSON => {
-                let error = translateDroiError(response, null);
+                let error = translateDroiError(response);
                 if (!error.isOk)
                     throw error;
 
@@ -132,7 +132,7 @@ export namespace RemoteServiceHelper {
                 
         return DroiHttpSecure.sendRequest(request).then(
             (response) => {
-                let error = translateDroiError(response, null);
+                let error = translateDroiError(response);
                 if (!error.isOk)
                     throw error;
 
@@ -182,8 +182,8 @@ export namespace RemoteServiceHelper {
         }    
     }
 
-    export function translateDroiError(resp: DroiHttpResponse, ticket: string): DroiError {
-        let retError = new DroiError(DroiError.OK, null, ticket);
+    export function translateDroiError(resp: DroiHttpResponse): DroiError {
+        let retError = new DroiError(DroiError.OK, null);
         let code = -1;
         let errorCode = 0;
         let droiStatusCode = 0;
@@ -214,6 +214,7 @@ export namespace RemoteServiceHelper {
 
         if (resp instanceof DroiHttpSecureResponse) {
             droiStatusCode = (resp as DroiHttpSecureResponse).droiStatusCode;
+            retError.ticket = (resp as DroiHttpSecureResponse).requestId;
         }
 
         if (code != -1) {

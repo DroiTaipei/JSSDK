@@ -1,8 +1,3 @@
-import { assert } from 'chai'
-import { describe, it, beforeEach, afterEach, before, after } from 'mocha'
-// - 
-import * as DroiBaaS from '../../src'
-
 describe('Droi File', function() {
     this.timeout(60000);
     
@@ -23,7 +18,6 @@ describe('Droi File', function() {
 
     after( async () => {
         let err = await file.delete();
-        assert( err.isOk );
 
         let user = DroiBaaS.DroiUser.getCurrentUser();
         if (user != null && user.isLoggedIn())
@@ -33,21 +27,24 @@ describe('Droi File', function() {
 
     it( 'Create File', async ()=> {
         let error = await file.save( (curr, total) => {
-            assert( curr <= total );
+            if (curr > total)
+                throw "overflow";
         });
-        assert( error.isOk );
-        assert( file.Size == data.length );
+        if (file.Size != data.length)
+            throw "size not match";
     });
 
     it( 'Get URL', async () => {
         let urls = await file.getUris( false );
-        assert( urls != null && urls.length > 0 );
+        if (urls == null || urls.length == 0)
+            throw "no urls";
         console.log('Get URL by Dmd. value is ' + urls[0]);
     });
 
     it( 'Get URLs', async () => {
         let urls = await file.getUris( true );
-        assert( urls != null && urls.length > 0 );
+        if (urls == null || urls.length == 0)
+            throw "no urls";
         console.log('Get URL from cloud. value is ' + urls[0]);
     });
 
@@ -56,9 +53,10 @@ describe('Droi File', function() {
         for ( let idx =0; idx<data.length; idx++ )
             data[idx] = idx;    
         let err = await file.update( data, (curr, total) => {
-            assert( curr <= total );
+            if (curr > total)
+                throw "overflow";
         });
-        assert( err.isOk );
-        assert( file.Size == data.length );
+        if (file.Size != data.length)
+            throw "size not match";
     });
 });

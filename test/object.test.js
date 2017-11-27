@@ -1,7 +1,7 @@
-import { assert } from 'chai'
-import { describe, it, beforeEach, afterEach, before, after } from 'mocha'
+const { assert } = require('chai');
+const { describe, it, beforeEach, afterEach, before, after } = require('mocha')
 // - 
-import * as DroiBaaS from '../../src'
+const DroiBaaS = require('../src')
 
 describe('Droi objects', function() {
     this.timeout(60000);
@@ -20,13 +20,13 @@ describe('Droi objects', function() {
     afterEach( async () => {
         let query = DroiBaaS.DroiQuery.create("js_base");
         let list = await query.runQuery();
-        for (let obj of list)
-            await obj.delete();
+        for (let key in list)
+            await list[key].delete();
 
         query = DroiBaaS.DroiQuery.create("js_test");
         list = await query.runQuery();
-        for (let obj of list)
-            await obj.delete();
+        for (let key in list)
+            await list[key].delete();
     });
 
     it('Upsert object', async () => {
@@ -87,30 +87,28 @@ describe('Droi objects', function() {
         if (list.length != 1)
             throw new DroiBaaS.DroiError(DroiBaaS.DroiError.ERROR, `obj ref query size != 1, size = ${list.length}`);
 
-        let obj = (list[0] as DroiBaaS.DroiObject).getValue("ref") as DroiBaaS.DroiObject;
+        let obj = list[0].getValue("ref");
         if ("value1" !== obj.getValue("field1"))
             throw new DroiBaaS.DroiError(DroiBaaS.DroiError.ERROR, `obj ref wrong value, value = ${obj.getValue("field1")}`);
     });
 
-    // For now, 'Partial update' not supported in RESTapi
-    //
-    // it ('Partial update', async () => {
-    //     for (let i=0; i<10; ++i) {
-    //         let obj = DroiBaaS.DroiObject.createObject("js_test");
-    //         obj.setValue("name", `skyer${i}`);
-    //         obj.setValue("data", i);
-    //         await obj.save();
-    //     }
+    it('Partial update', async () => {
+        for (let i=0; i<10; ++i) {
+            let obj = DroiBaaS.DroiObject.createObject("js_test");
+            obj.setValue("name", `skyer${i}`);
+            obj.setValue("data", i);
+            await obj.save();
+        }
 
-    //     let cond = DroiBaaS.DroiCondition.eq("data", 3).or(DroiBaaS.DroiCondition.eq("data", 5));
-    //     let query = DroiBaaS.DroiQuery.updateData("js_test").set("name", "skyer").where(cond);
-    //     await query.run();
+        let cond = DroiBaaS.DroiCondition.eq("data", 3).or(DroiBaaS.DroiCondition.eq("data", 5));
+        let query = DroiBaaS.DroiQuery.updateData("js_test").set("name", "skyer").where(cond);
+        await query.run();
 
-    //     query = DroiBaaS.DroiQuery.create("js_test").where(DroiBaaS.DroiCondition.eq("name", "skyer"));
-    //     let list = await query.runQuery();
-    //     if (list.length != 2)
-    //         throw new DroiBaaS.DroiError(DroiBaaS.DroiError.ERROR, `obj ref query size != 2, size = ${list.length}`);
-    // });
+        query = DroiBaaS.DroiQuery.create("js_test").where(DroiBaaS.DroiCondition.eq("name", "skyer"));
+        let list = await query.runQuery();
+        if (list.length != 2)
+            throw new DroiBaaS.DroiError(DroiBaaS.DroiError.ERROR, `obj ref query size != 2, size = ${list.length}`);
+    });
 
     it ('Atomic', async () => {
         let obj = DroiBaaS.DroiObject.createObject("js_test");

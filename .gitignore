@@ -1,5 +1,6 @@
 node_modules/
 wwwroot/
+release/
 .DS_Store
 package-lock.json
 built

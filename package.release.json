@@ -1,0 +1,26 @@
+{
+  "name": "JSSDK",
+  "version": "1.0.14",
+  "description": "DroiBaaS JavaScript SDK",
+  "main": "./src/index.js",
+  "repository": "git@github.com:DroiTaipei/JSSDK.git",
+  "author": "Droi developers",
+  "license": "MIT",
+  "scripts": {
+    "test": "mocha --no-timeouts tests/*.test.*",
+    "test-browser": "cp droi-baas-min.js tests/browser && node server.js"
+  },
+  "dependencies": {
+    "adler-32": "^1.1.0",
+    "cuint": "^0.2.2",
+    "dom-storage": "^2.0.2",
+    "sha256": "^0.2.0",
+    "superagent": "^3.8.1",
+    "ts-md5": "^1.2.2",
+    "zlibjs": "^0.3.1"
+  },
+  "devDependencies": {
+    "express": "^4.16.2",
+    "mocha": "^4.0.1"
+  }
+}

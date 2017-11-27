@@ -1,7 +1,3 @@
-import { describe, it, beforeEach, afterEach, before, after } from 'mocha'
-// - 
-import * as DroiBaaS from '../../src'
-
 describe('RestAPI', function() {
     this.timeout(60000);
 

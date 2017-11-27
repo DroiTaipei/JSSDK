@@ -3,7 +3,7 @@ export enum LogLevel {
 }
 
 export class DroiLog {
-    private static LOG_LEVEL = LogLevel.Debug;
+    private static LOG_LEVEL = LogLevel.Error;
     private static ISCOLOR = true;
     private static COLORS_16_MAP = ["1;37", "1;34", "1;32", "33", "31"];
 
