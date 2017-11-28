@@ -2,7 +2,9 @@
 
 import { DroiHttpResponse, DroiHttpMethod, DroiHttpRequest, DroiHttp } from "./droi-http"
 import * as TUTILNS from "./droi-secure/src"
-import { DroiError, DroiCore, DroiObject } from "./index"
+import { DroiError } from "./droi-error"
+import { DroiCore } from "./droi-core"
+import { DroiObject } from "./droi-object"
 import { DroiPersistSettings } from "./droi-persist-settings"
 import { DroiLog } from "./droi-log";
 import * as UINT from "cuint"
@@ -190,7 +192,7 @@ class IpList {
         for (let i=ipes.length-1; i>=0; --i) {
             let ipe = ipes[i];
             if (ipe === curr) {
-                delete ipes[i];
+                ipes.splice(i, 1);
                 found = true;
                 break;
             }
@@ -579,6 +581,10 @@ export class DroiHttpSecure {
             let droiStatus = -999;
             if (resp.headers[DroiConstant.HTTP_HEADER_DROI_STATUS.toLowerCase()])
                 droiStatus = Number(resp.headers[DroiConstant.HTTP_HEADER_DROI_STATUS.toLowerCase()]);
+            if (droiStatus == -999) {
+                return {error: new DroiError(DroiError.ERROR, "validate fail. No headers"), droiStatus: droiStatus};
+            }
+
             let drid = resp.headers[DroiConstant.HTTP_HEADER_REQUEST_ID.toLowerCase()];
 
             let error = new DroiError(DroiError.OK);
