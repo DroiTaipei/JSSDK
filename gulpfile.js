@@ -1,12 +1,10 @@
-var gulp = require("gulp");
-var ts = require("gulp-typescript");
-var rename = require("gulp-rename");
-
-gulp.task("copy-package", function() {
-  return gulp.src('package.release.json')
-    .pipe(rename('package.json'))
-    .pipe(gulp.dest('release'));
-});
+const gulp = require("gulp");
+const ts = require("gulp-typescript");
+const rename = require("gulp-rename");
+const fs = require('fs');
+const bump = require('gulp-bump');
+const semver = require('semver');
+const process = require('process');
 
 gulp.task("copy-tests", function() {
   return gulp.src('test/**')
@@ -16,6 +14,47 @@ gulp.task("copy-tests", function() {
 gulp.task("copy-www-server", function() {
   return gulp.src('server.js')
     .pipe(gulp.dest('release'))
+});
+
+const getPackageJson = function () {
+  return JSON.parse(fs.readFileSync('./package.json', 'utf8'));
+};
+
+gulp.task('bump', function () {
+  if (process.env.DISABLE_BUMP) {
+    console.log('- Disable version bumping.');
+    return;
+  }
+    
+  // reget package
+  var pkg = getPackageJson();
+  // increment version
+  var newVer = semver.inc(pkg.version, 'patch');
+
+  // uses gulp-filter
+  gulp.src('./package.json')
+    .pipe(bump({
+      version: newVer
+    }))
+    .pipe(gulp.dest('./'));
+
+  gulp.src('./package.release.json')
+    .pipe(bump({
+      version: newVer
+    }))
+    .pipe(gulp.dest('./'));
+
+  return gulp.src('./src/droi-core.ts')
+    .pipe(bump({
+      version: newVer
+    }))
+    .pipe(gulp.dest('./src'));
+});
+
+gulp.task("copy-package", ['bump'], function() {
+  return gulp.src('package.release.json')
+    .pipe(rename('package.json'))
+    .pipe(gulp.dest('release'));
 });
 
 gulp.task("node", ['copy-package', 'copy-tests', 'copy-www-server'], function () {
@@ -34,12 +73,12 @@ gulp.task("copy-html", function () {
       .pipe(gulp.dest("wwwroot"));
 });
 
-var browserify = require("browserify");
-var source = require('vinyl-source-stream');
-var tsify = require("tsify");
-var uglify = require('gulp-uglify');
-var buffer = require('vinyl-buffer');
-var sourcemaps = require('gulp-sourcemaps');
+const browserify = require("browserify");
+const source = require('vinyl-source-stream');
+const tsify = require("tsify");
+const uglify = require('gulp-uglify');
+const buffer = require('vinyl-buffer');
+const sourcemaps = require('gulp-sourcemaps');
 
 gulp.task("www", function () {
   return browserify({
