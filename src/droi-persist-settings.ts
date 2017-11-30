@@ -10,6 +10,7 @@ export class DroiPersistSettings {
     static readonly KEY_KLKEY = "kkl";
     static readonly KEY_KL_TIMESTAMPV2 = "klt2";
     static readonly KEY_PREFERENCE = "dcp";
+    static readonly KEY_APP_ID = "apid";
 
     static getItem(key: string): string {
         return localStorage.getItem(key);

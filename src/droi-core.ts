@@ -7,7 +7,7 @@ import { DroiFile } from "./droi-file";
 import { Guid, DroiObject } from "./droi-object"
 import { DroiGroup } from "./droi-group";
 
-const version = "1.0.27";
+const version = "1.0.31";
 
 /**
  * 
@@ -19,6 +19,15 @@ class DroiCore {
      * @param appid The application identifier
      */
     static initializeCore(appid:string, apikey: string) {
+        let cacheAppId = DroiPersistSettings.getItem(DroiPersistSettings.KEY_APP_ID);
+        if (appid !== cacheAppId) {
+            DroiPersistSettings.setItem(DroiPersistSettings.KEY_APP_ID, appid);
+            DroiPersistSettings.removeItem(DroiPersistSettings.KEY_IPLIST);
+            DroiPersistSettings.removeItem(DroiPersistSettings.KEY_KL_TIMESTAMPV2);
+            DroiPersistSettings.removeItem(DroiPersistSettings.KEY_KLKEY);
+            DroiPersistSettings.removeItem(DroiPersistSettings.KEY_PREFERENCE);
+            DroiPersistSettings.removeItem(DroiPersistSettings.KEY_SAVED_USER);
+        }
         DroiCore.appId = appid;
         DroiCore.apiKey = apikey;
         DroiObject.registerCreateFactory( "_User", ()=>DroiUser.createUser() );
