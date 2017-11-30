@@ -99,9 +99,9 @@ gulp.task("www", function () {
   .bundle()
   .pipe(source('droi-baas-min.js'))  // gives streaming vinyl file object
   .pipe(buffer()) // <----- convert from streaming to buffered vinyl file object
-  .pipe(sourcemaps.init({loadMaps: true}))
+  // .pipe(sourcemaps.init({loadMaps: true}))
   .pipe(uglify()) // now gulp-uglify works
-  .pipe(sourcemaps.write('.')) 
+  // .pipe(sourcemaps.write('.')) 
   .pipe(gulp.dest("release"));
 });
 
