@@ -1,5 +1,5 @@
 {
-  "name": "JSSDK",
+  "name": "droibaas-jssdk",
   "version": "1.0.37",
   "description": "DroiBaaS JavaScript SDK",
   "main": "./src/index.js",
