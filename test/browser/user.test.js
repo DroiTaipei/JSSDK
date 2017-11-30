@@ -33,7 +33,7 @@ async function clearOtpUser() {
 }
 
 describe('Droi User API', function() {
-    this.timeout(20000);
+    this.timeout(60000);
 
     before( () => {
         // Production

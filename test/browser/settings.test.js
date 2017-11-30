@@ -1,4 +1,5 @@
 describe('Droi settings', function() {
+    this.timeout(60000);
     before(function() {
         DroiBaaS.DroiCore.initializeCore("rnitmbzhCkr4YpyljuoQpvufVr6_mpHwlQDOWywR", "ie9e4K9aVni7-Kh06qdJd5PgvMtNmswApFIMPoV1xpfWtTFHSqU0GMeIilBqEIlG");
     });

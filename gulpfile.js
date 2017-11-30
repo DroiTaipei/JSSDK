@@ -57,18 +57,19 @@ gulp.task("copy-package", ['bump'], function() {
     .pipe(gulp.dest('release'));
 });
 
-gulp.task("node", ['copy-package', 'copy-tests', 'copy-www-server'], function () {
+gulp.task("node-build", ['copy-package', 'copy-tests', 'copy-www-server'], function() {
   var tsProject = ts.createProject("tsconfig.node.json");
   
   return tsProject.src()  
   .pipe(tsProject())
-  .js.pipe(gulp.dest("release/src"))
+  .js.pipe(gulp.dest("release/src"));
+})
+
+gulp.task("node", ['node-build'], function () {
   // Uglify asmcrypto
-  .pipe(
-    gulp.src("release/src/droi-secure/src/*.js")
+  return gulp.src("release/src/droi-secure/src/*.js")
     .pipe(uglify())
-    .pipe(gulp.dest("release/src/droi-secure/src"))
-  );
+    .pipe(gulp.dest("release/src/droi-secure/src"));
 });
 
 gulp.task("copy-html", function () {
