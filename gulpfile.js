@@ -59,9 +59,16 @@ gulp.task("copy-package", ['bump'], function() {
 
 gulp.task("node", ['copy-package', 'copy-tests', 'copy-www-server'], function () {
   var tsProject = ts.createProject("tsconfig.node.json");
+  
   return tsProject.src()  
   .pipe(tsProject())
-  .js.pipe(gulp.dest("release/src"));
+  .js.pipe(gulp.dest("release/src"))
+  // Uglify asmcrypto
+  .pipe(
+    gulp.src("release/src/droi-secure/src/*.js")
+    .pipe(uglify())
+    .pipe(gulp.dest("release/src/droi-secure/src"))
+  );
 });
 
 gulp.task("copy-html", function () {
