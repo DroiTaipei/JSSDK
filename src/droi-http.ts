@@ -31,9 +31,13 @@ export class DroiHttp {
 
     static sendRequest(request: DroiHttpRequest): Promise<DroiHttpResponse> {
 
-       let req = Request(request.method, request.url)
-        // let req = Request('POST', 'http://localhost:5432')
-            .responseType("arraybuffer");
+        let isBinary = (typeof request.data !== "string");
+        let req = Request(request.method, request.url);
+        // let req = Request('POST', 'http://localhost:5432');
+
+
+        if (isBinary)
+            req.responseType("arraybuffer");
 
         // req.set('X-Path', request.url);
         // req.set('X-Method', request.method);
@@ -61,7 +65,12 @@ export class DroiHttp {
             
         return req
             .then( (resp) => {
-                let text = TUTIL.bytes_to_string(new Uint8Array(resp.body));
+                let text;
+                if (isBinary)
+                    text = TUTIL.bytes_to_string(new Uint8Array(resp.body));
+                else
+                    text = resp.text;
+
                 DroiLog.d(DroiHttp.LOG_TAG, ` Output: ${text}`);
                 let response = new DroiHttpResponse();
                 response.status = resp.status;

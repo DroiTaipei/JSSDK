@@ -5,6 +5,15 @@ const fs = require('fs');
 const bump = require('gulp-bump');
 const semver = require('semver');
 const process = require('process');
+const browserify = require("browserify");
+const source = require('vinyl-source-stream');
+const tsify = require("tsify");
+const uglifyes = require('uglify-es');
+const composer = require('gulp-uglify/composer');
+const uglify = composer(uglifyes, console);
+const buffer = require('vinyl-buffer');
+const sourcemaps = require('gulp-sourcemaps');
+const runSequence = require('run-sequence')
 
 gulp.task("copy-tests", function() {
   return gulp.src('test/**')
@@ -65,13 +74,6 @@ gulp.task("node-build", ['copy-package', 'copy-tests', 'copy-www-server'], funct
   .js.pipe(gulp.dest("release/src"));
 })
 
-gulp.task("node", ['node-build'], function () {
-  // Uglify asmcrypto
-  return gulp.src("release/src/droi-secure/src/*.js")
-    .pipe(uglify())
-    .pipe(gulp.dest("release/src/droi-secure/src"));
-});
-
 gulp.task("copy-html", function () {
   var paths = {
     pages: ['test/browser/*.html', 'test/browser/*.js', 'node_modules/mocha/mocha.*']
@@ -81,17 +83,30 @@ gulp.task("copy-html", function () {
       .pipe(gulp.dest("wwwroot"));
 });
 
-const browserify = require("browserify");
-const source = require('vinyl-source-stream');
-const tsify = require("tsify");
-const uglify = require('gulp-uglify');
-const buffer = require('vinyl-buffer');
-const sourcemaps = require('gulp-sourcemaps');
+gulp.task("copy-weapp", function () {
+  return gulp.src(["platforms/weapp/src/*.ts", "platforms/weapp/src/*.js"])
+    .pipe(gulp.dest("src"));
+});
+
+gulp.task("patch-weapp", function () {
+  let data = fs.readFileSync("release/droi-baas-weapp-min.js").toString();
+  data = data.replace('h.XMLHttpRequest', 'XMLHttpRequest');
+  fs.writeFileSync("release/droi-baas-weapp-min.js", data);
+});
+
+// Main tasks
+
+gulp.task("node", ['node-build'], function () {
+  // Uglify asmcrypto
+  return gulp.src("release/src/droi-secure/src/*.js")
+    .pipe(uglify())
+    .pipe(gulp.dest("release/src/droi-secure/src"));
+});
 
 gulp.task("www", function () {
   return browserify({
       basedir: '.',
-      debug: true,
+//      debug: true,
       entries: ['./index.browser.ts'],
       cache: {},
       packageCache: {}
@@ -106,3 +121,25 @@ gulp.task("www", function () {
   .pipe(gulp.dest("release"));
 });
 
+gulp.task("www-weapp", function () {
+  return browserify({
+      basedir: '.',
+      // debug: true,
+      entries: ['./index.browser.ts'],
+      cache: {},
+      packageCache: {},
+      standalone: "DroiBaaS"
+  })
+  .plugin(tsify, { p:"tsconfig.www.json" })
+  .bundle()
+  .pipe(source('droi-baas-weapp-min.js'))  // gives streaming vinyl file object
+  .pipe(buffer()) // <----- convert from streaming to buffered vinyl file object
+  // .pipe(sourcemaps.init({loadMaps: true}))
+  .pipe(uglify()) // now gulp-uglify works
+  // .pipe(sourcemaps.write('.')) 
+  .pipe(gulp.dest("release"));
+});
+
+gulp.task("weapp", function () {
+  return runSequence('copy-weapp', 'www-weapp', 'patch-weapp');
+})

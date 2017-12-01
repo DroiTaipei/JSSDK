@@ -42,7 +42,7 @@ export class DroiUser extends DroiObject {
 
     private static loadUserCache(): DroiUser {
         let jstr = DroiPersistSettings.getItem(DroiPersistSettings.KEY_SAVED_USER);
-        if (jstr == null)
+        if (jstr == null || jstr.length == 0)
             return null;
 
         let jdata = JSON.parse(jstr);

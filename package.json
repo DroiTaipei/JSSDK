@@ -1,6 +1,6 @@
 {
   "name": "JSSDK",
-  "version": "1.0.38",
+  "version": "1.0.40",
   "description": "DroiBaaS JavaScript SDK",
   "main": "./src/index.js",
   "repository": "git@github.com:DroiTaipei/JSSDK.git",
@@ -16,19 +16,19 @@
   },
   "dependencies": {
     "adler-32": "^1.1.0",
+    "buffer": "^5.0.8",
     "cuint": "^0.2.2",
     "dom-storage": "^2.0.2",
     "sha256": "^0.2.0",
     "superagent": "^3.8.1",
     "ts-md5": "^1.2.2",
+    "weapp-polyfill": "^3.0.0",
     "zlibjs": "^0.3.1"
   },
   "devDependencies": {
     "@types/node": "^8.0.51",
     "@types/superagent": "^3.5.6",
-    "atob": "^2.0.3",
     "browserify": "^14.5.0",
-    "btoa": "^1.1.2",
     "chai": "^4.1.2",
     "express": "^4.16.2",
     "gulp": "^3.9.1",
@@ -39,11 +39,13 @@
     "gulp-typescript": "^3.2.3",
     "gulp-uglify": "^3.0.0",
     "mocha": "^4.0.1",
+    "run-sequence": "^2.2.0",
     "semver": "^5.4.1",
     "source-map-loader": "^0.2.2",
     "ts-node": "^3.3.0",
     "tsify": "^3.0.3",
     "typescript": "^2.5.3",
+    "uglify-es": "^3.2.0",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   }

@@ -1,3 +1,13 @@
-import * as DroiBaaS from "./src/index"
+import * as DroiBaaS from "./src"
 
-global["DroiBaaS"] = DroiBaaS;
+let globalInstance = this;
+if (typeof global !== 'undefined')
+    globalInstance = global;
+else if (typeof window !== 'undefined')
+    globalInstance = window;
+
+globalInstance["DroiBaaS"] = DroiBaaS;
+
+if (typeof module !== 'undefined') {
+    module.exports = DroiBaaS;
+}

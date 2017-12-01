@@ -1,12 +1,14 @@
+require('weapp-polyfill/auto-polyfill');
 
-// trick for bypass typescript checking
-declare var require: any;
-declare var global: any;
-declare var localStorage: any;
-    
-export function setupPolyfill() {
-    if (!(String.prototype as any).repeat) {
-        (String.prototype as any).repeat = function (count) {
+function setupPolyfill() {
+    let __global = this;
+    if (typeof global !== 'undefined')
+        __global = global;
+    else if (typeof window !== 'undefined')
+        __global = window;
+
+    if (!String.prototype.repeat) {
+        String.prototype.repeat = function (count) {
             if (this == null) {
                 throw new TypeError('can\'t convert ' + this + ' to object');
             }
@@ -39,8 +41,8 @@ export function setupPolyfill() {
         }
     }
 
-    if (!(String.prototype as any).padStart) {
-        (String.prototype as any).padStart = function padStart(targetLength, padString) {
+    if (!String.prototype.padStart) {
+        String.prototype.padStart = function padStart(targetLength, padString) {
             targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
             padString = String(padString || ' ');
             if (this.length > targetLength) {
@@ -54,12 +56,5 @@ export function setupPolyfill() {
                 return padString.slice(0, targetLength) + String(this);
             }
         };
-    }
-
-    if (typeof localStorage === 'undefined') {
-        if (typeof global !== 'undefined') {
-            let storage = require('dom-storage');
-            global['localStorage'] = new storage('./data.json', {strict: true});
-        }
     }
 }
