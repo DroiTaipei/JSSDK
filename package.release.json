@@ -1,8 +1,9 @@
 {
   "name": "droibaas-jssdk",
-  "version": "1.0.40",
+  "version": "1.0.42",
   "description": "DroiBaaS JavaScript SDK",
   "main": "./src/index.js",
+  "browser": "./droi-baas-min.js",
   "repository": "git@github.com:DroiBaaS/DroiBaaS-SDK-JS.git",
   "author": "Droi developers",
   "license": "MIT",

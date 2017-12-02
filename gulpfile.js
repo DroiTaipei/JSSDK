@@ -109,7 +109,8 @@ gulp.task("www", function () {
 //      debug: true,
       entries: ['./index.browser.ts'],
       cache: {},
-      packageCache: {}
+      packageCache: {},
+      standalone: "DroiBaaS"
   })
   .plugin(tsify, { p:"tsconfig.www.json" })
   .bundle()
