@@ -12,7 +12,7 @@
     "test-browser": "gulp www-test",
     "browser": "gulp www",
     "node": "gulp node",
-    "release": "gulp node && gulp www"
+    "release": "gulp node && gulp www && gulp weapp"
   },
   "dependencies": {
     "adler-32": "^1.1.0",
