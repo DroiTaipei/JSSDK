@@ -7,7 +7,7 @@ import { DroiFile } from "./droi-file";
 import { Guid, DroiObject } from "./droi-object"
 import { DroiGroup } from "./droi-group";
 
-const version = "1.0.42";
+const version = "1.0.43";
 
 /**
  * 
