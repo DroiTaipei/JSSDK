@@ -20,8 +20,17 @@ gulp.task("copy-tests", function() {
     .pipe(gulp.dest('release/tests'));
 });
 
-gulp.task("copy-www-server", function() {
+gulp.task("copy-www", function() {
   return gulp.src('server.js')
+    .pipe(gulp.dest('release'))
+});
+
+gulp.task("copy-package", ['bump'], function() {
+  gulp.src('package.release.json')
+    .pipe(rename('package.json'))
+    .pipe(gulp.dest('release'));
+
+  return gulp.src('README.md')
     .pipe(gulp.dest('release'))
 });
 
@@ -60,13 +69,7 @@ gulp.task('bump', function () {
     .pipe(gulp.dest('./src'));
 });
 
-gulp.task("copy-package", ['bump'], function() {
-  return gulp.src('package.release.json')
-    .pipe(rename('package.json'))
-    .pipe(gulp.dest('release'));
-});
-
-gulp.task("node-build", ['copy-package', 'copy-tests', 'copy-www-server'], function() {
+gulp.task("node-build", ['copy-package', 'copy-tests', 'copy-www'], function() {
   var tsProject = ts.createProject("tsconfig.node.json");
   
   return tsProject.src()  
@@ -103,42 +106,31 @@ gulp.task("node", ['node-build'], function () {
     .pipe(gulp.dest("release/src/droi-secure/src"));
 });
 
-gulp.task("www", function () {
+function packBrowserify(destName) {
   return browserify({
-      basedir: '.',
+    basedir: '.',
 //      debug: true,
-      entries: ['./index.browser.ts'],
-      cache: {},
-      packageCache: {},
-      standalone: "DroiBaaS"
+    entries: ['./index.browser.ts'],
+    cache: {},
+    packageCache: {},
+    standalone: "DroiBaaS"
   })
   .plugin(tsify, { p:"tsconfig.www.json" })
   .bundle()
-  .pipe(source('droi-baas-min.js'))  // gives streaming vinyl file object
+  .pipe(source(destName))  // gives streaming vinyl file object
   .pipe(buffer()) // <----- convert from streaming to buffered vinyl file object
   // .pipe(sourcemaps.init({loadMaps: true}))
   .pipe(uglify()) // now gulp-uglify works
   // .pipe(sourcemaps.write('.')) 
   .pipe(gulp.dest("release"));
+}
+
+gulp.task("www", function () {
+  return packBrowserify('droi-baas-min.js');
 });
 
 gulp.task("www-weapp", function () {
-  return browserify({
-      basedir: '.',
-      // debug: true,
-      entries: ['./index.browser.ts'],
-      cache: {},
-      packageCache: {},
-      standalone: "DroiBaaS"
-  })
-  .plugin(tsify, { p:"tsconfig.www.json" })
-  .bundle()
-  .pipe(source('droi-baas-weapp-min.js'))  // gives streaming vinyl file object
-  .pipe(buffer()) // <----- convert from streaming to buffered vinyl file object
-  // .pipe(sourcemaps.init({loadMaps: true}))
-  .pipe(uglify()) // now gulp-uglify works
-  // .pipe(sourcemaps.write('.')) 
-  .pipe(gulp.dest("release"));
+  return packBrowserify('droi-baas-weapp-min.js');
 });
 
 gulp.task("weapp", function () {
