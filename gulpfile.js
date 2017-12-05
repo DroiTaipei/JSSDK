@@ -35,7 +35,7 @@ function packBrowserify(destName) {
 }
 
 function copyPlatform(platform) {
-  return gulp.src([`platforms/${platform}/src/**.ts`, `platforms/${platform}/src/**.js`])
+  return gulp.src([`platforms/${platform}/src/**/*.ts`, `platforms/${platform}/src/**/*.js`])
     .pipe(gulp.dest('src'));
 }
 
