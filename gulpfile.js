@@ -15,6 +15,31 @@ const buffer = require('vinyl-buffer');
 const sourcemaps = require('gulp-sourcemaps');
 const runSequence = require('run-sequence')
 
+function packBrowserify(destName) {
+  return browserify({
+    basedir: '.',
+//      debug: true,
+    entries: ['./index.browser.ts'],
+    cache: {},
+    packageCache: {},
+    standalone: "DroiBaaS"
+  })
+  .plugin(tsify, { p:"tsconfig.www.json" })
+  .bundle()
+  .pipe(source(destName))  // gives streaming vinyl file object
+  .pipe(buffer()) // <----- convert from streaming to buffered vinyl file object
+  // .pipe(sourcemaps.init({loadMaps: true}))
+  .pipe(uglify()) // now gulp-uglify works
+  // .pipe(sourcemaps.write('.')) 
+  .pipe(gulp.dest("release"));
+}
+
+function copyPlatform(platform) {
+  return gulp.src([`platforms/${platform}/src/**.ts`, `platforms/${platform}/src/**.js`])
+    .pipe(gulp.dest('src'));
+}
+
+// Sub Tasks
 gulp.task("copy-tests", function() {
   return gulp.src('test/**')
     .pipe(gulp.dest('release/tests'));
@@ -34,10 +59,6 @@ gulp.task("copy-package", ['bump'], function() {
     .pipe(gulp.dest('release'))
 });
 
-const getPackageJson = function () {
-  return JSON.parse(fs.readFileSync('./package.json', 'utf8'));
-};
-
 gulp.task('bump', function () {
   if (process.env.DISABLE_BUMP) {
     console.log('- Disable version bumping.');
@@ -45,7 +66,7 @@ gulp.task('bump', function () {
   }
     
   // reget package
-  var pkg = getPackageJson();
+  var pkg = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
   // increment version
   var newVer = semver.inc(pkg.version, 'patch');
 
@@ -69,7 +90,7 @@ gulp.task('bump', function () {
     .pipe(gulp.dest('./src'));
 });
 
-gulp.task("node-build", ['copy-package', 'copy-tests', 'copy-www'], function() {
+gulp.task("node-build", ['copy-package', 'copy-tests', 'platform-general'], function() {
   var tsProject = ts.createProject("tsconfig.node.json");
   
   return tsProject.src()  
@@ -78,17 +99,16 @@ gulp.task("node-build", ['copy-package', 'copy-tests', 'copy-www'], function() {
 })
 
 gulp.task("copy-html", function () {
-  var paths = {
-    pages: ['test/browser/*.html', 'test/browser/*.js', 'node_modules/mocha/mocha.*']
-  };
-
-  return gulp.src(paths.pages)
+  return gulp.src(['test/browser/*.html', 'test/browser/*.js', 'node_modules/mocha/mocha.*'])
       .pipe(gulp.dest("wwwroot"));
 });
 
-gulp.task("copy-weapp", function () {
-  return gulp.src(["platforms/weapp/src/*.ts", "platforms/weapp/src/*.js"])
-    .pipe(gulp.dest("src"));
+gulp.task("platform-weapp", function () {
+  return copyPlatform('weapp');
+});
+
+gulp.task('platform-general', function() {
+  return copyPlatform('general');
 });
 
 gulp.task("patch-weapp", function () {
@@ -97,42 +117,26 @@ gulp.task("patch-weapp", function () {
   fs.writeFileSync("release/droi-baas-weapp-min.js", data);
 });
 
-// Main tasks
+gulp.task("www-weapp", function () {
+  return packBrowserify('droi-baas-weapp-min.js');
+});
 
+// Main tasks
 gulp.task("node", ['node-build'], function () {
-  // Uglify asmcrypto
   return gulp.src("release/src/droi-secure/src/*.js")
     .pipe(uglify())
     .pipe(gulp.dest("release/src/droi-secure/src"));
 });
 
-function packBrowserify(destName) {
-  return browserify({
-    basedir: '.',
-//      debug: true,
-    entries: ['./index.browser.ts'],
-    cache: {},
-    packageCache: {},
-    standalone: "DroiBaaS"
-  })
-  .plugin(tsify, { p:"tsconfig.www.json" })
-  .bundle()
-  .pipe(source(destName))  // gives streaming vinyl file object
-  .pipe(buffer()) // <----- convert from streaming to buffered vinyl file object
-  // .pipe(sourcemaps.init({loadMaps: true}))
-  .pipe(uglify()) // now gulp-uglify works
-  // .pipe(sourcemaps.write('.')) 
-  .pipe(gulp.dest("release"));
-}
-
-gulp.task("www", function () {
+gulp.task("www", ['copy-www', 'platform-general'], function () {
   return packBrowserify('droi-baas-min.js');
 });
 
-gulp.task("www-weapp", function () {
-  return packBrowserify('droi-baas-weapp-min.js');
-});
-
 gulp.task("weapp", function () {
-  return runSequence('copy-weapp', 'www-weapp', 'patch-weapp');
+  return runSequence('platform-weapp', 'www-weapp', 'patch-weapp');
+})
+
+// Release task
+gulp.task("release", function () {
+  return runSequence('node', 'www', 'weapp');
 })

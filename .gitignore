@@ -7,3 +7,6 @@ built
 local
 data.json
 www_built
+
+src/droi-secure-http.ts
+src/droi-polyfill.js

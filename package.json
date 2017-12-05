@@ -1,6 +1,6 @@
 {
   "name": "JSSDK",
-  "version": "1.0.45",
+  "version": "1.0.49",
   "description": "DroiBaaS JavaScript SDK",
   "main": "./src/index.js",
   "repository": "git@github.com:DroiTaipei/JSSDK.git",
@@ -8,11 +8,10 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "test": "TS_NODE_PROJECT=tsconfig.node.json mocha --no-timeouts -r ts-node/register test/node/*.test.*",
-    "test-browser": "gulp www-test",
     "browser": "gulp www",
     "node": "gulp node",
-    "release": "gulp node && gulp www && gulp weapp"
+    "weapp": "gulp weapp",
+    "release": "gulp release"
   },
   "dependencies": {
     "adler-32": "^1.1.0",
