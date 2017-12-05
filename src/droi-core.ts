@@ -31,7 +31,7 @@ class DroiCore {
         DroiCore.appId = appid;
         DroiCore.apiKey = apikey;
         DroiObject.registerCreateFactory( "_User", ()=>DroiUser.createUser() );
-        DroiObject.registerCreateFactory( "_File", ()=>DroiFile.createFile() );
+        DroiObject.registerCreateFactory( "_File", ()=>DroiFile.createEmptyFile() );
         DroiObject.registerCreateFactory( "_Group", ()=>DroiGroup.createGroup() );
     }
 

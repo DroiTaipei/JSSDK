@@ -6,16 +6,57 @@ import { RestFile } from './rest/file'
 import { DroiConstant } from "./droi-const";
 import { DroiLog } from "./droi-log"
 
+declare var wx: any;
+
+interface WxFileInfo {
+    digest: string;
+    size: number;
+}
+
+function wxGetFileMd5(path: string): Promise<WxFileInfo> {
+    return new Promise( ( resolve, reject ) => {
+        wx.getFileInfo( {
+            filePath: path,
+            success: (res) => {
+                resolve({digest: res.digest, size: res.size});
+            },
+            fail: (err) => {
+                reject(err);
+            }
+        });
+    });
+}
+
 class DroiFile extends DroiObject {
     static createEmptyFile(): DroiFile {
-        return DroiFile.createFile();
+        let df = new DroiFile();
+        df.newFile = false;
+
+        let name = "DroiFile-".concat(df.objectId());
+        df.contentPath = null;
+        df.contentDirty = true;
+
+        //
+        df.setValue( DroiFile.DROI_KEY_FILE_NAME, name );
+        df.setValue( DroiFile.DROI_KEY_FILE_FID, 0 );
+
+        df.setValue( DroiFile.DROI_KEY_FILE_MD5, 0 );
+        df.setValue( DroiFile.DROI_KEY_FILE_SIZE, 0 );
+
+        return df;
     }
 
-    static createFile(buffer: Uint8Array = null, name: string = null, mimeType: string = "application/octet-stream"): DroiFile {
-        let df: DroiFile = new DroiFile( buffer, name, mimeType );
+    static async createFile( path: string = null, name: string = null ): Promise<DroiFile> {
+        let df: DroiFile = new DroiFile();
+
+        try {
+            await df.init( path, name );
+        } catch ( err ) {
+            return Promise.reject( err );
+        }
 
         // Reset newFile flag
-        if ( buffer == null && name == null )
+        if ( path == null && name == null )
             df.newFile = false;
         return df;
     }
@@ -27,26 +68,29 @@ class DroiFile extends DroiObject {
     private static readonly DROI_KEY_FILE_EXTRA = "_MongoDmd";
 
 
-    private constructor( buffer: Uint8Array, name: string = null, mimeType: string = "application/octet-stream" ) {
+    private constructor() {
         super( "_File" );
+    }
 
+    private async init( path: string = null, name: string = null ): Promise<boolean> {
         name = name || "DroiFile-".concat(this.objectId());
-        this.contentBuffer = buffer;
+        this.contentPath = path;
         this.contentDirty = true;
-        this.mimeType = mimeType;
 
         //
         this.setValue( DroiFile.DROI_KEY_FILE_NAME, name );
         this.setValue( DroiFile.DROI_KEY_FILE_FID, 0 );
 
-        if ( buffer != null ) {
-            let md5 = new Md5().start().appendByteArray( buffer ).end();
-            this.setValue( DroiFile.DROI_KEY_FILE_MD5, md5 );
-            this.setValue( DroiFile.DROI_KEY_FILE_SIZE, buffer.length );
+        if ( path != null ) {
+            let info = await wxGetFileMd5(path);
+            this.setValue( DroiFile.DROI_KEY_FILE_MD5, info.digest );
+            this.setValue( DroiFile.DROI_KEY_FILE_SIZE, info.size );
         } else {
             this.setValue( DroiFile.DROI_KEY_FILE_MD5, 0 );
             this.setValue( DroiFile.DROI_KEY_FILE_SIZE, 0 );
         }
+
+        return Promise.resolve(true);
     }
 
     get Size(): number {
@@ -76,37 +120,45 @@ class DroiFile extends DroiObject {
         return RestFile.instance().getUri( this.objectId() );
     }
 
-    update( buffer: Uint8Array, progress: (currentSize: number, totalSize: number) => void = null, mimeType: string = "application/octet-stream"): Promise< DroiError > {
-        if ( buffer == null || buffer.length == 0 ) {
-            return Promise.reject( new DroiError( DroiError.ERROR, "The size is zero.") );
+    async update( path: string, progress: (currentSize: number, totalSize: number) => void = null, mimeType: string = "application/octet-stream"): Promise< DroiError > {
+        if ( path == null || path.length == 0 ) {
+            return Promise.reject( new DroiError( DroiError.ERROR, "The file path is empty.") );
         }
 
-        let md5 = new Md5().start().appendByteArray( buffer ).end();
+        let md5: string = null;
+        let size: number = 0;
+
+        try {
+            let info = await wxGetFileMd5( path );
+            md5 = info.digest;
+            size = info.size;
+        } catch ( err ) {
+            return Promise.reject( err );
+        }
+
         if ( md5 == this.MD5 ) {
             return Promise.resolve( new DroiError( DroiError.OK ) );
         }
 
-        this.mimeType = mimeType;
-        this.contentBuffer = buffer;
+        this.contentPath = path;
 
         this.contentDirty = true;
-        this.mimeType = mimeType;
 
         //
         this.setValue( DroiFile.DROI_KEY_FILE_MD5, md5 );
-        this.setValue( DroiFile.DROI_KEY_FILE_SIZE, buffer.length );
+        this.setValue( DroiFile.DROI_KEY_FILE_SIZE, size );
         
         return this.save( progress );
     }
 
     async save(progress: (currentSize: number, totalSize: number) => void = null): Promise<DroiError> {
         // Check whether the parameter is correct..
-        if ( this.contentDirty && (this.contentBuffer == null || this.contentBuffer.length == 0) ) {
-            return Promise.reject( new DroiError( DroiError.ERROR, "The size is zero.") );
+        if ( this.contentDirty && (this.contentPath == null || this.contentPath.length == 0) ) {
+            return Promise.reject( new DroiError( DroiError.ERROR, "The file path is empty.") );
         }
 
         try {
-            let error = await this.saveInternal( this.contentBuffer, progress );
+            let error = await this.saveInternal( this.contentPath, progress );
             if ( error.isOk == false ) {
                 return Promise.reject( error );
             }
@@ -128,8 +180,8 @@ class DroiFile extends DroiObject {
         return this.contentDirty
     }
 
-    private async saveInternal( buffer: Uint8Array, progress: (currentSize: number, totalSize: number) => void ): Promise< DroiError > {
-        if ( buffer == null || buffer.length == 0 ) {
+    private async saveInternal( path: string, progress: (currentSize: number, totalSize: number) => void ): Promise< DroiError > {
+        if ( path == null || path.length == 0 ) {
             return Promise.reject( new DroiError( DroiError.ERROR, "File content is empty. (No update)"));
         }
 
@@ -139,7 +191,7 @@ class DroiFile extends DroiObject {
 
         // Get upload token from DroiBaaS
         try {
-            let tokenResults = await RestFile.instance().getUploadToken( this.objectId(), this.Name, this.mimeType, this.Size, this.MD5, this.newFile );
+            let tokenResults = await RestFile.instance().getUploadToken( this.objectId(), this.Name, "application/octet-stream", this.Size, this.MD5, this.newFile );
 
             //
             let fileToken = tokenResults["Token"];
@@ -153,7 +205,7 @@ class DroiFile extends DroiObject {
 
             // Upload data to CDN
             DroiLog.d( DroiFile.LOG_TAG, "Upload data to CDN" );
-            let response = await RestFile.instance().upload( uploadUrl, fileToken, sessionId, this.objectId(), this.Name, this.mimeType, this.contentBuffer, progress );
+            let response = await RestFile.instance().upload( uploadUrl, fileToken, sessionId, this.objectId(), this.Name, this.contentPath, progress );
 
             //
             let result = JSON.parse(response.data).Result;
@@ -177,8 +229,7 @@ class DroiFile extends DroiObject {
     }
 
     private contentDirty: boolean = true;
-    private contentBuffer: Uint8Array = null;
-    private mimeType: string;
+    private contentPath: string = null;
     private newFile: boolean = true;
     private static readonly LOG_TAG: string = "DroiFile";
 }

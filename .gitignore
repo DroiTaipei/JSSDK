@@ -10,3 +10,5 @@ www_built
 
 src/droi-secure-http.ts
 src/droi-polyfill.js
+src/droi-file.ts
+src/rest/file.ts
