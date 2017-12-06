@@ -92,7 +92,7 @@ class RestFile {
                     let response = new DroiHttpResponse();
                     response.status = res.statusCode;
                     response.data = res.data;
-                    return response;
+                    resolve(response);
                 },
                 fail: (err) => {
                     reject(err);
