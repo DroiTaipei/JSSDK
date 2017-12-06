@@ -55,7 +55,7 @@ gulp.task("copy-package", ['bump'], function() {
     .pipe(rename('package.json'))
     .pipe(gulp.dest('release'));
 
-  return gulp.src('README.md')
+  return gulp.src(['README.md', 'CHANGELOG.md'])
     .pipe(gulp.dest('release'))
 });
 
