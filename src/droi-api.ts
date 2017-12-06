@@ -104,7 +104,7 @@ export namespace RemoteServiceHelper {
         request.method = method;
         request.data = input;
         request.headers = headers;
-        request.isBinanry = false;
+        request.isBinary = false;
 
         await appendDefaultHeaders(request, tokenHolder);
                 
@@ -128,7 +128,7 @@ export namespace RemoteServiceHelper {
         request.method = method;
         request.data = input;
         request.headers = headers;
-        request.isBinanry = true;
+        request.isBinary = true;
 
         await appendDefaultHeaders(request, tokenHolder);
                 
@@ -148,7 +148,7 @@ export namespace RemoteServiceHelper {
             let request = new DroiHttpRequest();
             request.url = FETCH_DEVICE_ID_URL;
             request.method = DroiHttpMethod.GET;
-            request.isBinanry = false;
+            request.isBinary = false;
 
             return DroiHttp.sendRequest(request)
                 .then( (response) => {

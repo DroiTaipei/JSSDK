@@ -17,7 +17,7 @@ export class DroiHttpRequest {
     method: DroiHttpMethod;
     headers?: {[key: string]: string};
     data?: any;
-    isBinanry: boolean;
+    isBinary: boolean;
 }
 
 export class DroiHttpResponse {
@@ -36,7 +36,7 @@ export class DroiHttp {
         // let req = Request('POST', 'http://localhost:5432');
 
 
-        if (request.isBinanry)
+        if (request.isBinary)
             req.responseType("arraybuffer");
 
         // req.set('X-Path', request.url);
@@ -66,7 +66,7 @@ export class DroiHttp {
         return req
             .then( (resp) => {
                 let text;
-                if (request.isBinanry)
+                if (request.isBinary)
                     text = TUTIL.bytes_to_string(new Uint8Array(resp.body));
                 else
                     text = resp.text;

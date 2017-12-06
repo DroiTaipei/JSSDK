@@ -48,6 +48,7 @@ class IpList {
         let req = new DroiHttpRequest();
         req.url = `${DroiConstant.IP_LIST_URL}?appid=${appId}`;
         req.method = DroiHttpMethod.GET;
+        req.isBinary = false;
 
         return DroiHttp.sendRequest(req).then( (resp) => {
             if (resp.status != 200)
@@ -411,6 +412,7 @@ export class DroiHttpSecure {
             req.method = request.method;
             req.url = DroiHttpSecure.getURLWithRequest(request, ipElement);
             req.headers = JSON.parse(JSON.stringify(request.headers));
+            req.isBinary = true;
 
             let kid = TUTIL.getKlKeyID().toString(); // UINT64
             let ktype = TUTIL.getKlKeyType();
@@ -576,6 +578,7 @@ export class DroiHttpSecure {
         request.method = DroiHttpMethod.POST;
         request.data = Buffer.from(data.buffer);
         request.headers = headers;
+        request.isBinary = true;
         
         return DroiHttp.sendRequest(request).then( (resp) => {
             let droiStatus = -999;
