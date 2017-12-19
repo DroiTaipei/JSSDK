@@ -11,5 +11,6 @@ export * from "./droi-file"
 export * from "./droi-preference"
 export * from "./droi-cloudcache"
 export * from "./droi-group"
+export * from "./droi-log"
 
 require('./droi-polyfill');

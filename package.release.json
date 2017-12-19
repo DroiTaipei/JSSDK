@@ -18,7 +18,8 @@
     "sha256": "^0.2.0",
     "superagent": "^3.8.1",
     "ts-md5": "^1.2.2",
-    "zlibjs": "^0.3.1"
+    "zlibjs": "^0.3.1",
+    "utf8": "^3.0.0"
   },
   "devDependencies": {
     "express": "^4.16.2",

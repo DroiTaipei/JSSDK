@@ -10,6 +10,8 @@ import { DroiLog } from "./droi-log";
 import * as UINT from "cuint"
 import { DroiConstant } from "./droi-const";
 
+const utf8 = require('utf8');
+
 let TUTIL = TUTILNS.TUTIL();
 
 interface SecureRefreshResult {
@@ -361,7 +363,7 @@ export class DroiHttpSecure {
 
             // Compress data
             if (request.data != null) {
-                dataBuffer = TUTIL.string_to_bytes(request.data);
+                dataBuffer = TUTIL.string_to_bytes(utf8.encode(request.data));
                 inputBuffer = TUTIL.compressDeflater(dataBuffer);
                 if (inputBuffer == null) {
                     error = new DroiError(DroiError.ERROR, "compress fail.");
@@ -529,7 +531,7 @@ export class DroiHttpSecure {
                     if (outEncoding.indexOf("gzip") > 0) {
                         decBuffer = TUTIL.decompress(decBuffer);
                     }
-                    resp.data = TUTIL.bytes_to_string(decBuffer);
+                    resp.data = utf8.decode(TUTIL.bytes_to_string(decBuffer));
                 }
             } catch ( error ) {
                 error.code = DroiError.ERROR;
