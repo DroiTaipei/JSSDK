@@ -92,8 +92,8 @@ export class DroiError {
      */
     constructor(code: number, msg?: string, ticket?: string) {
         this._code = code;
-        this._appendMessage = msg;
-        this._ticket = ticket;
+        this._appendMessage = msg || "";
+        this._ticket = ticket || "";
     }
 
     /**
@@ -175,10 +175,10 @@ export class DroiError {
         if (!message)
             message = `Error code: ${this._code}`;
 
-        if (this._ticket)
+        if (this._ticket != "")
             message = `${message} Ticket: ${this._ticket}`;
 
-        if (this._appendMessage)
+        if (this._appendMessage != "")
             message = `${message} ${this._appendMessage}`;
 
         return message;
