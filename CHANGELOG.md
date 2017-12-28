@@ -1,4 +1,4 @@
-## 1.0.55 (2017/12/28)
+## 1.0.56 (2017/12/28)
 
 * [Fix] limit / offset not working
 * [Fix] File upload progress 
