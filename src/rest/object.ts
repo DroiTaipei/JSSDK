@@ -143,10 +143,10 @@ export class RestObject implements RestCRUD {
             queryStrings = `${queryStrings}offset=${offset}&`
 
         if (limit || !isNaN(limit))
-            queryStrings = `${queryStrings}offset=${limit}&`
+            queryStrings = `${queryStrings}limit=${limit}&`
 
         if (order)
-            queryStrings = `${queryStrings}offset=${encodeURIComponent(order)}&`
+            queryStrings = `${queryStrings}order=${encodeURIComponent(order)}&`
         
         return (queryStrings.length > 0) ? queryStrings.substring(0, queryStrings.length-1) : queryStrings;
     }
