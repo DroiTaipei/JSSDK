@@ -1,8 +1,10 @@
+import { RestObject } from './rest/object';
 import { DroiConstant } from './droi-const';
 import { DroiPermission } from './droi-permission';
 import { DroiError } from "./droi-error";
 import { DroiQueryInternal as DroiQuery } from "./droi-query-internal";
 import { DroiCondition } from './droi-condition';
+
 
 class Dictionary {
     [keyName: string]: any;
@@ -22,6 +24,22 @@ enum DirtyFlag {
     DIRTY_FLAG_BODY = 1,
     DIRTY_FLAG_REFERENCE = 2
 };
+
+class BulkList {
+    objs: Array<any> = [];
+    dataSize: number = 0;
+
+    addDroiObject(obj: DroiObject) {
+        let jsonStr = obj.toJson();
+        this.objs.push(JSON.parse(jsonStr));
+        this.dataSize += encodeURIComponent(jsonStr).replace(/%[A-F\d]{2}/g, 'U').length;
+    }
+
+    addObjectId(objId: string) {
+        this.objs.push(objId);
+        this.dataSize += encodeURIComponent(objId).replace(/%[A-F\d]{2}/g, 'U').length + 3;
+    }
+}
 
 /**
  * 
@@ -134,9 +152,93 @@ class DroiObject {
         return this.properties[keyName];
     }
 
-    static saveAll( items : Array<DroiObject> ) :Promise<DroiError> {
+    static async saveAll( items : Array<DroiObject> ): Promise<DroiError> {
+        let groups: {[key: string]: Array<BulkList>} = {};
+        for (let obj of items) {
+            if (DroiObject.getDepth(obj, 0) > 0) {
+                try {
+                    await obj.save();
+                } catch (error) {
+                    return Promise.reject(error);
+                }
+                continue;
+            }
 
-        return null;
+            obj.checkDirtyFlags();
+            if (!obj.isDirty)
+                continue;
+
+            let tableName = obj.tableName();
+            let objs: Array<BulkList> = null;
+            if (groups.hasOwnProperty(tableName))
+                objs = groups[tableName];
+            else {
+                objs = [new BulkList()];
+                groups[tableName] = objs;
+            }
+
+            let bulkList = objs[objs.length-1];
+            if (bulkList.dataSize > 409600) {
+                bulkList = new BulkList();
+                objs.push(bulkList);
+            }
+
+            bulkList.addDroiObject(obj);
+        }
+
+        let restObject = RestObject.instance();
+
+        for (let tableName in groups) {
+            let objs = groups[tableName];
+            for (let bulkList of objs) {
+                let jobj = {"Objects": bulkList.objs};
+                try {
+                    await restObject.bulkUpsert(tableName, JSON.stringify(jobj));
+                } catch (error) {
+                    return Promise.reject(error);
+                }
+            }
+        }
+
+        return Promise.resolve(new DroiError(DroiError.OK));
+    }
+
+    static async deleteAll( items : Array<DroiObject> ): Promise<DroiError> {
+        let groups: {[key: string]: Array<BulkList>} = {};
+        for (let obj of items) {
+            let tableName = obj.tableName();
+            let objs: Array<BulkList> = null;
+            if (groups.hasOwnProperty(tableName))
+                objs = groups[tableName];
+            else {
+                objs = [new BulkList()];
+                groups[tableName] = objs;
+            }
+
+            let bulkList = objs[objs.length-1];
+            if (bulkList.dataSize > 1024) {
+                bulkList = new BulkList();
+                objs.push(bulkList);
+            }
+
+            bulkList.addObjectId(obj.objectId());
+        }
+
+        let restObject = RestObject.instance();
+
+        for (let tableName in groups) {
+            let objs = groups[tableName];
+            for (let bulkList of objs) {
+                let jobj = {"IDs": bulkList.objs};
+                try {
+                    await restObject.bulkDelete(tableName, JSON.stringify(jobj));
+                } catch (error) {
+                    return Promise.reject(error);
+                }
+            }
+        }
+
+        return Promise.resolve(new DroiError(DroiError.OK));
     }
 
     static fetch( tableName: string, objectId: string ): Promise<DroiObject> {
@@ -180,7 +282,7 @@ class DroiObject {
                     reject( error );
                 }
             } catch( e ) {
-                // console.log(e);
+                console.log(e);
                 let error : DroiError;
                 if ( e instanceof DroiError )
                     error = e;
@@ -383,6 +485,32 @@ class DroiObject {
         //
         if ( dobject != null )
             cb( dobject );
+    }
+
+    private static getDepth(obj: any, depth: number): number {
+        if (depth > 3)
+            return 3;
+
+        if (obj == null || typeof obj !== "object")
+            return depth;
+
+        let nowDepth = depth;
+
+        if (obj instanceof Array) {
+            for (let item of obj) {
+                let newDepth = (item instanceof DroiObject) ? nowDepth + 1 : nowDepth;
+                depth = Math.max(depth, DroiObject.getDepth(item, newDepth));
+            }
+        } else if (obj instanceof Object) {
+            let objs = (obj instanceof DroiObject) ? obj.properties : obj;
+            for (let key in objs) {
+                let subObj = objs[key];
+                let newDepth = (subObj instanceof DroiObject) ? nowDepth + 1 : nowDepth;
+                depth = Math.max(depth, DroiObject.getDepth(subObj, newDepth));        
+            }
+        }
+
+        return depth;
     }
 
     //

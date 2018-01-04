@@ -55,7 +55,7 @@ export class CloudStorageDataProvider implements DroiDataProvider {
             });
     }
     
-    query( commands: Multimap<string, any> ): Promise<Array<DroiObject>> {
+    query( commands: Multimap<string, any> ): Promise<Array<any>> {
         let tableName: string = null;
 
         let res: Array<DroiObject> = [];
@@ -78,8 +78,16 @@ export class CloudStorageDataProvider implements DroiDataProvider {
         if (commands.containsKey(DroiConstant.DroiQuery_LIMIT))
             limit = commands.get(DroiConstant.DroiQuery_LIMIT)[0]; 
 
-        return restHandler.query(tableName, where, offset, limit, order).then(
+        let countOnly = commands.containsKey(DroiConstant.DroiQuery_COUNT);
+        return restHandler.query(tableName, where, offset, limit, order, countOnly).then(
             (jResult) => {
+                // Return count only
+                if (countOnly && typeof jResult["Count"] !== 'undefined') {
+                    let count = jResult["Count"];
+                    delete jResult["Count"];
+                    return [count];
+                }
+
                 let result: Array<DroiObject> = [];
                 for (let jobj of jResult) {
                     let dobj = DroiObject.fromJson(jobj);

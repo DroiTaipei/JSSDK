@@ -45,7 +45,7 @@ class DroiQuery {
                 if ( res.length <= 0 )
                     throw new DroiError( DroiError.ERROR );
                 let counter = res[0];
-                return counter;
+                return Number(counter);
             });
     }
 

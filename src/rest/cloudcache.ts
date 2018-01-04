@@ -32,16 +32,13 @@ export class RestCloudCache {
         });
     }
 
-    set(key: string, value: string, ttl?: number): Promise<DroiError> {
+    set(key: string, value: string): Promise<DroiError> {
         let secureAvaiable = DroiHttpSecure.isEnable();
         
         let url = `${secureAvaiable?RestCloudCache.REST_HTTPS_SECURE:RestCloudCache.REST_HTTPS}/${key}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
-        ttl = ttl || 180;
-
-        let body = {TTL: ttl, Value: value};
-
-        return callServer(url, DroiHttpMethod.PUT, JSON.stringify(body), null, null).then( (result) => {
+        
+        return callServer(url, DroiHttpMethod.PUT, value, null, null).then( (result) => {
             return new DroiError(DroiError.OK);
         });
     }

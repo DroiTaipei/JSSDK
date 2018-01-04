@@ -35,13 +35,13 @@ export class RestGroup implements RestCRUD {
             });
     }
 
-    query(table: string, where?: string, offset?: number, limit?: number, order?: string): Promise<Array<JSON>> {
+    query(table: string, where?: string, offset?: number, limit?: number, order?: string, countOnly: boolean = false): Promise<Array<JSON>> {
         let secureAvaiable = DroiHttpSecure.isEnable();
         
         let url = `${secureAvaiable?RestGroup.REST_HTTPS_SECURE:RestGroup.REST_HTTPS}${RestGroup.REST_GROUP_URL}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
-        let queryStrings = RestObject.generatorQueryString(where, offset, limit, order);
+        let queryStrings = RestObject.generatorQueryString(where, offset, limit, order, countOnly);
 
         if (!secureAvaiable)
             queryStrings = queryStrings + "&include_depth=3";

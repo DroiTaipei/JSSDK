@@ -24,9 +24,16 @@ describe('Droi objects', function() {
             await list[key].delete();
 
         query = DroiBaaS.DroiQuery.create("js_test");
-        list = await query.runQuery();
-        for (let key in list)
-            await list[key].delete();
+        let count = await query.count();   
+        let limit = 200;
+        let offset = count - limit;
+        if (offset < 0) offset = 0;
+        while (count > 0 && offset >= 0) {
+            query = DroiBaaS.DroiQuery.create("js_test").offset(0).limit(limit);
+            list = await query.runQuery();
+            await DroiBaaS.DroiObject.deleteAll(list);
+            offset -= list.length;
+        }
     });
 
     it('Upsert object', async () => {
@@ -70,6 +77,10 @@ describe('Droi objects', function() {
         list = await query.runQuery();
         if (list.length != 10)
             throw new DroiBaaS.DroiError(DroiBaaS.DroiError.ERROR, `obj null query size != 10, size = ${list.length}`);
+
+        let count = await DroiBaaS.DroiQuery.create("js_test").count();
+        if (count != 10)
+            throw new DroiBaaS.DroiError(DroiBaaS.DroiError.ERROR, `count fail. ${count} != 10`);
     });
 
     it('Reference objects', async () => {
@@ -90,6 +101,53 @@ describe('Droi objects', function() {
         let obj = list[0].getValue("ref");
         if ("value1" !== obj.getValue("field1"))
             throw new DroiBaaS.DroiError(DroiBaaS.DroiError.ERROR, `obj ref wrong value, value = ${obj.getValue("field1")}`);
+    });
+
+    it('depth', function() {
+        let obj = DroiBaaS.DroiObject.createObject("js_test");
+        let obj2 = DroiBaaS.DroiObject.createObject("js_base");
+        let obj3 = DroiBaaS.DroiObject.createObject("js_second");
+        obj3.setValue("field", "value");
+        obj2.setValue("field1", "value1");
+        obj2.setValue("ref", obj3);
+        obj2.setValue("ref2", [obj3]);
+        obj.setValue("name", "name 1");
+        obj.setValue("ref", {"key": [obj2]});
+
+        let depth = DroiBaaS.DroiObject.getDepth(obj, 0);
+        if (depth != 2)
+            throw new DroiBaaS.DroiError(DroiBaaS.DroiError.ERROR, `depth ${depth} != 2`);
+    });
+
+    it('Save all', async function() {
+        let list = [];
+        for (let i=0; i<2600; ++i) {
+            let obj = DroiBaaS.DroiObject.createObject("js_test");
+            obj.setValue("name", "Name " + i);
+            list.push(obj);
+        }
+
+        await DroiBaaS.DroiObject.saveAll(list);
+
+        let query = DroiBaaS.DroiQuery.create("js_test");
+        let count = await query.count();
+        if (count != 2600)
+            throw new DroiBaaS.DroiError(DroiBaaS.DroiError.ERROR, `add count ${count} != 2600`);
+
+        let limit = 200;
+        let offset = count - limit;
+        while (offset >= 0) {
+            query = DroiBaaS.DroiQuery.create("js_test").offset(0).limit(limit);
+            list = await query.runQuery();
+            await DroiBaaS.DroiObject.deleteAll(list);
+            offset -= list.length;
+        }
+    
+        query = DroiBaaS.DroiQuery.create("js_test");
+        count = await query.count();
+        if (count != 0)
+            throw new DroiBaaS.DroiError(DroiBaaS.DroiError.ERROR, `remove count ${count} != 0`);
+
     });
 
     it('Partial update', async () => {

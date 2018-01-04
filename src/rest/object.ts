@@ -8,7 +8,7 @@ export interface RestCRUD {
     // Create
     upsert(obj: string, objId:string, table: string): Promise<boolean>;
     // Query
-    query(table: string, where?: string, offset?: number, limit?: number, order?: string): Promise<Array<JSON>>;
+    query(table: string, where?: string, offset?: number, limit?: number, order?: string, countOnly?: boolean): Promise<Array<JSON>>;
     // Update
     updateData(table: string, data: string, where?: string, offset?: number, limit?: number, order?: string): Promise<boolean>;
     // Delete
@@ -55,13 +55,13 @@ export class RestObject implements RestCRUD {
             });
     }
 
-    query(table: string, where?: string, offset?: number, limit?: number, order?: string): Promise<Array<JSON>> {
+    query(table: string, where?: string, offset?: number, limit?: number, order?: string, countOnly: boolean = false): Promise<Array<JSON>> {
         let secureAvaiable = DroiHttpSecure.isEnable();
         
         let url = `${secureAvaiable?RestObject.REST_HTTPS_SECURE:RestObject.REST_HTTPS}${RestObject.REST_OBJECT_URL}/${table}`;
         let callServer = secureAvaiable ? RemoteServiceHelper.callServerSecure : RemoteServiceHelper.callServer;
 
-        let queryStrings = RestObject.generatorQueryString(where, offset, limit, order);
+        let queryStrings = RestObject.generatorQueryString(where, offset, limit, order, countOnly);
 
         if (!secureAvaiable)
             queryStrings = queryStrings + "&include_depth=3";
@@ -133,7 +133,7 @@ export class RestObject implements RestCRUD {
             });
     }
 
-    static generatorQueryString(where?: string, offset?: number, limit?: number, order?: string) {
+    static generatorQueryString(where?: string, offset?: number, limit?: number, order?: string, countOnly: boolean = false) {
         let queryStrings = "";
         
         if (where)
@@ -147,6 +147,9 @@ export class RestObject implements RestCRUD {
 
         if (order)
             queryStrings = `${queryStrings}order=${encodeURIComponent(order)}&`
+
+        if (countOnly)
+            queryStrings = `${queryStrings}count=true&`
         
         return (queryStrings.length > 0) ? queryStrings.substring(0, queryStrings.length-1) : queryStrings;
     }

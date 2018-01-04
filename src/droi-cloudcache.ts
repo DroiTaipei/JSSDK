@@ -6,8 +6,8 @@ export class DroiCloudCache {
         return RestCloudCache.instance().get(key);
     }
 
-    static setValue(key: string, value: string, ttl?: number): Promise<DroiError> {
-        return RestCloudCache.instance().set(key, value, ttl);
+    static setValue(key: string, value: string): Promise<DroiError> {
+        return RestCloudCache.instance().set(key, value);
     }
 
     static removeValue(key: string): Promise<DroiError> {
