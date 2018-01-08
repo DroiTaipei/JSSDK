@@ -33,6 +33,9 @@ export class RestCloudCache {
     }
 
     set(key: string, value: string): Promise<DroiError> {
+        if (key == null || value == null)
+            return Promise.reject(new DroiError(DroiError.INVALID_PARAMETER, "key/value empty"));
+            
         let secureAvaiable = DroiHttpSecure.isEnable();
         
         let url = `${secureAvaiable?RestCloudCache.REST_HTTPS_SECURE:RestCloudCache.REST_HTTPS}/${key}`;
