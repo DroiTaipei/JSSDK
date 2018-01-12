@@ -60,6 +60,24 @@ export class DroiUser extends DroiObject {
         DroiUser.currentUser = null;
     }
 
+    static async setCurrentUserToken(userObjId: string, sessionToken: string): Promise<DroiUser> {
+        let fakeUser = DroiUser.createUser();
+        fakeUser.session = {Token: sessionToken, ExpiredAt: new Date((Date.now() + 2952000000)).toISOString()};
+        DroiUser.currentUser = fakeUser;
+
+        try {
+            let dobj = await DroiUser.fetch("_User", userObjId);
+            let user = DroiUser.createUser();
+            user.cloneFrom(dobj);
+            user.session = fakeUser.session;
+            DroiUser.currentUser = user;
+            DroiUser.saveUserCache(user);
+            return Promise.resolve(user);
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    }
+
     static getCurrentUser(): DroiUser {
         if (DroiUser.currentUser != null)
             return DroiUser.currentUser;
@@ -90,7 +108,7 @@ export class DroiUser extends DroiObject {
                 let juser = jlogin["Data"];
                 let user: DroiUser = DroiObject.fromJson(juser);
                 user.session = {Token: token, ExpiredAt: expired};
-                
+                DroiUser.currentUser = user;
                 DroiUser.saveUserCache(user);
 
                 return user;
