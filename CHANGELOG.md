@@ -1,3 +1,10 @@
+## 1.0.80 (2018/1/15)
+
+* [Add] DroiObject.deleteAll / DroiObject.saveAll
+* [Add] DroiUser.setCurrentUserToken
+* [Fix] DroiQuery.count API
+* [Fix] One DroiSecure uncaught exception
+
 ## 1.0.56 (2017/12/28)
 
 * [Fix] limit / offset not working
