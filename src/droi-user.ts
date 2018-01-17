@@ -22,16 +22,19 @@ export class DroiUser extends DroiObject {
 
     private static currentUser: DroiUser = null;
 
-    static createUser() {
-        return new DroiUser();
+    static createUser(className ?: string ) {
+        return new DroiUser(className);
     }
 
-    protected constructor() {
+    protected constructor(className ?: string) {
         super("_User");
+        className = className || "_User";
+
         this.session = null;
         this.setValue(DroiUser.KEY_ENABLE, true);
         this.setValue(DroiUser.KEY_EMAIL_VERIFIED, false);
         this.setValue(DroiUser.KEY_PHONE_VERIFIED, false);
+        this.setClassName( className );
     }
 
     private static saveUserCache(user: DroiUser) {

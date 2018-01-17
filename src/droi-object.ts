@@ -50,19 +50,20 @@ class DroiObject {
 
     /**
      * Create DroiObject instance by specific table name
-     * @param tableName Table name of collection
+     * @param className Class name of collection
      */
-    static createObject( tableName : string ) : DroiObject {
-        if ( DroiObject.factoryies.hasOwnProperty( tableName ) ) {
-            return DroiObject.factoryies[tableName]();
+    static createObject( className : string ) : DroiObject {
+        if ( DroiObject.factoryies.hasOwnProperty( className ) ) {
+            return DroiObject.factoryies[className]();
         }
-        return new DroiObject( tableName );
+        return new DroiObject( className );
     }
 
     protected constructor( tableName : string ) {
 
-        // createdTime, modifiedTime
+        // createdTime, modifiedTime        
         let currentDate = new Date();
+        this.mTableName = tableName;
         this.properties[ DroiConstant.DROI_KEY_JSON_CLASSNAME ] = tableName;
         this.properties[ DroiConstant.DROI_KEY_JSON_OBJECTID ] = Guid.newGuid().replace(/-/g, "").substring(8);
         this.properties[ DroiConstant.DROI_KEY_JSON_CREATION_TIME ] = currentDate.toISOString();
@@ -93,7 +94,11 @@ class DroiObject {
     }
 
     tableName() : string {
-        return this.properties[DroiConstant.DROI_KEY_JSON_CLASSNAME];
+        return this.mTableName;
+    }
+
+    setClassName( className : string ) {
+        this.properties[ DroiConstant.DROI_KEY_JSON_CLASSNAME ] =  className;
     }
 
     setValue( keyName : string, value : any ) {
@@ -411,8 +416,9 @@ class DroiObject {
                 jobj[DroiConstant.DROI_KEY_JSON_OBJECTID] !== undefined &&
                 jobj[DroiConstant.DROI_KEY_JSON_CREATION_TIME] !== undefined &&
                 jobj[DroiConstant.DROI_KEY_JSON_MODIFIED_TIME] !== undefined ) {
-                let tableName = jobj[DroiConstant.DROI_KEY_JSON_CLASSNAME];
+                let tableName = jobj[DroiConstant.DROI_KEY_JSON_CLASSNAME]; // ????
                 // TODO: Check tableName
+                // The tableName is set by creation factory..
                 let r = DroiObject.createObject( tableName );
 
                 // Copy the key-Value into object
@@ -562,13 +568,14 @@ class DroiObject {
         throw new Error("Unable to copy obj! Its type isn't supported.");
     }
 
-    public static registerCreateFactory( tableName: string, factory: ()=>DroiObject ) {
-        DroiObject.factoryies[ tableName ] = factory;
+    public static registerCreateFactory( className: string, factory: ()=>DroiObject ) {
+        DroiObject.factoryies[ className ] = factory;
     }
 
     //
     protected perm : DroiPermission;
     protected properties : Dictionary = {};
+    private mTableName : string;
     private dirtyFlags : number = DirtyFlag.DIRTY_FLAG_BODY;
     private static factoryies : Dictionary = {};
 };
