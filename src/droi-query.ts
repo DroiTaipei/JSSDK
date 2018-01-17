@@ -53,7 +53,7 @@ class DroiQuery {
         try {
             this.throwIfTheCommandInvalid();
         } catch ( e ) {
-            return Promise.reject( new DroiError( DroiError.ERROR, e.message ) );
+            return Promise.reject( new DroiError( DroiError.ERROR, e ) );
         }
 
         // 
