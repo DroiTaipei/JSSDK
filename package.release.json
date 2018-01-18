@@ -1,6 +1,6 @@
 {
   "name": "droibaas-jssdk",
-  "version": "1.0.81",
+  "version": "1.0.82",
   "description": "DroiBaaS JavaScript SDK",
   "main": "./src/index.js",
   "browser": "./droi-baas-min.js",

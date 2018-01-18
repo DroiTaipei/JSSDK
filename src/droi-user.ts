@@ -50,9 +50,7 @@ export class DroiUser extends DroiObject {
 
         let jdata = JSON.parse(jstr);
 
-        let obj = DroiObject.fromJson(JSON.parse(jdata.userData));
-        let user = DroiUser.createUser();
-        user.cloneFrom(obj);
+        let user = DroiObject.fromJson(JSON.parse(jdata.userData));
         user.session = jdata.session;
 
         return user;
@@ -131,9 +129,7 @@ export class DroiUser extends DroiObject {
 
         return RestUser.instance().loginUser(userId, sha256(password))
             .then( (jresult) => {
-                let user = DroiUser.createUser();
-                let obj = DroiObject.fromJson(jresult["Data"]);
-                user.cloneFrom(obj);
+                let user = DroiObject.fromJson(jresult["Data"]);
                 user.session = {Token: jresult["Token"], ExpiredAt: jresult["ExpiredAt"]};
 
                 DroiUser.saveUserCache(user);
@@ -155,9 +151,7 @@ export class DroiUser extends DroiObject {
 
         return RestUser.instance().loginOTP(otpCode, type, JSON.parse(user.toJson()))
             .then( (jdata) => {
-                let user = DroiUser.createUser();
-                let obj = DroiObject.fromJson(jdata["Data"]);
-                user.cloneFrom(obj);
+                let user = DroiObject.fromJson(jdata["Data"]);
                 user.session = {Token: jdata["Token"], ExpiredAt: jdata["ExpiredAt"]};
 
                 DroiUser.saveUserCache(user);
