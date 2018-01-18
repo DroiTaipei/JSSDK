@@ -47,6 +47,7 @@ class BulkList {
 class DroiObject {
 
     static TIME_SHIFT: number = 0;
+    static INTERNAL_KEYS = [ DroiConstant.DROI_KEY_JSON_OBJECTID, DroiConstant.DROI_KEY_JSON_CREATION_TIME, DroiConstant.DROI_KEY_JSON_MODIFIED_TIME, DroiConstant.DROI_KEY_JSON_CLASSNAME ];
 
     /**
      * Create DroiObject instance by specific table name
@@ -102,10 +103,7 @@ class DroiObject {
     }
 
     setValue( keyName : string, value : any ) {
-        if ( keyName == DroiConstant.DROI_KEY_JSON_OBJECTID ||
-            keyName == DroiConstant.DROI_KEY_JSON_CREATION_TIME ||
-            keyName == DroiConstant.DROI_KEY_JSON_MODIFIED_TIME ||
-            keyName == DroiConstant.DROI_KEY_JSON_CLASSNAME )
+        if (DroiObject.INTERNAL_KEYS.indexOf(keyName) >= 0)
             return;
 
         if ( value == null ) {
@@ -146,12 +144,12 @@ class DroiObject {
         }
     }
 
+    getKeys(): Array<string> {
+        return Object.keys(this.properties).filter(v => DroiObject.INTERNAL_KEYS.indexOf(v) == -1);
+    }
+
     getValue( keyName : string ) : any {
-        if ( keyName == DroiConstant.DROI_KEY_JSON_OBJECTID ||
-            keyName == DroiConstant.DROI_KEY_JSON_CREATION_TIME ||
-            keyName == DroiConstant.DROI_KEY_JSON_MODIFIED_TIME ||
-            keyName == DroiConstant.DROI_KEY_JSON_CLASSNAME ||
-            this.properties[keyName] === undefined )
+        if (DroiObject.INTERNAL_KEYS.indexOf(keyName) >= 0 || this.properties[keyName] == undefined)
             return null;
 
         return this.properties[keyName];
