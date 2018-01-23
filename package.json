@@ -1,6 +1,6 @@
 {
   "name": "JSSDK",
-  "version": "1.0.86",
+  "version": "1.0.87",
   "description": "DroiBaaS JavaScript SDK",
   "main": "./src/index.js",
   "repository": "git@github.com:DroiTaipei/JSSDK.git",

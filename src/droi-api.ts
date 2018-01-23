@@ -179,7 +179,7 @@ export namespace RemoteServiceHelper {
 
     async function appendDefaultHeaders(request: DroiHttpRequest, tokenHolder: TokenHolder) {
         request.headers[DroiConstant.DROI_KEY_HTTP_APP_ID] = DroiCore.getAppId();
-        if (!DroiHttpSecure.isEnable())
+        if (!DroiHttpSecure.isEnable() && Object.keys(request.headers).indexOf(DroiConstant.DROI_KEY_HTTP_API_KEY) == -1)
             request.headers[DroiConstant.DROI_KEY_HTTP_API_KEY] = DroiCore.getApiKey();
         
         try {
