@@ -30,10 +30,9 @@ class DroiCore {
         }
         DroiCore.appId = appid;
         DroiCore.apiKey = apikey;
-        DroiObject.registerCreateFactory( "_User", ()=>DroiUser.createUser() );
-        DroiObject.registerCreateFactory( "DroiUser", ()=>DroiUser.createUser("DroiUser") );
-        DroiObject.registerCreateFactory( "_File", ()=>DroiFile.createEmptyFile() );
-        DroiObject.registerCreateFactory( "_Group", ()=>DroiGroup.createGroup() );
+        DroiObject.registerCreateFactory( "DroiUser", ()=>DroiUser.createUser() );
+        DroiObject.registerCreateFactory( "DroiFile", ()=>DroiFile.createEmptyFile() );
+        DroiObject.registerCreateFactory( "DroiGroup", ()=>DroiGroup.createGroup() );
     }
 
     /**

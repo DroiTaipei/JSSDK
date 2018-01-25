@@ -29,7 +29,7 @@ export class DroiGroup extends DroiObject {
 
     protected constructor(name: string) {
         super("_Group");
-
+        this.setClassName("DroiGroup");
         if (name) {
             this.Name = name;
         }
