@@ -7,7 +7,7 @@ import { DroiFile } from "./droi-file";
 import { Guid, DroiObject } from "./droi-object"
 import { DroiGroup } from "./droi-group";
 
-const version = "1.0.87";
+const version = "1.0.89";
 
 /**
  * 
@@ -31,6 +31,7 @@ class DroiCore {
         DroiCore.appId = appid;
         DroiCore.apiKey = apikey;
         DroiObject.registerCreateFactory( "_User", ()=>DroiUser.createUser() );
+        DroiObject.registerCreateFactory( "DroiUser", ()=>DroiUser.createUser("DroiUser") );
         DroiObject.registerCreateFactory( "_File", ()=>DroiFile.createEmptyFile() );
         DroiObject.registerCreateFactory( "_Group", ()=>DroiGroup.createGroup() );
     }

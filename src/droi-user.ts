@@ -28,7 +28,7 @@ export class DroiUser extends DroiObject {
 
     protected constructor(className ?: string) {
         super("_User");
-        className = className || "_User";
+        className = className || "DroiUser";
 
         this.session = null;
         this.setValue(DroiUser.KEY_ENABLE, true);
@@ -94,7 +94,7 @@ export class DroiUser extends DroiObject {
     static async loginAnonymous(): Promise<DroiUser> {
         // Already logged in
         let user = DroiUser.getCurrentUser();
-        if (user != null && user.isLoggedIn) {
+        if (user != null && user.isLoggedIn()) {
             return Promise.reject(new DroiError(DroiError.USER_ALREADY_LOGIN));
         }
 
