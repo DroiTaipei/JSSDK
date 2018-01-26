@@ -1,3 +1,8 @@
+## 1.0.88 (2018/1/26)
+
+* [Add] DroiObject.getKeys API
+* [Fix] Fix network issue due to parallels request
+
 ## 1.0.80 (2018/1/15)
 
 * [Add] DroiObject.deleteAll / DroiObject.saveAll
