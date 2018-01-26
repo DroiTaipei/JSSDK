@@ -438,6 +438,7 @@ export class DroiHttpSecure {
             req.headers[DroiConstant.HTTP_HEADER_DROI_TS] = headerTs;
 
             let encBuffer: Uint8Array = null;
+            let oriKey = TUTIL.klKeyGet();
             if (inputBuffer != null) {
                 encBuffer = DroiHttpSecure.encodeBuffer(inputBuffer, headerTs);
 
@@ -526,6 +527,7 @@ export class DroiHttpSecure {
 
             try {
                 if (outData != null) {
+                    TUTIL.klKeyAlloc(oriKey);
                     encBuffer = TUTIL.string_to_bytes(outData);
                     let decBuffer = TUTIL.aesDecrypt(encBuffer);
                     if (outEncoding.indexOf("gzip") > 0) {
