@@ -134,20 +134,31 @@ class DroiPermission {
             newInstance.setPublicWritePermission( dict["pw"] );
         }
 
-        let setPermission = ( propName:string, dict, func: (user, falg) => void ) => (name, func) => {
-            if ( dict.hashOwnProperty(propName) ) {
+        let setPermission = function ( propName:string, dict, callback: (userId, flag) => void ) {
+            if ( dict.hasOwnProperty(propName) ) {
                 for ( let name of dict[propName] ) {
-                    func( name, true );
+                    callback( name, true );
                 }
             }
         };
 
         // User Read/Write permission
-        setPermission( "ur", dict, newInstance.setUserReadPermission );
-        setPermission( "uw", dict, newInstance.setUserWritePermission );
+        setPermission( "ur", dict, (id, flag) => {
+            newInstance.setUserReadPermission(id, flag);
+        } );
+
+        setPermission( "uw", dict, (id, flag) => {
+            newInstance.setUserWritePermission(id, flag);
+        } );
+
         // Group Read/Write permission
-        setPermission( "gr", dict, newInstance.setGroupReadPermission );
-        setPermission( "gw", dict, newInstance.setGroupWritePermission );
+        setPermission( "gr", dict, (id, flag) => {
+            newInstance.setGroupReadPermission(id, flag);
+        } );
+
+        setPermission( "gw", dict, (id, flag) => {
+            newInstance.setGroupWritePermission(id, flag);
+        } );
         return newInstance;
     }
 
